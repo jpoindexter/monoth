@@ -221,7 +221,7 @@ correlation_matrix (
 
 **How it works:**
 
-1. **Event detection** -- FRED API polled for new macro data; compare to expected values from economic calendar
+1. **Event detection** -- Finnhub economic calendar API provides actual/expected/previous values. Poll for new releases; when actual lands, compute surprise = actual - expected
 2. **Snapshot capture** -- on new event, snapshot prices for ~50 tracked symbols at t=0, then at t+1h, t+4h, t+1d, t+1w via cron
 3. **Correlation computation** -- nightly job recomputes correlation_matrix from all historical event_price_snapshots
 4. **Signal generation** -- when a new event arrives, look up correlation_matrix for that indicator. If current price movement exceeds historical avg by >1 std dev, surface as an alert
@@ -368,6 +368,64 @@ Pro includes AI analysis. Budget assumption:
 - Morning brief = ~2K tokens input + ~500 tokens output per user per day
 - At $3/1M input tokens (Claude Haiku): ~1000 users = ~$6/day = ~$180/month
 - Price Pro tier accordingly (minimum $19/month covers AI cost + margin)
+
+## Landing Page
+
+Separate route (`/`) with marketing content, pricing table, data source logos, CTA to sign up. Dashboard lives at `/dashboard`. Both served from the same Vite SPA via client-side routing (react-router).
+
+## Search & Command Palette
+
+shadcn `<Command>` component (Cmd+K / Ctrl+K):
+- Search symbols (tickers, crypto, forex pairs)
+- Jump to panels
+- Search indicators (CPI, GDP, etc.)
+- Toggle panels on/off
+- Quick actions (export data, toggle theme)
+
+## Keyboard Shortcuts
+
+- `/` -- focus search
+- `Cmd+K` -- command palette
+- `Esc` -- close modals/sheets
+- `1-9` -- jump to panel by index
+- `R` -- refresh current panel
+- `L` -- toggle layout lock (prevent drag/resize)
+- `D` -- toggle dark/light mode
+
+## URL Routing
+
+- `/` -- landing page
+- `/dashboard` -- main dashboard (default layout)
+- `/dashboard?layout=<id>` -- saved layout (pro)
+- `/symbol/:ticker` -- symbol detail sheet
+- `/settings` -- user preferences
+- `/api-keys` -- API key management (paid tier)
+
+## Analytics & Monitoring
+
+- **Analytics:** Vercel Analytics (free tier, built-in)
+- **Error tracking:** Sentry (free tier, 5K events/month)
+- **API health:** `/api/health` endpoint that checks all upstream sources, returns status per source. Polled by Vercel cron every 5 min. Surface in a small status indicator in the dashboard footer.
+- **Uptime:** Betterstack or similar free uptime monitor on the health endpoint
+
+## Testing (noted, not built yet)
+
+- E2E: Playwright (same as World Monitor)
+- Unit: Vitest for services/utils
+- No tests in MVP. Ship first, test when stabilizing for pro launch.
+
+## Source Code
+
+Closed source. Private repo at `github.com/jpoindexter/monoth`.
+
+## Rate Limit Budget (Finnhub 60 req/min)
+
+With caching, target >95% cache hit rate:
+- Price data cached 30s = max 2 req/min per symbol group
+- Economic calendar cached 5 min = negligible
+- Company profiles cached 24h = negligible
+- At 95% hit rate, 60 req/min supports thousands of concurrent users
+- Monitor cache hit ratio in Vercel KV; alert if drops below 90%
 
 ## Non-Goals (MVP)
 
