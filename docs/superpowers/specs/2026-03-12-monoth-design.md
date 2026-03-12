@@ -24,16 +24,18 @@ World Monitor repo (`github.com/koala73/worldmonitor`) serves as architectural r
 
 | Layer | Choice | Why |
 |-------|--------|-----|
-| Bundler | Vite 8 (Rolldown) | 10-30x faster builds, released today, Rust-based |
+| Bundler | Vite 8 (Rolldown) | 10-30x faster builds, released 2026-03-12, Rust-based |
 | Framework | React 19 | Ecosystem, hiring, component libraries |
 | Language | TypeScript (strict) | Non-negotiable |
 | UI | shadcn/ui (new-york style) | Clean, composable, finance-appropriate |
 | Styling | Tailwind CSS | Utility-first, pairs with shadcn |
-| Auth/DB | Supabase | Auth, user prefs, billing, API key management |
+| Auth/DB | Supabase | Auth, user prefs, API key management |
+| Billing | Stripe + Supabase | Stripe for payments, Supabase stores subscription state |
+| State | Zustand | Lightweight stores for panels, layout, market data, user prefs |
 | Deployment | Vercel | Static SPA + serverless API routes |
 | Charts | Lightweight Charts (TradingView), Recharts | Candlesticks, sparklines, area charts |
 | Grid | react-grid-layout | Draggable/resizable panel system |
-| Real-time | SSE / polling (free), WebSocket (pro) | Progressive enhancement by tier |
+| Real-time | SSE / polling (free), faster polling via Vercel KV (pro) | No WebSocket on Vercel serverless; pro = 30s polling vs 5-15min free |
 
 ## Design System
 
@@ -82,16 +84,16 @@ All built on shadcn primitives:
 
 | # | Panel | Data Source | Description |
 |---|-------|-------------|-------------|
-| 1 | Live Markets | Finnhub, Yahoo Finance | Major indices (S&P 500, NASDAQ, DJIA, FTSE, Nikkei, etc.), top movers, market status |
+| 1 | Live Markets | Finnhub (primary), yfinance fallback | Major indices (S&P 500, NASDAQ, DJIA, FTSE, Nikkei, etc.), top movers, market status |
 | 2 | Market Headlines | RSS (CNBC, MarketWatch, Yahoo Finance, Reuters, Bloomberg via Google News proxy) | Aggregated financial news feed |
-| 3 | Forex & Currencies | exchangerate.host, Finnhub | Major pairs, DXY, central bank rate context |
+| 3 | Forex & Currencies | Frankfurter.app, Finnhub | Major pairs, DXY, central bank rate context |
 | 4 | Fixed Income | Google News RSS, FRED | Treasury yields, corporate bonds, yield curves |
-| 5 | Commodities & Futures | Yahoo Finance, Google News RSS | Oil, gold, metals, agriculture, futures |
+| 5 | Commodities & Futures | Finnhub, CoinGecko (gold/silver), Google News RSS | Oil, gold, metals, agriculture, futures |
 | 6 | Crypto & Digital Assets | CoinGecko | Top coins, DeFi, market cap, volume |
 | 7 | Central Bank Watch | Federal Reserve RSS, Google News RSS | Rate decisions, monetary policy, meeting calendars |
 | 8 | Economic Data | FRED, Google News RSS | CPI, GDP, PMI, jobs data, housing |
-| 9 | Sector Heatmap | Finnhub, Yahoo Finance | S&P 500 sectors, color-coded performance grid |
-| 10 | Market Radar | Derived from all sources | Macro signal strength indicators, correlation alerts |
+| 9 | Sector Heatmap | Finnhub | S&P 500 sectors, color-coded performance grid |
+| 10 | Market Radar | Computed from panels 1-9 | Aggregate signal dashboard: fear/greed gauge (VIX + put/call from Finnhub), sector rotation indicator, rate sensitivity score, commodity pressure index. Each signal = weighted composite of 2-3 panel data points. |
 | 11 | Correlation Engine | All sources + historical | Links macro events to price movements. The differentiator. |
 
 ### Tier 2 -- Extended (available, off by default)
@@ -99,11 +101,11 @@ All built on shadcn primitives:
 | # | Panel | Data Source | Description |
 |---|-------|-------------|-------------|
 | 12 | IPOs, Earnings & M&A | Google News RSS | Upcoming IPOs, earnings calendar, deal flow |
-| 13 | Derivatives & Options | Google News RSS | VIX, options flow, futures positioning |
+| 13 | Derivatives & Options News | Google News RSS | Options/futures news aggregation (not live data) |
 | 14 | Fintech & Trading Tech | Google News RSS | Industry news, platform updates |
 | 15 | Financial Regulation | SEC RSS, Google News RSS | SEC actions, regulatory changes |
-| 16 | Hedge Funds & PE | Google News RSS | Institutional moves, 13F filings |
-| 17 | Market Analysis | Google News RSS | Bank research, analyst outlook, risk/volatility |
+| 16 | Hedge Funds & PE News | Google News RSS | Institutional moves, 13F filing news |
+| 17 | Market Analysis News | Google News RSS | Bank research, analyst outlook, risk/volatility |
 | 18 | BTC ETF Tracker | CoinGecko, Google News RSS | Flows, AUM, performance |
 | 19 | Stablecoins | CoinGecko | Market cap, peg status, flows |
 
@@ -176,14 +178,59 @@ interface MacroSignal {
 
 ### Correlation Engine
 
-The differentiator. Connects macro events to market movements:
+The differentiator. Connects macro events to market movements.
 
-1. **Event detection** -- new macro data point arrives (CPI, rate decision, jobs report)
-2. **Historical lookup** -- what happened to correlated assets in similar past events
-3. **Real-time tracking** -- monitor actual price movements post-event
-4. **Signal generation** -- surface correlations that exceed historical norms
+**Supabase schema:**
 
-Storage: Supabase for historical correlation data. Built up over time as the system collects data.
+```sql
+-- Macro events (CPI, rate decisions, jobs reports, etc.)
+macro_events (
+  id uuid PK,
+  indicator text,         -- 'CPI', 'FOMC_RATE', 'NFP', etc.
+  value numeric,
+  previous numeric,
+  expected numeric,
+  surprise numeric,       -- value - expected (the signal)
+  timestamp timestamptz,
+  source text
+)
+
+-- Price snapshots taken at event time + intervals after
+event_price_snapshots (
+  id uuid PK,
+  event_id uuid FK -> macro_events,
+  symbol text,            -- 'SPY', 'BTC-USD', 'GLD', etc.
+  price_at_event numeric,
+  price_1h numeric,
+  price_4h numeric,
+  price_1d numeric,
+  price_1w numeric
+)
+
+-- Pre-computed correlation coefficients (refreshed daily)
+correlation_matrix (
+  indicator text,
+  symbol text,
+  direction text,         -- 'beat' or 'miss' (vs expected)
+  avg_move_1h numeric,
+  avg_move_1d numeric,
+  sample_size int,
+  last_updated timestamptz
+)
+```
+
+**How it works:**
+
+1. **Event detection** -- FRED API polled for new macro data; compare to expected values from economic calendar
+2. **Snapshot capture** -- on new event, snapshot prices for ~50 tracked symbols at t=0, then at t+1h, t+4h, t+1d, t+1w via cron
+3. **Correlation computation** -- nightly job recomputes correlation_matrix from all historical event_price_snapshots
+4. **Signal generation** -- when a new event arrives, look up correlation_matrix for that indicator. If current price movement exceeds historical avg by >1 std dev, surface as an alert
+
+**Cold start:** Seed with 2 years of historical FRED data + historical price data from Finnhub. Run backfill job once on setup to populate event_price_snapshots retroactively. System is useful from day one.
+
+**Tracked indicators (initial set):** CPI, Core CPI, NFP, Unemployment Rate, FOMC Rate Decision, GDP, PCE, PPI, ISM PMI, Consumer Confidence, Retail Sales
+
+**Tracked symbols (initial set):** SPY, QQQ, DIA, IWM, TLT, GLD, SLV, USO, UUP, BTC-USD, ETH-USD, EUR-USD, JPY-USD, VIX
 
 ## Monetization Tiers
 
@@ -226,15 +273,18 @@ Storage: Supabase for historical correlation data. Built up over time as the sys
 
 | Source | Data | Rate Limit (Free) | Notes |
 |--------|------|-------------------|-------|
-| Finnhub | Stock prices, company profiles | 60 req/min | Best free stock API |
-| Yahoo Finance | Indices, commodities, historical | Unofficial, use carefully | No official API, scrape-adjacent |
-| Alpha Vantage | Stock, forex, crypto | 25 req/day (free) | Good for historical data |
-| CoinGecko | Crypto prices, market data | 10-30 req/min | Best free crypto API |
-| FRED | Macro indicators (CPI, GDP, rates) | 120 req/min | Federal Reserve data, excellent |
-| exchangerate.host | Forex rates | 100 req/month (free) | Simple currency data |
+| Finnhub | Stock prices, indices, company profiles, sector data | 60 req/min | Primary market data source |
+| CoinGecko | Crypto prices, market data, precious metals | 10-30 req/min | Primary crypto + metals source |
+| FRED | Macro indicators (CPI, GDP, rates, yields) | 120 req/min | Federal Reserve data, excellent |
+| Frankfurter.app | Forex rates (ECB data) | No key, no meaningful limit | Replaced exchangerate.host |
 | Google News RSS | Financial news (proxied) | No hard limit | Same pattern as World Monitor |
 | Federal Reserve RSS | Fed press releases | No limit | Direct RSS feed |
 | SEC RSS | Regulatory filings, press releases | No limit | Direct RSS feed |
+
+**Removed from consideration:**
+- Alpha Vantage: 25 req/day is unusable for a multi-user app
+- exchangerate.host: 100 req/month is unusable
+- Yahoo Finance: unofficial scrape, breaks without warning. Use as last-resort fallback only, never as primary source
 
 ## File Structure
 
@@ -270,6 +320,54 @@ monoth/
   public/
   docs/
 ```
+
+## Zustand Stores
+
+```
+panelStore      -- panel registry, enabled/disabled state, panel-specific settings
+layoutStore     -- grid layout positions/sizes per user, sidebar state
+marketStore     -- cached market data keyed by symbol, last refresh timestamps
+newsStore       -- aggregated news items, category filters
+userStore       -- auth state, subscription tier, preferences, watchlist
+```
+
+## Error Handling
+
+- Panels show a subtle error state (muted card with "Data unavailable" + retry button) when their source is down
+- Never crash the whole dashboard because one API failed
+- Fallback chain: primary source -> cache (stale-while-revalidate) -> error state
+- API routes return cached data with `X-Cache: STALE` header when upstream is down
+
+## Vercel API Route Notes
+
+- All routes under `/api/*` are Vercel serverless functions (not an Express server)
+- CORS: allow `*.monoth.app` + `localhost:*` for dev
+- All routes set `Cache-Control` headers for Vercel Edge Cache
+- Rate limiting per IP on free tier, per API key on paid tier (Vercel KV)
+
+## Delivery Phases
+
+### Phase 1 -- Foundation (week 1)
+Vite 8 + React + shadcn scaffold, panel grid system, sidebar, theme. Deploy empty shell to Vercel.
+
+### Phase 2 -- Core Data (week 1-2)
+Vercel API routes for Finnhub, CoinGecko, FRED, Frankfurter, RSS proxy. Caching layer with Vercel KV. Panels 1-6 (Live Markets, Headlines, Forex, Fixed Income, Commodities, Crypto).
+
+### Phase 3 -- Intelligence (week 2)
+Panels 7-11 (Central Bank, Economic Data, Sector Heatmap, Market Radar, Correlation Engine). FRED historical backfill. Correlation engine cold start with seeded data.
+
+### Phase 4 -- Extended (week 3)
+Tier 2 panels (12-19). Supabase auth. User prefs/saved layouts. Watchlist.
+
+### Phase 5 -- Monetization (week 3-4)
+Stripe integration. Pro tier faster polling. AI insights panel (BYOK). Export panel. API tier with key management.
+
+## AI Cost Model (Pro tier)
+
+Pro includes AI analysis. Budget assumption:
+- Morning brief = ~2K tokens input + ~500 tokens output per user per day
+- At $3/1M input tokens (Claude Haiku): ~1000 users = ~$6/day = ~$180/month
+- Price Pro tier accordingly (minimum $19/month covers AI cost + margin)
 
 ## Non-Goals (MVP)
 
