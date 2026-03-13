@@ -51,7 +51,9 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
   const [candles, setCandles] = useState<CandleData[]>([])
   const [candleLoading, setCandleLoading] = useState(true)
   const [range, setRange] = useState<Range>('3M')
-  const [tab, setTab] = useState<'overview' | 'chart' | 'news'>('overview')
+  const [fundamentals, setFundamentals] = useState<Record<string, number | string | null> | null>(null)
+  const [fundsLoading, setFundsLoading] = useState(false)
+  const [tab, setTab] = useState<'overview' | 'chart' | 'news' | 'fundamentals'>('overview')
 
   const indexMatch = indices.find((i) => i.symbol === ticker)
   const cryptoMatch = crypto.find((c) => c.symbol === ticker)
@@ -67,6 +69,16 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
   const changePercent = quote?.changePercent ?? indexMatch?.changePercent ?? cryptoMatch?.changePercent24h ?? null
   const name = indexMatch?.name ?? cryptoMatch?.name ?? ticker
   const isPos = (changePercent ?? 0) >= 0
+
+  useEffect(() => {
+    if (!open || tab !== 'fundamentals') return
+    setFundsLoading(true)
+    fetch(`/api/market/fundamentals?symbol=${ticker}`)
+      .then((r) => r.json())
+      .then((d) => setFundamentals(d))
+      .catch(() => {})
+      .finally(() => setFundsLoading(false))
+  }, [ticker, open, tab])
 
   useEffect(() => {
     if (!open) return
@@ -97,7 +109,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
     `text-[10px] uppercase tracking-wider px-2 py-1 font-medium transition-colors ${active ? 'text-foreground border-b border-foreground' : 'text-muted-foreground hover:text-foreground'}`
 
   const rangeCls = (r: Range) =>
-    `text-[9px] px-1.5 py-0.5 rounded-sm font-medium transition-colors ${range === r ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] px-1.5 py-0.5 rounded-sm font-medium transition-colors ${range === r ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -144,7 +156,8 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
         <div className="flex border-b border-border/20 px-5 gap-4">
           <button className={tabCls(tab === 'overview')} onClick={() => setTab('overview')}>Overview</button>
           <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
-          <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News {relatedNews.length > 0 && <span className="ml-1 text-[8px] text-muted-foreground">({relatedNews.length})</span>}</button>
+          <button className={tabCls(tab === 'fundamentals')} onClick={() => setTab('fundamentals')}>Fundamentals</button>
+          <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News {relatedNews.length > 0 && <span className="ml-1 text-[9px] text-muted-foreground">({relatedNews.length})</span>}</button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -167,7 +180,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                 <div className="rounded-sm overflow-hidden border border-border/20">
                   {candleLoading ? (
                     <div className="h-28 flex items-center justify-center">
-                      <span className="text-[9px] text-muted-foreground animate-pulse">Loading…</span>
+                      <span className="text-[10px] text-muted-foreground animate-pulse">Loading…</span>
                     </div>
                   ) : candles.length > 0 ? (
                     <LightweightChart
@@ -179,14 +192,14 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                       areaBottomColor="rgba(0,0,0,0)"
                     />
                   ) : (
-                    <div className="h-28 flex items-center justify-center text-[9px] text-muted-foreground">No chart data</div>
+                    <div className="h-28 flex items-center justify-center text-[10px] text-muted-foreground">No chart data</div>
                   )}
                 </div>
 
                 {/* 52W range indicator */}
                 {high52 && low52 && price && highPct !== null && (
                   <div className="mt-2">
-                    <div className="flex justify-between text-[9px] text-muted-foreground mb-1">
+                    <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>${fmt(low52)} low</span>
                       <span>${fmt(high52)} high</span>
                     </div>
@@ -211,7 +224,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                   { label: 'Data Points', value: candles.length > 0 ? `${candles.length} days` : '—' },
                 ].map(({ label, value, colored, positive }) => (
                   <div key={label} className="bg-[#0e0e0e] px-3 py-2.5">
-                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">{label}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{label}</div>
                     <div className={`text-[12px] font-semibold tabular-nums ${colored ? (positive ? 'text-emerald-400' : 'text-red-400') : 'text-foreground'}`}>
                       {value}
                     </div>
@@ -231,7 +244,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
               </div>
               <div className="rounded-sm overflow-hidden border border-border/20">
                 {candleLoading ? (
-                  <div className="h-64 flex items-center justify-center text-[9px] text-muted-foreground animate-pulse">Loading…</div>
+                  <div className="h-64 flex items-center justify-center text-[10px] text-muted-foreground animate-pulse">Loading…</div>
                 ) : candles.length > 0 ? (
                   <LightweightChart
                     type="area"
@@ -243,12 +256,89 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                     showAxes
                   />
                 ) : (
-                  <div className="h-64 flex items-center justify-center text-[9px] text-muted-foreground">No data</div>
+                  <div className="h-64 flex items-center justify-center text-[10px] text-muted-foreground">No data</div>
                 )}
               </div>
               {candles.length > 0 && (
-                <div className="mt-3 text-[9px] text-muted-foreground text-center">{candles.length} trading days · Daily close</div>
+                <div className="mt-3 text-[10px] text-muted-foreground text-center">{candles.length} trading days · Daily close</div>
               )}
+            </div>
+          )}
+
+          {/* Fundamentals tab */}
+          {tab === 'fundamentals' && (
+            <div className="px-5 py-4">
+              {fundsLoading && (
+                <div className="h-20 flex items-center justify-center text-[10px] text-muted-foreground animate-pulse">Loading…</div>
+              )}
+              {!fundsLoading && !fundamentals && (
+                <div className="text-[10px] text-muted-foreground text-center py-8">No fundamental data available</div>
+              )}
+              {!fundsLoading && fundamentals && (() => {
+                function fmtBig(n: number | null) {
+                  if (n == null) return '—'
+                  if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T'
+                  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B'
+                  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M'
+                  return '$' + n.toLocaleString()
+                }
+                function fmtPct(n: number | null) {
+                  if (n == null) return '—'
+                  return (n * 100).toFixed(1) + '%'
+                }
+                function fmtNum(n: number | null, digits = 2) {
+                  if (n == null) return '—'
+                  return n.toFixed(digits)
+                }
+                function Row({ label, value }: { label: string; value: string }) {
+                  return (
+                    <div className="flex justify-between py-1.5 border-b border-border/15">
+                      <span className="text-[10px] text-muted-foreground">{label}</span>
+                      <span className="text-[11px] font-medium tabular-nums text-foreground">{value}</span>
+                    </div>
+                  )
+                }
+                const f = fundamentals as Record<string, number | null>
+                return (
+                  <div className="space-y-4">
+                    {(fundamentals.sector || fundamentals.industry) && (
+                      <div className="text-[10px] text-muted-foreground">
+                        {fundamentals.sector as string}{fundamentals.industry ? ` · ${fundamentals.industry as string}` : ''}
+                      </div>
+                    )}
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Valuation</div>
+                      <Row label="P/E (TTM)" value={fmtNum(f.peRatio)} />
+                      <Row label="Forward P/E" value={fmtNum(f.forwardPE)} />
+                      <Row label="P/B" value={fmtNum(f.pbRatio)} />
+                      <Row label="P/S (TTM)" value={fmtNum(f.priceToSales)} />
+                      <Row label="EV/EBITDA" value={fmtNum(f.evToEbitda)} />
+                      <Row label="PEG Ratio" value={fmtNum(f.pegRatio)} />
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Profitability</div>
+                      <Row label="Net Margin" value={fmtPct(f.profitMargin)} />
+                      <Row label="Operating Margin" value={fmtPct(f.operatingMargin)} />
+                      <Row label="ROE" value={fmtPct(f.roe)} />
+                      <Row label="ROA" value={fmtPct(f.roa)} />
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Growth</div>
+                      <Row label="Revenue Growth" value={fmtPct(f.revenueGrowth)} />
+                      <Row label="Earnings Growth" value={fmtPct(f.earningsGrowth)} />
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Balance Sheet</div>
+                      <Row label="Market Cap" value={fmtBig(f.marketCap)} />
+                      <Row label="Revenue (TTM)" value={fmtBig(f.revenue)} />
+                      <Row label="EBITDA" value={fmtBig(f.ebitda)} />
+                      <Row label="Debt/Equity" value={fmtNum(f.debtToEquity)} />
+                      <Row label="Current Ratio" value={fmtNum(f.currentRatio)} />
+                      <Row label="Beta" value={fmtNum(f.beta)} />
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
           )}
 
@@ -268,7 +358,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                       className="block border border-border/20 rounded-sm p-3 hover:border-border/50 hover:bg-white/[0.02] transition-colors"
                     >
                       <div className="text-[11px] font-medium text-foreground leading-snug mb-1.5">{item.title}</div>
-                      <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                         <span>{item.source}</span>
                         <span>·</span>
                         <span>{relTime(item.published)}</span>

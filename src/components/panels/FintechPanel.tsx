@@ -8,9 +8,9 @@ import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { relTime, tabCls } from '@/lib/panel-utils'
 
-const FINTECH_SYMBOLS = ['ARKF', 'FINX', 'IPAY', 'SQ', 'PYPL', 'COIN']
+const FINTECH_SYMBOLS = ['ARKF', 'FINX', 'AFRM', 'SQ', 'PYPL', 'COIN']
 const FINTECH_NAMES: Record<string, string> = {
-  ARKF: 'ARK Fintech', FINX: 'Global Fintech', IPAY: 'Digital Payments',
+  ARKF: 'ARK Fintech', FINX: 'Global Fintech', AFRM: 'Affirm Holdings',
   SQ: 'Block Inc', PYPL: 'PayPal', COIN: 'Coinbase',
 }
 
@@ -139,7 +139,7 @@ export default function FintechPanel() {
               const share = MARKET_SHARE[p.symbol] ?? 0
               return (
                 <div key={p.symbol} className="flex items-center gap-2">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0 ${NETWORK_COLOR[p.symbol] ?? 'bg-zinc-500'}`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${NETWORK_COLOR[p.symbol] ?? 'bg-zinc-500'}`}>
                     {NETWORK_LOGO[p.symbol] ?? p.symbol[0]}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -154,7 +154,7 @@ export default function FintechPanel() {
                           style={{ width: `${share}%` }}
                         />
                       </div>
-                      <span className="text-[9px] text-muted-foreground tabular-nums shrink-0">{share}%</span>
+                      <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">{share}%</span>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -169,7 +169,7 @@ export default function FintechPanel() {
           </div>
 
           <div className="mt-3 border-t border-border/20 pt-2 space-y-1">
-            <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5">Daily Transaction Volume</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Daily Transaction Volume</div>
             <div className="flex justify-between items-center">
               <span className="text-[11px] text-muted-foreground">Card transactions</span>
               <span className="text-[12px] font-bold tabular-nums">{cardTxns.toFixed(2)}B/day</span>
@@ -190,7 +190,7 @@ export default function FintechPanel() {
         <div>
           <div className="flex items-center justify-between mb-3 p-2 bg-muted/40 rounded-md">
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Innovation Index</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Innovation Index</div>
               <div className="text-[18px] font-bold tabular-nums leading-tight">{INNOVATION_INDEX}<span className="text-[10px] text-muted-foreground font-normal">/100</span></div>
             </div>
             <div className="w-12 h-12 rounded-full border-2 border-emerald-500 flex items-center justify-center">
@@ -204,7 +204,7 @@ export default function FintechPanel() {
                 <div className="flex items-center justify-between mb-0.5">
                   <div>
                     <span className={`${expanded ? 'text-[13px]' : 'text-[11px]'} font-medium`}>{t.label}</span>
-                    <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} text-muted-foreground ml-1.5`}>{t.size}</span>
+                    <span className={`${expanded ? 'text-[11px]' : 'text-[10px]'} text-muted-foreground ml-1.5`}>{t.size}</span>
                   </div>
                   <span className={`${expanded ? 'text-[13px]' : 'text-[11px]'} font-bold tabular-nums text-emerald-600`}>+{t.growth}%</span>
                 </div>
@@ -219,7 +219,7 @@ export default function FintechPanel() {
           </div>
 
           <div className="mt-2 pt-2 border-t border-border/20">
-            <div className="text-[9px] text-muted-foreground">YoY growth rates. Bar width relative to highest growth vertical.</div>
+            <div className="text-[10px] text-muted-foreground">YoY growth rates. Bar width relative to highest growth vertical.</div>
           </div>
         </div>
       )}
@@ -230,7 +230,7 @@ export default function FintechPanel() {
             {CHART_SYMBOLS.map((sym) => (
               <button
                 key={sym}
-                className={`text-[8px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+                className={`text-[9px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
                 onClick={() => setChartSymbol(sym)}
               >
                 {sym}
@@ -254,7 +254,7 @@ export default function FintechPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>
