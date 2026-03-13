@@ -32,5 +32,5 @@ export const PANELS: PanelConfig[] = [
   { id: 'supply-chain', name: 'Supply Chain', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'watchlist', name: 'Watchlist', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'ai-insights', name: 'AI Insights', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
-  { id: 'export', name: 'Export', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'export', name: 'Settings', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
 ]
