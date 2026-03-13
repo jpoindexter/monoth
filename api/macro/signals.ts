@@ -107,13 +107,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // 5. VIX (Yahoo Finance ^VIX)
       try {
-        const vixRes = await fetch('https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX', {
-          headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
+        const vixRes = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1d&range=1d', {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
         })
         const vixData = await vixRes.json()
-        const q = vixData.quoteResponse?.result?.[0]
-        if (q?.regularMarketPrice != null) {
-          const level = q.regularMarketPrice
+        const meta = vixData.chart?.result?.[0]?.meta
+        if (meta?.regularMarketPrice != null) {
+          const level = meta.regularMarketPrice
           signals.push({
             name: 'Volatility',
             value: Math.round(level * 10) / 10,

@@ -3,7 +3,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useUserStore } from '@/stores/user-store'
 import { useMarketStore } from '@/stores/market-store'
 import { useNewsData } from '@/hooks/use-news-data'
-import { classifyHeadline, CATEGORY_LABELS, ThreatCategory } from '@/lib/news-classifier'
+import { classifyHeadline, CATEGORY_LABELS } from '@/lib/news-classifier'\nimport type { ThreatCategory } from '@/lib/news-classifier'
 import type { NewsItem } from '@/types'
 
 const LS_KEY = 'monoth-ai-key'
