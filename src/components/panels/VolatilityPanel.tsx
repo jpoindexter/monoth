@@ -23,7 +23,7 @@ function relTime(ts: number): string {
 }
 
 export default function VolatilityPanel() {
-  const [tab, setTab] = useState<'etfs' | 'news' | 'chart'>('etfs')
+  const [tab, setTab] = useState<'etfs' | 'news' | 'chart'>('news')
   const [chartData, setChartData] = useState<CandleData[]>([])
   const fetcher = useCallback(() => fetchQuotes(VOL_SYMBOLS), [])
   const { data, loading, error, refresh } = usePolling({ fetcher, interval: 300_000 })
@@ -67,8 +67,11 @@ export default function VolatilityPanel() {
             </tr>
           </thead>
           <tbody>
+            {(!data || data.length === 0) && !loading && (
+              <tr><td colSpan={3} className="py-3 text-center text-muted-foreground text-[10px]">No data available. Try News tab.</td></tr>
+            )}
             {data?.map((point) => {
-              const isPositive = point.changePercent >= 0
+              const isPositive = (point.changePercent ?? 0) >= 0
               return (
                 <tr key={point.symbol} className="border-t border-border/20">
                   <td className="py-1">
@@ -79,7 +82,7 @@ export default function VolatilityPanel() {
                     {point.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className={`text-right tabular-nums font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {isPositive ? '+' : ''}{point.changePercent.toFixed(2)}%
+                    {isPositive ? '+' : ''}{(point.changePercent ?? 0).toFixed(2)}%
                   </td>
                 </tr>
               )

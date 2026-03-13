@@ -44,11 +44,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             title: m.question,
             yesPct,
             noPct: 100 - yesPct,
-            volume: m.volume,
+            volume: Number(m.volume) || 0,
             endDate: m.endDate,
           }
         })
-        .filter((m) => m.volume > 100)
+        .filter((m) => Number(m.volume) > 100)
         .slice(0, 15)
     })
 

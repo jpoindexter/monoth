@@ -137,6 +137,7 @@ export const CATEGORY_LABELS: Record<ThreatCategory, string> = {
 }
 
 export function classifyHeadline(headline: string): Classification | null {
+  if (!headline) return null
   const lower = headline.toLowerCase()
 
   for (const [keyword, category] of Object.entries(CRITICAL_KEYWORDS)) {

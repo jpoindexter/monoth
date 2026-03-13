@@ -48,8 +48,11 @@ export default function BondNewsPanel() {
             </tr>
           </thead>
           <tbody>
+            {(!priceData || priceData.length === 0) && !priceLoading && (
+              <tr><td colSpan={3} className="py-3 text-center text-muted-foreground text-[10px]">No data available. Try News tab.</td></tr>
+            )}
             {priceData?.map((p) => {
-              const isPos = p.changePercent >= 0
+              const isPos = (p.changePercent ?? 0) >= 0
               return (
                 <tr key={p.symbol} className="border-t border-border/20">
                   <td className="py-0.5">
@@ -58,7 +61,7 @@ export default function BondNewsPanel() {
                   </td>
                   <td className="text-right tabular-nums">${p.price.toFixed(2)}</td>
                   <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {isPos ? '+' : ''}{p.changePercent.toFixed(2)}%
+                    {isPos ? '+' : ''}{(p.changePercent ?? 0).toFixed(2)}%
                   </td>
                 </tr>
               )

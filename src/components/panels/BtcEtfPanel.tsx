@@ -19,7 +19,7 @@ function relTime(ts: number): string {
 const ETF_SYMBOLS = ['IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB']
 
 export default function BtcEtfPanel() {
-  const [tab, setTab] = useState<'etfs' | 'news' | 'chart'>('etfs')
+  const [tab, setTab] = useState<'etfs' | 'news' | 'chart'>('news')
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
   const { data: newsData, loading: newsLoading, error: newsError, refresh } = useNewsData('btcetf')
   useCryptoData()
