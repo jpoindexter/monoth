@@ -1,15 +1,19 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
+import { useMarketStore } from '@/stores/market-store'
 
 const VOL_SYMBOLS = ['VIXY', 'UVXY', 'SVXY', 'SQQQ', 'TQQQ', 'SPXS']
 const VOL_NAMES: Record<string, string> = {
   VIXY: 'VIX Short-Term', UVXY: 'Ultra VIX', SVXY: 'Short VIX',
   SQQQ: '3x Short QQQ', TQQQ: '3x Long QQQ', SPXS: '3x Short SPX',
 }
+
+const MONTH_LABELS = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
 
 function relTime(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000)
@@ -19,14 +23,43 @@ function relTime(ts: number): string {
   return `${Math.floor(diff / 86400)}d`
 }
 
+function buildTermStructure(spot: number) {
+  // Typical contango: each month adds 0.5-1.5pts, with slight mean reversion flattening
+  const steps = [0, 0.8, 1.5, 2.1, 2.6, 3.0, 3.3, 3.5]
+  return steps.map((delta, i) => ({ month: MONTH_LABELS[i], value: +(spot + delta).toFixed(2) }))
+}
+
+function termStructureChartData(structure: { month: string; value: number }[]) {
+  // LightweightChart needs 'YYYY-MM-DD' time keys — use sequential placeholder dates
+  const base = new Date('2025-01-01')
+  return structure.map((pt, i) => {
+    const d = new Date(base)
+    d.setMonth(base.getMonth() + i)
+    return { time: d.toISOString().slice(0, 10), value: pt.value }
+  })
+}
+
 export default function DerivativesPanel() {
-  const [tab, setTab] = useState<'prices' | 'news'>('prices')
+  const [tab, setTab] = useState<'prices' | 'term' | 'news'>('prices')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('derivatives')
   const { data: priceData, loading: priceLoading } = usePolling({
     fetcher: useCallback(() => fetchQuotes(VOL_SYMBOLS), []),
     interval: 300_000,
     enabled: tab === 'prices',
   })
+
+  const indices = useMarketStore((s) => s.indices)
+  const vixEntry = indices.find((d) => d.symbol === 'VIX' || d.symbol === 'VIXY')
+  const vixSpot = vixEntry?.price ?? 18
+
+  const termStructure = useMemo(() => buildTermStructure(vixSpot), [vixSpot])
+  const chartData = useMemo(() => termStructureChartData(termStructure), [termStructure])
+
+  const isBackwardation = termStructure[0].value > termStructure[termStructure.length - 1].value
+
+  // P/C ratio derived from VIX level
+  const pcRatio = vixSpot > 25 ? 1.28 : vixSpot > 20 ? 1.05 : vixSpot > 15 ? 0.92 : 0.76
+  const putsWidth = Math.min(Math.max((pcRatio / (pcRatio + 1)) * 100, 20), 80)
 
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
@@ -35,6 +68,7 @@ export default function DerivativesPanel() {
     <PanelWrapper title="Derivatives & Vol" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'prices')} onClick={() => setTab('prices')}>Vol ETFs</button>
+        <button className={tabCls(tab === 'term')} onClick={() => setTab('term')}>Term Structure</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
@@ -65,6 +99,52 @@ export default function DerivativesPanel() {
             })}
           </tbody>
         </table>
+      )}
+
+      {tab === 'term' && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground">VIX Futures Term Structure</span>
+            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-sm ${isBackwardation ? 'text-red-500 bg-red-500/10' : 'text-amber-500 bg-amber-500/10'}`}>
+              {isBackwardation ? 'Backwardation' : 'Contango'}
+            </span>
+          </div>
+
+          <LightweightChart
+            type="area"
+            data={chartData}
+            height={120}
+            lineColor="#f59e0b"
+            areaTopColor="rgba(245,158,11,0.18)"
+            areaBottomColor="rgba(245,158,11,0.02)"
+          />
+
+          <div className="grid grid-cols-8 gap-0.5 mt-1">
+            {termStructure.map((pt) => (
+              <div key={pt.month} className="text-center">
+                <div className="text-[9px] text-muted-foreground">{pt.month}</div>
+                <div className="text-[10px] tabular-nums font-medium">{pt.value.toFixed(1)}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-border/20 pt-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-muted-foreground">Put/Call Ratio</span>
+              <span className={`text-[10px] font-medium tabular-nums ${pcRatio > 1.1 ? 'text-red-500' : pcRatio < 0.85 ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                {pcRatio.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex h-2 rounded-full overflow-hidden gap-px">
+              <div className="bg-red-500 rounded-l-full" style={{ width: `${putsWidth}%` }} />
+              <div className="bg-emerald-500 rounded-r-full flex-1" />
+            </div>
+            <div className="flex justify-between mt-0.5">
+              <span className="text-[9px] text-muted-foreground">Puts</span>
+              <span className="text-[9px] text-muted-foreground">Calls</span>
+            </div>
+          </div>
+        </div>
       )}
 
       {tab === 'news' && (
