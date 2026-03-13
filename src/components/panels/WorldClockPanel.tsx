@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 
@@ -43,6 +41,99 @@ function isMarketOpen(city: City): boolean {
   return hours >= city.openHour && hours < city.closeHour
 }
 
+function hoursUntilEvent(city: City): string {
+  const now = getTimeInZone(city.timezone)
+  const day = now.getDay()
+  const hours = now.getHours() + now.getMinutes() / 60
+  const open = isMarketOpen(city)
+
+  if (city.weekdays && (day === 0 || day === 6)) {
+    const daysUntilMon = day === 0 ? 1 : 2
+    return `opens in ${daysUntilMon}d`
+  }
+
+  if (open) {
+    const remaining = city.closeHour - hours
+    if (remaining < 1) return `closes in ${Math.round(remaining * 60)}m`
+    return `closes in ${remaining.toFixed(1)}h`
+  }
+
+  if (hours < city.openHour) {
+    const until = city.openHour - hours
+    if (until < 1) return `opens in ${Math.round(until * 60)}m`
+    return `opens in ${until.toFixed(1)}h`
+  }
+
+  return 'closed'
+}
+
+function SessionTimeline() {
+  const etNow = getTimeInZone('America/New_York')
+  const etHour = etNow.getHours() + etNow.getMinutes() / 60
+
+  // Convert each market's open/close to ET offset
+  function toET(city: City) {
+    const localNow = getTimeInZone(city.timezone)
+    const localHour = localNow.getHours() + localNow.getMinutes() / 60
+    const offset = etHour - localHour
+    return {
+      name: city.market,
+      open: city.openHour + offset,
+      close: city.closeHour + offset,
+      isOpen: isMarketOpen(city),
+    }
+  }
+
+  const sessions = CITIES.map(toET)
+
+  return (
+    <div className="mt-1 pt-1.5 border-t border-border/20">
+      <div className="text-[8px] uppercase tracking-wider text-muted-foreground mb-1">Session Overlap (ET)</div>
+      <div className="relative h-[60px]">
+        {/* Hour markers */}
+        {[0, 4, 8, 12, 16, 20, 24].map((h) => (
+          <div key={h} className="absolute top-0 bottom-0" style={{ left: `${(h / 24) * 100}%` }}>
+            <div className="w-px h-full bg-border/20" />
+            <span className="absolute -bottom-0.5 -translate-x-1/2 text-[7px] text-muted-foreground/60">{h}</span>
+          </div>
+        ))}
+        {/* Now line */}
+        <div
+          className="absolute top-0 bottom-0 w-px bg-red-500 z-10"
+          style={{ left: `${(etHour / 24) * 100}%` }}
+        />
+        {/* Session bars */}
+        {sessions.slice(0, 6).map((s, i) => {
+          let open = s.open % 24
+          if (open < 0) open += 24
+          let close = s.close % 24
+          if (close < 0) close += 24
+
+          const left = (open / 24) * 100
+          const width = open < close
+            ? ((close - open) / 24) * 100
+            : ((24 - open) / 24) * 100
+
+          return (
+            <div
+              key={s.name}
+              className={`absolute h-[7px] rounded-sm ${s.isOpen ? 'bg-emerald-500/60' : 'bg-zinc-400/30'}`}
+              style={{
+                left: `${left}%`,
+                width: `${Math.min(width, 100 - left)}%`,
+                top: `${i * 9}px`,
+              }}
+              title={`${s.name}: ${open.toFixed(1)}-${close.toFixed(1)} ET`}
+            >
+              <span className="text-[6px] font-medium text-foreground/70 pl-0.5 leading-[7px]">{s.name}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function WorldClockPanel() {
   const [, setNow] = useState(Date.now())
 
@@ -51,9 +142,14 @@ export default function WorldClockPanel() {
     return () => clearInterval(timer)
   }, [])
 
+  const openCount = CITIES.filter(isMarketOpen).length
+
   return (
     <PanelWrapper title="World Clock">
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+      <div className="text-[9px] text-muted-foreground mb-1.5">
+        <span className="text-emerald-600 font-medium">{openCount}</span> of {CITIES.length} markets open
+      </div>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
         {CITIES.map((city) => {
           const time = getTimeInZone(city.timezone)
           const open = isMarketOpen(city)
@@ -61,7 +157,7 @@ export default function WorldClockPanel() {
             <div key={city.name} className="flex items-center justify-between py-0.5">
               <div className="min-w-0">
                 <div className="text-[11px] font-medium text-foreground truncate">{city.name}</div>
-                <div className="text-[9px] text-muted-foreground">{city.market}</div>
+                <div className="text-[8px] text-muted-foreground">{city.market} · {hoursUntilEvent(city)}</div>
               </div>
               <div className="text-right shrink-0 ml-2">
                 <div className="text-[11px] tabular-nums font-medium">{formatTime(time)}</div>
@@ -76,6 +172,7 @@ export default function WorldClockPanel() {
           )
         })}
       </div>
+      <SessionTimeline />
     </PanelWrapper>
   )
 }

@@ -3,6 +3,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { useCryptoData } from '@/hooks/use-crypto-data'
 import { useMarketStore } from '@/stores'
 import { usePolling } from '@/hooks/use-polling'
+import { fetchQuotes } from '@/services/api/market'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
@@ -17,13 +18,6 @@ function relTime(ts: number): string {
 
 const ETF_SYMBOLS = ['IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB']
 
-interface EtfQuote {
-  symbol: string
-  price: number
-  change: number
-  changePercent: number
-}
-
 export default function BtcEtfPanel() {
   const [tab, setTab] = useState<'etfs' | 'news' | 'chart'>('etfs')
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
@@ -32,21 +26,8 @@ export default function BtcEtfPanel() {
   const crypto = useMarketStore((s) => s.crypto)
   const btc = crypto.find((c) => c.id === 'bitcoin')
 
-  const { data: etfData, loading: etfLoading } = usePolling<EtfQuote[]>({
-    fetcher: useCallback(async () => {
-      const results = await Promise.allSettled(
-        ETF_SYMBOLS.map(async (sym) => {
-          const res = await fetch(`/api/market/quote?symbol=${sym}`)
-          if (!res.ok) return null
-          const q = await res.json()
-          return { symbol: sym, price: q.c ?? 0, change: q.d ?? 0, changePercent: q.dp ?? 0 }
-        })
-      )
-      return results
-        .filter((r): r is PromiseFulfilledResult<EtfQuote | null> => r.status === 'fulfilled')
-        .map((r) => r.value)
-        .filter((v): v is EtfQuote => v !== null && v.price > 0)
-    }, []),
+  const { data: etfData, loading: etfLoading } = usePolling({
+    fetcher: useCallback(() => fetchQuotes(ETF_SYMBOLS), []),
     interval: 60_000,
     enabled: tab === 'etfs',
   })
@@ -116,16 +97,16 @@ export default function BtcEtfPanel() {
           </thead>
           <tbody>
             {etfData?.map((etf) => {
-              const isPos = etf.changePercent >= 0
+              const isPos = (etf.changePercent ?? 0) >= 0
               return (
                 <tr key={etf.symbol} className="border-t border-border/20">
                   <td className="py-0.5 font-medium">{etf.symbol}</td>
                   <td className="text-right tabular-nums">${etf.price.toFixed(2)}</td>
                   <td className={`text-right tabular-nums ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {isPos ? '+' : ''}{etf.change.toFixed(2)}
+                    {isPos ? '+' : ''}{(etf.change ?? 0).toFixed(2)}
                   </td>
                   <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {isPos ? '+' : ''}{etf.changePercent.toFixed(2)}%
+                    {isPos ? '+' : ''}{(etf.changePercent ?? 0).toFixed(2)}%
                   </td>
                 </tr>
               )

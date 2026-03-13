@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
@@ -24,14 +24,24 @@ export default function HeadlinesPanel() {
   const pillCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
+  const breakingCount = useMemo(
+    () => data?.filter((item) => Date.now() - item.published < 1800_000).length ?? 0,
+    [data]
+  )
+
   return (
     <PanelWrapper title="Headlines" loading={loading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
-        {SOURCES.map((s) => (
-          <button key={s} className={pillCls(source === s)} onClick={() => setSource(s)}>
-            {s}
-          </button>
-        ))}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex gap-1">
+          {SOURCES.map((s) => (
+            <button key={s} className={pillCls(source === s)} onClick={() => setSource(s)}>
+              {s}
+            </button>
+          ))}
+        </div>
+        {breakingCount > 0 && (
+          <span className="text-[8px] font-bold text-red-500 animate-pulse">{breakingCount} NEW</span>
+        )}
       </div>
       <div className="space-y-0">
         {filtered?.map((item) => {
