@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Settings, Sun, Moon } from 'lucide-react'
+import { Settings, Sun, Moon, Monitor } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -92,12 +92,13 @@ export function TopBar() {
           /
         </kbd>
         <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={() => setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark')}
           className="p-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
-          title="Toggle theme (D)"
+          title={`Theme: ${theme} (D to cycle)`}
         >
-          <Sun className="w-3 h-3 dark:hidden" />
-          <Moon className="w-3 h-3 hidden dark:block" />
+          {theme === 'dark' && <Moon className="w-3 h-3" />}
+          {theme === 'light' && <Sun className="w-3 h-3" />}
+          {theme === 'system' && <Monitor className="w-3 h-3" />}
         </button>
         <button
           onClick={() => setSettingsOpen(true)}

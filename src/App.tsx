@@ -29,7 +29,7 @@ function AppInner() {
         e.preventDefault()
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))
       } else if (e.key === 'D' || e.key === 'd') {
-        setTheme(theme === 'dark' ? 'light' : 'dark')
+        setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark')
       } else if (e.key === 'L' || e.key === 'l') {
         toggleLock()
       } else if (e.key === 'R' || e.key === 'r') {

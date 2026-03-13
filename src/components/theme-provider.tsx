@@ -26,19 +26,31 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem(storageKey) as Theme | null
-    if (stored === "light" || stored === "dark") return stored
+    if (stored === "light" || stored === "dark" || stored === "system") return stored
     return defaultTheme
   })
 
   useEffect(() => {
     const root = window.document.documentElement
-    root.classList.remove("light", "dark")
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-      root.classList.add(systemTheme)
-      return
+
+    function applyTheme(t: Theme) {
+      root.classList.remove("light", "dark")
+      if (t === "system") {
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+        root.classList.add(systemTheme)
+      } else {
+        root.classList.add(t)
+      }
     }
-    root.classList.add(theme)
+
+    applyTheme(theme)
+
+    if (theme === "system") {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)")
+      const handler = () => applyTheme("system")
+      mq.addEventListener("change", handler)
+      return () => mq.removeEventListener("change", handler)
+    }
   }, [theme])
 
   const value = {
