@@ -92,8 +92,13 @@ export function CommandPalette() {
         setOpen((v) => !v)
       }
     }
+    function onOpen() { setOpen(true) }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('monoth:open-command', onOpen)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('monoth:open-command', onOpen)
+    }
   }, [])
 
   useEffect(() => {

@@ -29,7 +29,7 @@ function AppInner() {
 
       if (e.key === '/') {
         e.preventDefault()
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))
+        window.dispatchEvent(new CustomEvent('monoth:open-command'))
       } else if (e.key === 'D' || e.key === 'd') {
         setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark')
       } else if (e.key === 'L' || e.key === 'l') {
