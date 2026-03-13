@@ -1,12 +1,15 @@
+import { useState, useRef } from 'react'
 import { usePanelStore } from '@/stores'
 import { useSpanStore } from '@/stores/span-store'
 import { PanelRenderer } from '@/components/panels'
 import { PanelIdProvider } from '@/components/layout/PanelWrapper'
 
 export function PanelGrid() {
-  const { enabledPanels } = usePanelStore()
+  const { enabledPanels, reorderPanels } = usePanelStore()
   const panels = enabledPanels()
   const getSpan = useSpanStore((s) => s.getSpan)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const dragId = useRef<string | null>(null)
 
   return (
     <div
@@ -25,7 +28,28 @@ export function PanelGrid() {
         return (
           <div
             key={p.id}
-            className="min-h-0 overflow-hidden"
+            draggable
+            onDragStart={() => { dragId.current = p.id }}
+            onDragOver={(e) => {
+              e.preventDefault()
+              if (dragId.current !== p.id) setDragOverId(p.id)
+            }}
+            onDragLeave={() => setDragOverId(null)}
+            onDrop={(e) => {
+              e.preventDefault()
+              if (dragId.current && dragId.current !== p.id) {
+                reorderPanels(dragId.current, p.id)
+              }
+              dragId.current = null
+              setDragOverId(null)
+            }}
+            onDragEnd={() => {
+              dragId.current = null
+              setDragOverId(null)
+            }}
+            className={`min-h-0 overflow-hidden transition-shadow ${
+              dragOverId === p.id ? 'ring-2 ring-foreground/20 ring-inset' : ''
+            }`}
             style={{
               gridColumn: span.col > 1 ? `span ${span.col}` : undefined,
               gridRow: span.row > 1 ? `span ${span.row}` : undefined,
