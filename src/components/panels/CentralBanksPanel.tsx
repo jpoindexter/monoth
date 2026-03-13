@@ -75,8 +75,44 @@ function relTime(ts: number): string {
   return `${Math.floor(diff / 86400)}d`
 }
 
+const CURRENT_FED_RATE = 4.50
+
+const DOT_PLOT_DATA: { rate: number; members: number }[] = [
+  { rate: 3.25, members: 1 },
+  { rate: 3.50, members: 2 },
+  { rate: 3.75, members: 4 },
+  { rate: 4.00, members: 5 },
+  { rate: 4.25, members: 4 },
+  { rate: 4.50, members: 3 },
+]
+
+const DOT_PLOT_MEDIAN = (() => {
+  const flat: number[] = []
+  for (const d of DOT_PLOT_DATA) {
+    for (let i = 0; i < d.members; i++) flat.push(d.rate)
+  }
+  flat.sort((a, b) => a - b)
+  const mid = Math.floor(flat.length / 2)
+  return flat.length % 2 === 0 ? (flat[mid - 1] + flat[mid]) / 2 : flat[mid]
+})()
+
+const BALANCE_SHEETS = [
+  { name: 'Fed', currency: 'USD', current: 7.4, peak: 8.9, unit: 'T', usdEq: 7.4, qtPace: 'STEADY' as const },
+  { name: 'ECB', currency: 'EUR', current: 6.8, peak: 8.8, unit: 'T', usdEq: 7.3, qtPace: 'ACCELERATING' as const },
+  { name: 'BoJ', currency: 'JPY', current: 760, peak: 780, unit: 'T', usdEq: 5.1, qtPace: 'SLOWING' as const },
+  { name: 'BoE', currency: 'GBP', current: 850, peak: 1030, unit: 'B', usdEq: 1.1, qtPace: 'STEADY' as const },
+]
+
+const QT_PACE_COLORS: Record<'ACCELERATING' | 'STEADY' | 'SLOWING', string> = {
+  ACCELERATING: 'text-red-500',
+  STEADY: 'text-yellow-500',
+  SLOWING: 'text-emerald-500',
+}
+
+const GLOBAL_LIQUIDITY_USD = BALANCE_SHEETS.reduce((sum, b) => sum + b.usdEq, 0)
+
 export default function CentralBanksPanel() {
-  const [tab, setTab] = useState<'signals' | 'news' | 'rates' | 'calendar'>('signals')
+  const [tab, setTab] = useState<'signals' | 'news' | 'rates' | 'calendar' | 'dotplot' | 'balancesheet'>('signals')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('centralbanks')
   const { data: signals, loading: sigLoading } = usePolling<MacroSignal[]>({
     fetcher: useCallback(async () => {
@@ -103,10 +139,12 @@ export default function CentralBanksPanel() {
 
   return (
     <PanelWrapper title="Central Bank Watch" loading={newsLoading && sigLoading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex gap-1 mb-2 flex-wrap">
         <button className={tabCls(tab === 'signals')} onClick={() => setTab('signals')}>Signals</button>
         <button className={tabCls(tab === 'rates')} onClick={() => setTab('rates')}>Rates</button>
         <button className={tabCls(tab === 'calendar')} onClick={() => setTab('calendar')}>Calendar</button>
+        <button className={tabCls(tab === 'dotplot')} onClick={() => setTab('dotplot')}>Dot Plot</button>
+        <button className={tabCls(tab === 'balancesheet')} onClick={() => setTab('balancesheet')}>Balance Sheet</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
@@ -183,6 +221,131 @@ export default function CentralBanksPanel() {
                 <div className="flex items-center gap-1.5">
                   <span className="text-[9px] text-muted-foreground tabular-nums">{days}d</span>
                   <ActionBadge dir={dir} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {tab === 'dotplot' && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+            <span>19 FOMC members — end 2026 projections</span>
+            <span
+              className={`font-bold uppercase tracking-wider ${
+                DOT_PLOT_MEDIAN <= CURRENT_FED_RATE ? 'text-emerald-500' : 'text-red-500'
+              }`}
+            >
+              {DOT_PLOT_MEDIAN <= CURRENT_FED_RATE ? 'Dovish Lean' : 'Hawkish Lean'}
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {[...DOT_PLOT_DATA].reverse().map(({ rate, members }) => {
+              const isMedian = rate === DOT_PLOT_MEDIAN
+              return (
+                <div key={rate} className="flex items-center gap-2">
+                  <span
+                    className={`text-[10px] tabular-nums w-10 shrink-0 font-medium ${
+                      isMedian ? 'text-amber-500' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {rate.toFixed(2)}%
+                  </span>
+                  <div className="flex gap-1 items-center flex-wrap">
+                    {Array.from({ length: members }).map((_, i) => (
+                      <span
+                        key={i}
+                        className={`w-3 h-3 rounded-full border-2 ${
+                          isMedian
+                            ? 'bg-amber-400 border-amber-500'
+                            : rate === CURRENT_FED_RATE
+                            ? 'bg-sky-400/60 border-sky-500'
+                            : 'bg-foreground/30 border-foreground/50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {isMedian && (
+                    <span className="text-[8px] font-bold uppercase tracking-wider text-amber-500 ml-1">
+                      Median
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          <div className="mt-2 pt-2 border-t border-border/20 flex items-center justify-between text-[10px] text-muted-foreground">
+            <span>
+              Range:{' '}
+              <span className="text-foreground font-medium tabular-nums">
+                {Math.min(...DOT_PLOT_DATA.map((d) => d.rate)).toFixed(2)}%
+                {' — '}
+                {Math.max(...DOT_PLOT_DATA.map((d) => d.rate)).toFixed(2)}%
+              </span>
+            </span>
+            <span>
+              Current:{' '}
+              <span className="text-sky-400 font-medium tabular-nums">{CURRENT_FED_RATE.toFixed(2)}%</span>
+            </span>
+            <span>
+              Median:{' '}
+              <span className="text-amber-500 font-medium tabular-nums">{DOT_PLOT_MEDIAN.toFixed(2)}%</span>
+            </span>
+          </div>
+        </div>
+      )}
+
+      {tab === 'balancesheet' && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between mb-1 pb-1.5 border-b border-border/20">
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Global Liquidity</span>
+              <div className="text-[14px] font-bold tabular-nums">
+                ~${GLOBAL_LIQUIDITY_USD.toFixed(1)}T
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground block">QT Overall</span>
+              <span className="text-[10px] font-bold text-yellow-500 uppercase tracking-wider">Steady</span>
+            </div>
+          </div>
+          {BALANCE_SHEETS.map((b) => {
+            const pct = Math.round((b.current / b.peak) * 100)
+            const reduction = pct < 100
+            return (
+              <div key={b.name} className="space-y-0.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[8px] font-bold bg-foreground/10 text-foreground px-1 py-px rounded-sm">
+                      {b.currency}
+                    </span>
+                    <span className="text-[11px] font-medium">{b.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <span className="tabular-nums font-bold">
+                      {b.currency !== 'USD' ? b.currency + ' ' : '$'}
+                      {b.current}{b.unit}
+                    </span>
+                    <span className="text-muted-foreground tabular-nums">
+                      peak {b.currency !== 'USD' ? b.currency + ' ' : '$'}{b.peak}{b.unit}
+                    </span>
+                    <span className={`font-bold uppercase text-[8px] tracking-wider ${QT_PACE_COLORS[b.qtPace]}`}>
+                      {b.qtPace}
+                    </span>
+                  </div>
+                </div>
+                <div className="h-1.5 rounded-full bg-foreground/10 w-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      reduction ? 'bg-sky-500' : 'bg-emerald-500'
+                    }`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[8px] text-muted-foreground">
+                  <span>QT progress: {100 - pct}% drawn down</span>
+                  <span>{pct}% of peak</span>
                 </div>
               </div>
             )
