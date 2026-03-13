@@ -8,6 +8,7 @@ import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { DonutChart, PALETTE } from '@/components/charts/DonutChart'
 import { X } from 'lucide-react'
+import { useAlertStore } from '@/stores/alert-store'
 
 const SHARES_KEY = 'monoth-portfolio-shares'
 
@@ -53,7 +54,13 @@ export default function WatchlistPanel() {
   const [tab, setTab] = useState<'quotes' | 'portfolio'>('quotes')
   const [shares, setShares] = useState<Record<string, number>>(loadShares)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [alertOpen, setAlertOpen] = useState<string | null>(null)
+  const [alertPrice, setAlertPrice] = useState('')
   const navigate = useNavigate()
+
+  const alerts = useAlertStore((s) => s.alerts)
+  const addAlert = useAlertStore((s) => s.addAlert)
+  const removeAlert = useAlertStore((s) => s.removeAlert)
 
   const fetcher = useCallback(() => fetchQuotes(watchlist), [watchlist])
   const { data, loading, error, refresh } = usePolling({
@@ -84,6 +91,19 @@ export default function WatchlistPanel() {
 
   function toggleExpanded(sym: string) {
     setExpanded((prev) => (prev === sym ? null : sym))
+  }
+
+  function openAlertForm(sym: string, price: number | undefined) {
+    setAlertOpen((prev) => (prev === sym ? null : sym))
+    setAlertPrice(price ? price.toFixed(2) : '')
+  }
+
+  function createAlert(sym: string, direction: 'above' | 'below') {
+    const p = parseFloat(alertPrice)
+    if (isNaN(p) || p <= 0) return
+    addAlert(sym, p, direction)
+    setAlertOpen(null)
+    setAlertPrice('')
   }
 
   const totalValue = watchlist.reduce((sum, sym) => {
@@ -134,21 +154,27 @@ export default function WatchlistPanel() {
               const point = data?.find((d) => d.symbol === sym)
               const isPos = (point?.changePercent ?? 0) >= 0
               const isExpanded = expanded === sym
+              const symAlerts = alerts.filter((a) => a.symbol === sym && !a.triggered)
+              const hasTriggered = alerts.some((a) => a.symbol === sym && a.triggered)
+              const hasActive = symAlerts.length > 0
               return (
                 <>
                   <tr
                     key={sym}
-                    className="border-t border-border/20 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                    className={`border-t border-border/20 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${hasTriggered ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}
                     onClick={() => toggleExpanded(sym)}
                   >
-                    <td className="py-0.5 font-medium flex items-center gap-1">
-                      <span
-                        className="inline-block text-muted-foreground transition-transform duration-150"
-                        style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', fontSize: '8px' }}
-                      >
-                        &#9654;
-                      </span>
-                      {sym}
+                    <td className="py-0.5 font-medium">
+                      <div className="flex items-center gap-1">
+                        <span
+                          className="inline-block text-muted-foreground transition-transform duration-150"
+                          style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', fontSize: '8px' }}
+                        >
+                          &#9654;
+                        </span>
+                        {sym}
+                        {hasActive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+                      </div>
                     </td>
                     <td className="text-right tabular-nums">
                       {point ? `$${point.price.toFixed(2)}` : '-'}
@@ -156,15 +182,73 @@ export default function WatchlistPanel() {
                     <td className={`text-right tabular-nums font-medium ${point ? (isPos ? 'text-emerald-600' : 'text-red-500') : ''}`}>
                       {point ? `${isPos ? '+' : ''}${point.changePercent.toFixed(2)}%` : '-'}
                     </td>
-                    <td className="text-right" onClick={(e) => { e.stopPropagation(); navigate(`/symbol/${sym}`) }}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); removeFromWatchlist(sym) }}
-                        className="p-0.5 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="w-2.5 h-2.5" />
-                      </button>
+                    <td className="text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openAlertForm(sym, point?.price) }}
+                          className="p-0.5 text-muted-foreground hover:text-foreground text-[10px] leading-none"
+                          title="Set price alert"
+                        >
+                          🔔
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); removeFromWatchlist(sym) }}
+                          className="p-0.5 text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
+                  {alertOpen === sym && (
+                    <tr key={`${sym}-alert-form`}>
+                      <td colSpan={4} className="pb-1 pt-0.5">
+                        <div className="flex items-center gap-1 px-1" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="number"
+                            value={alertPrice}
+                            onChange={(e) => setAlertPrice(e.target.value)}
+                            placeholder="Price"
+                            className="w-16 bg-transparent border-b border-border/40 text-[10px] tabular-nums outline-none focus:border-foreground/40 text-right"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => createAlert(sym, 'above')}
+                            className="text-[9px] px-1 py-0.5 bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-sm hover:bg-emerald-500/30"
+                          >
+                            Above
+                          </button>
+                          <button
+                            onClick={() => createAlert(sym, 'below')}
+                            className="text-[9px] px-1 py-0.5 bg-red-500/20 text-red-700 dark:text-red-400 rounded-sm hover:bg-red-500/30"
+                          >
+                            Below
+                          </button>
+                          <button
+                            onClick={() => setAlertOpen(null)}
+                            className="text-[9px] text-muted-foreground hover:text-foreground"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {alerts.filter((a) => a.symbol === sym).map((a) => (
+                    <tr key={`alert-${a.id}`}>
+                      <td colSpan={4} className={`text-[9px] px-1 pb-0.5 ${a.triggered ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
+                        <div className="flex items-center justify-between">
+                          <span>{a.triggered ? '✓' : '○'} {a.direction} ${a.targetPrice.toFixed(2)}</span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeAlert(a.id) }}
+                            className="hover:text-foreground"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                   {isExpanded && (
                     <tr key={`${sym}-chart`}>
                       <td colSpan={4} className="pb-2">

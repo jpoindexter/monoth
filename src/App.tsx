@@ -11,10 +11,12 @@ import { KeyboardHelp } from '@/components/KeyboardHelp'
 import { useLayoutStore } from '@/stores'
 import { useUserStore } from '@/stores/user-store'
 import { useTheme } from '@/components/theme-provider'
+import { useAlertChecker } from '@/hooks/use-alert-checker'
 
 function AppInner() {
   const toggleLock = useLayoutStore((s) => s.toggleLock)
   const { theme, setTheme } = useTheme()
+  useAlertChecker()
 
   useEffect(() => {
     useUserStore.getState().initAuth()
