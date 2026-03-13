@@ -7,16 +7,32 @@ export function useAlertChecker() {
   const markTriggered = useAlertStore((s) => s.markTriggered)
 
   useEffect(() => {
-    function check() {
+    async function check() {
       const { indices, crypto } = useMarketStore.getState()
       const untriggered = alerts.filter((a) => !a.triggered)
       if (!untriggered.length) return
 
-      for (const alert of untriggered) {
-        const indexMatch = indices.find((i) => i.symbol === alert.symbol)
-        const cryptoMatch = crypto.find((c) => c.symbol === alert.symbol)
-        const price = indexMatch?.price ?? cryptoMatch?.price ?? null
+      // Build price map from known store data
+      const priceMap: Record<string, number> = {}
+      for (const i of indices) priceMap[i.symbol] = i.price
+      for (const c of crypto) priceMap[c.symbol] = c.price
 
+      // Find symbols not in store that need a fresh quote
+      const missing = [...new Set(untriggered.map((a) => a.symbol).filter((s) => priceMap[s] == null))]
+      if (missing.length > 0) {
+        try {
+          const res = await fetch(`/api/market/quote?symbols=${missing.join(',')}`)
+          if (res.ok) {
+            const quotes = await res.json() as { symbol: string; price: number }[]
+            for (const q of quotes) priceMap[q.symbol] = q.price
+          }
+        } catch {
+          // best-effort — skip if offline
+        }
+      }
+
+      for (const alert of untriggered) {
+        const price = priceMap[alert.symbol] ?? null
         if (price === null) continue
 
         const hit =
@@ -27,16 +43,16 @@ export function useAlertChecker() {
 
         markTriggered(alert.id)
 
-        const msg = `Alert: ${alert.symbol} ${alert.direction} $${alert.targetPrice}`
+        const msg = `${alert.symbol} ${alert.direction === 'above' ? '▲' : '▼'} $${alert.targetPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })} — now $${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
         window.dispatchEvent(new CustomEvent('monoth:toast', { detail: msg }))
 
         Notification.requestPermission().then((perm) => {
-          if (perm === 'granted') new Notification('Monoth Alert', { body: msg })
+          if (perm === 'granted') new Notification('Monoth Price Alert', { body: msg })
         })
       }
     }
 
-    const id = setInterval(check, 10000)
+    const id = setInterval(check, 15_000)
     return () => clearInterval(id)
   }, [alerts, markTriggered])
 }
