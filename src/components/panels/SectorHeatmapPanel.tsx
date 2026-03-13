@@ -24,8 +24,10 @@ function relTime(ts: number): string {
   return `${Math.floor(diff / 86400)}d`
 }
 
+type TabId = 'heatmap' | 'table' | 'news' | 'rotation' | 'performance'
+
 export default function SectorHeatmapPanel() {
-  const [tab, setTab] = useState<'heatmap' | 'table' | 'news'>('heatmap')
+  const [tab, setTab] = useState<TabId>('heatmap')
   const fetcher = useCallback(() => fetchSectors(), [])
   const { data, loading, error, refresh } = usePolling({ fetcher, interval: 60_000 })
   const { data: newsData } = useNewsData('analysis')
@@ -38,12 +40,51 @@ export default function SectorHeatmapPanel() {
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
+  // Rotation tab derived data
+  const rotationData = (() => {
+    if (!data) return null
+    const median = [...data].sort((a, b) => a.changePercent - b.changePercent)[Math.floor(data.length / 2)]?.changePercent ?? 0
+    return data.map((s) => {
+      const pos = s.changePercent >= 0
+      const aboveMedian = s.changePercent >= median
+      let quadrant: 'Leading' | 'Weakening' | 'Improving' | 'Lagging'
+      if (pos && aboveMedian) quadrant = 'Leading'
+      else if (pos && !aboveMedian) quadrant = 'Weakening'
+      else if (!pos && aboveMedian) quadrant = 'Improving'
+      else quadrant = 'Lagging'
+      return { ...s, quadrant }
+    })
+  })()
+
+  const quadrantColor: Record<string, string> = {
+    Leading: 'text-emerald-500',
+    Weakening: 'text-yellow-500',
+    Lagging: 'text-red-500',
+    Improving: 'text-blue-400',
+  }
+
+  // Performance tab derived data
+  const DEFENSIVE = ['XLU', 'XLP', 'XLV']
+  const CYCLICAL = ['XLY', 'XLI', 'XLB']
+
+  const perfData = (() => {
+    if (!sorted) return null
+    const defAvg = sorted.filter((s) => DEFENSIVE.includes(s.symbol)).reduce((sum, s) => sum + s.changePercent, 0) / DEFENSIVE.length
+    const cycAvg = sorted.filter((s) => CYCLICAL.includes(s.symbol)).reduce((sum, s) => sum + s.changePercent, 0) / CYCLICAL.length
+    const riskOn = cycAvg > defAvg
+    const spread = sorted[0].changePercent - sorted[sorted.length - 1].changePercent
+    const maxAbs = Math.max(...sorted.map((s) => Math.abs(s.changePercent)), 0.01)
+    return { sectors: sorted, riskOn, spread, maxAbs }
+  })()
+
   return (
     <PanelWrapper title="Sectors" loading={loading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex gap-1 mb-2 flex-wrap">
         <button className={tabCls(tab === 'heatmap')} onClick={() => setTab('heatmap')}>Heatmap</button>
         <button className={tabCls(tab === 'table')} onClick={() => setTab('table')}>Table</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
+        <button className={tabCls(tab === 'rotation')} onClick={() => setTab('rotation')}>Rotation</button>
+        <button className={tabCls(tab === 'performance')} onClick={() => setTab('performance')}>Performance</button>
       </div>
 
       {tab === 'heatmap' && byMagnitude && (
@@ -145,6 +186,124 @@ export default function SectorHeatmapPanel() {
               </a>
             )
           })}
+        </div>
+      )}
+
+      {tab === 'rotation' && rotationData && (
+        <div className="flex flex-col gap-1.5">
+          <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Sector Rotation Cycle</div>
+          <div className="grid grid-cols-2 gap-1" style={{ minHeight: '160px' }}>
+            {/* Top-left: Improving */}
+            <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-blue-500/5">
+              <div className="text-[8px] font-bold uppercase tracking-wider text-blue-400 mb-0.5">Improving</div>
+              <div className="text-[8px] text-muted-foreground mb-1">Negative but recovering</div>
+              {rotationData.filter((s) => s.quadrant === 'Improving').map((s) => (
+                <div key={s.symbol} className="flex items-center justify-between">
+                  <span className="text-[9px] font-medium text-blue-400">{s.name}</span>
+                  <span className="text-[9px] tabular-nums text-blue-400">{s.changePercent.toFixed(2)}%</span>
+                </div>
+              ))}
+              {rotationData.filter((s) => s.quadrant === 'Improving').length === 0 && (
+                <span className="text-[9px] text-muted-foreground italic">None</span>
+              )}
+            </div>
+            {/* Top-right: Leading */}
+            <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-emerald-500/5">
+              <div className="text-[8px] font-bold uppercase tracking-wider text-emerald-500 mb-0.5">Leading</div>
+              <div className="text-[8px] text-muted-foreground mb-1">Positive and strong</div>
+              {rotationData.filter((s) => s.quadrant === 'Leading').map((s) => (
+                <div key={s.symbol} className="flex items-center justify-between">
+                  <span className="text-[9px] font-medium text-emerald-500">{s.name}</span>
+                  <span className="text-[9px] tabular-nums text-emerald-500">+{s.changePercent.toFixed(2)}%</span>
+                </div>
+              ))}
+              {rotationData.filter((s) => s.quadrant === 'Leading').length === 0 && (
+                <span className="text-[9px] text-muted-foreground italic">None</span>
+              )}
+            </div>
+            {/* Bottom-left: Lagging */}
+            <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-red-500/5">
+              <div className="text-[8px] font-bold uppercase tracking-wider text-red-500 mb-0.5">Lagging</div>
+              <div className="text-[8px] text-muted-foreground mb-1">Negative and weak</div>
+              {rotationData.filter((s) => s.quadrant === 'Lagging').map((s) => (
+                <div key={s.symbol} className="flex items-center justify-between">
+                  <span className="text-[9px] font-medium text-red-500">{s.name}</span>
+                  <span className="text-[9px] tabular-nums text-red-500">{s.changePercent.toFixed(2)}%</span>
+                </div>
+              ))}
+              {rotationData.filter((s) => s.quadrant === 'Lagging').length === 0 && (
+                <span className="text-[9px] text-muted-foreground italic">None</span>
+              )}
+            </div>
+            {/* Bottom-right: Weakening */}
+            <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-yellow-500/5">
+              <div className="text-[8px] font-bold uppercase tracking-wider text-yellow-500 mb-0.5">Weakening</div>
+              <div className="text-[8px] text-muted-foreground mb-1">Positive but fading</div>
+              {rotationData.filter((s) => s.quadrant === 'Weakening').map((s) => (
+                <div key={s.symbol} className="flex items-center justify-between">
+                  <span className="text-[9px] font-medium text-yellow-500">{s.name}</span>
+                  <span className="text-[9px] tabular-nums text-yellow-500">+{s.changePercent.toFixed(2)}%</span>
+                </div>
+              ))}
+              {rotationData.filter((s) => s.quadrant === 'Weakening').length === 0 && (
+                <span className="text-[9px] text-muted-foreground italic">None</span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-[8px] text-muted-foreground mt-0.5">
+            <span className="text-blue-400">Improving</span>
+            <span>→</span>
+            <span className="text-emerald-500">Leading</span>
+            <span>→</span>
+            <span className="text-yellow-500">Weakening</span>
+            <span>→</span>
+            <span className="text-red-500">Lagging</span>
+            <span>→</span>
+            <span className="text-blue-400">Improving</span>
+          </div>
+        </div>
+      )}
+
+      {tab === 'performance' && perfData && (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Sector Performance</span>
+            <span
+              className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${
+                perfData.riskOn
+                  ? 'bg-emerald-500/20 text-emerald-500'
+                  : 'bg-blue-500/20 text-blue-400'
+              }`}
+            >
+              {perfData.riskOn ? 'Risk-On' : 'Risk-Off'}
+            </span>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            {perfData.sectors.map((s) => {
+              const isPos = s.changePercent >= 0
+              const barWidth = `${Math.round((Math.abs(s.changePercent) / perfData.maxAbs) * 100)}%`
+              return (
+                <div key={s.symbol} className="flex items-center gap-1.5">
+                  <span className="text-[9px] text-muted-foreground w-[26px] shrink-0 text-right tabular-nums">{s.symbol}</span>
+                  <div className="flex-1 h-3 bg-border/20 rounded-sm overflow-hidden">
+                    <div
+                      className={`h-full rounded-sm ${isPos ? 'bg-emerald-500' : 'bg-red-500'}`}
+                      style={{ width: barWidth }}
+                    />
+                  </div>
+                  <span className={`text-[9px] tabular-nums font-medium w-[36px] text-right shrink-0 ${isPos ? 'text-emerald-500' : 'text-red-500'}`}>
+                    {isPos ? '+' : ''}{s.changePercent.toFixed(2)}%
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+          <div className="border-t border-border/30 mt-1 pt-1 flex items-center justify-between">
+            <span className="text-[9px] text-muted-foreground">Spread (best - worst)</span>
+            <span className="text-[9px] font-bold tabular-nums text-foreground">
+              {perfData.spread.toFixed(2)}%
+            </span>
+          </div>
         </div>
       )}
     </PanelWrapper>
