@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:api": "tsx dev-server.ts",
+    "dev:api": "tsx watch dev-server.ts",
     "dev:full": "vercel dev",
     "start": "concurrently -n api,app -c blue,green \"npm run dev:api\" \"npm run dev\"",
     "build": "tsc -b && vite build",
