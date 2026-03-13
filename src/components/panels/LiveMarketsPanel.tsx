@@ -86,8 +86,8 @@ export default function LiveMarketsPanel() {
             </tr>
           </thead>
           <tbody>
-            {data?.filter((p) => p.price != null).map((point) => {
-              const isPositive = point.changePercent >= 0
+            {data?.filter((p) => p.price != null && p.price > 0).map((point) => {
+              const isPositive = (point.changePercent ?? 0) >= 0
               return (
                 <tr key={point.symbol} className="border-t border-border/20">
                   <td className="py-1">
@@ -98,7 +98,7 @@ export default function LiveMarketsPanel() {
                     {point.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className={`text-right tabular-nums font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {isPositive ? '+' : ''}{point.changePercent.toFixed(2)}%
+                    {isPositive ? '+' : ''}{(point.changePercent ?? 0).toFixed(2)}%
                   </td>
                 </tr>
               )

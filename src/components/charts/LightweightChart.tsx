@@ -1,5 +1,14 @@
 import { useRef, useEffect } from 'react'
-import { createChart, type IChartApi, type ISeriesApi, ColorType } from 'lightweight-charts'
+import {
+  createChart,
+  type IChartApi,
+  type ISeriesApi,
+  ColorType,
+  AreaSeries,
+  CandlestickSeries,
+  LineSeries,
+  HistogramSeries,
+} from 'lightweight-charts'
 
 interface ChartDataPoint {
   time: string // 'YYYY-MM-DD' format
@@ -66,7 +75,7 @@ export function LightweightChart({
     chartRef.current = chart
 
     if (type === 'area') {
-      const series = chart.addAreaSeries({
+      const series = chart.addSeries(AreaSeries, {
         lineColor,
         topColor: areaTopColor,
         bottomColor: areaBottomColor,
@@ -76,7 +85,7 @@ export function LightweightChart({
       series.setData(data as any)
       seriesRef.current = series
     } else if (type === 'candlestick') {
-      const series = chart.addCandlestickSeries({
+      const series = chart.addSeries(CandlestickSeries, {
         upColor: '#059669',
         downColor: '#ef4444',
         borderUpColor: '#059669',
@@ -87,7 +96,7 @@ export function LightweightChart({
       series.setData(data as any)
       seriesRef.current = series
     } else if (type === 'line') {
-      const series = chart.addLineSeries({
+      const series = chart.addSeries(LineSeries, {
         color: lineColor,
         lineWidth: 1.5,
         crosshairMarkerRadius: 3,
@@ -95,7 +104,7 @@ export function LightweightChart({
       series.setData(data as any)
       seriesRef.current = series
     } else if (type === 'histogram') {
-      const series = chart.addHistogramSeries({
+      const series = chart.addSeries(HistogramSeries, {
         color: lineColor,
       })
       series.setData(data as any)
