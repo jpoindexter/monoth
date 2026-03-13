@@ -310,7 +310,7 @@ export default function FixedIncomePanel() {
               </thead>
               <tbody>
                 {AUCTIONS.map((a) => {
-                  const days = daysUntil(AUCTION_DATES[a.date])
+                  const days = daysUntil(AUCTION_DATES[a.date] ?? a.date)
                   const color = days <= 3 ? 'text-red-500' : days <= 7 ? 'text-amber-500' : 'text-emerald-600'
                   return (
                     <tr key={a.label} className="border-t border-border/20">

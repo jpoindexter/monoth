@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '@/stores'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api'
@@ -57,8 +56,6 @@ export default function WatchlistPanel() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [alertOpen, setAlertOpen] = useState<string | null>(null)
   const [alertPrice, setAlertPrice] = useState('')
-  const navigate = useNavigate()
-
   const alerts = useAlertStore((s) => s.alerts)
   const addAlert = useAlertStore((s) => s.addAlert)
   const removeAlert = useAlertStore((s) => s.removeAlert)
@@ -278,7 +275,7 @@ export default function WatchlistPanel() {
                 const point = data?.find((d) => d.symbol === sym)
                 const qty = shares[sym] ?? 0
                 const val = point ? point.price * qty : 0
-                return { label: sym, value: val, color: PALETTE[i % PALETTE.length] }
+                return { label: sym, value: val, color: PALETTE[i % PALETTE.length] ?? '#10b981' }
               })
               .filter((s) => s.value > 0)
             return segments.length > 0 ? (

@@ -25,7 +25,6 @@ const BASE_PRICES: Record<string, number> = {
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const SIZES: FlowEntry['size'][] = ['Sweep', 'Block', 'Split']
 const TIMES = ['9:32 AM', '9:47 AM', '10:12 AM', '10:31 AM', '10:58 AM', '11:14 AM', '11:43 AM', '12:02 PM', '12:38 PM', '1:05 PM', '1:29 PM', '2:11 PM', '2:44 PM', '3:07 PM', '3:31 PM', '3:48 PM', '3:58 PM']
 
 function seededRng(seed: number) {
@@ -56,8 +55,8 @@ function generateFlows(): FlowEntry[] {
   const entries: FlowEntry[] = []
 
   for (let i = 0; i < 20; i++) {
-    const ticker = TICKERS[Math.floor(rng() * TICKERS.length)]
-    const base = BASE_PRICES[ticker]
+    const ticker = TICKERS[Math.floor(rng() * TICKERS.length)] ?? 'SPY'
+    const base = BASE_PRICES[ticker] ?? 100
     const type: 'CALL' | 'PUT' = rng() < 0.55 ? 'CALL' : 'PUT'
     const strikePct = 0.85 + rng() * 0.30
     const strikeRaw = base * strikePct
@@ -66,7 +65,7 @@ function generateFlows(): FlowEntry[] {
     const daysOut = Math.floor(rng() * 90) + 1
     const expiryDate = new Date(now)
     expiryDate.setDate(expiryDate.getDate() + daysOut)
-    const expiry = MONTHS[expiryDate.getMonth()] + ' ' + expiryDate.getDate()
+    const expiry = (MONTHS[expiryDate.getMonth()] ?? 'Jan') + ' ' + expiryDate.getDate()
     const premium = Math.floor(50_000 + rng() * 4_950_000)
     const sizeRoll = rng()
     const size: FlowEntry['size'] = sizeRoll < 0.4 ? 'Sweep' : sizeRoll < 0.75 ? 'Block' : 'Split'
@@ -74,7 +73,7 @@ function generateFlows(): FlowEntry[] {
     let sentiment: FlowEntry['sentiment']
     if (type === 'CALL') sentiment = sentRoll < 0.65 ? 'Bullish' : sentRoll < 0.85 ? 'Neutral' : 'Bearish'
     else sentiment = sentRoll < 0.65 ? 'Bearish' : sentRoll < 0.85 ? 'Neutral' : 'Bullish'
-    const time = TIMES[Math.floor(rng() * TIMES.length)]
+    const time = TIMES[Math.floor(rng() * TIMES.length)] ?? '9:32 AM'
 
     entries.push({ ticker, type, strike, expiry, expiryDate, premium, sentiment, size, time })
   }
@@ -95,8 +94,8 @@ function groupByExpiry(flows: FlowEntry[]) {
 
   for (const f of flows) {
     const key = f.expiryDate <= endOfWeek ? 'thisWeek' : f.expiryDate <= endOfNextWeek ? 'nextWeek' : 'monthly'
-    groups[key].flows.push(f)
-    groups[key].total += f.premium
+    groups[key]!.flows.push(f)
+    groups[key]!.total += f.premium
   }
 
   return Object.values(groups)

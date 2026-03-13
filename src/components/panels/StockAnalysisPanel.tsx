@@ -20,7 +20,7 @@ function calcRSI(closes: number[], period = 14): number {
   if (closes.length < period + 1) return 50
   let gains = 0, losses = 0
   for (let i = closes.length - period; i < closes.length; i++) {
-    const diff = closes[i] - closes[i - 1]
+    const diff = (closes[i] ?? 0) - (closes[i - 1] ?? 0)
     if (diff > 0) gains += diff
     else losses -= diff
   }
@@ -108,7 +108,7 @@ export default function StockAnalysisPanel() {
   const signal = hasEnough ? getSignal(rsi, price, ma20) : 'HOLD'
 
   const last5 = closes.slice(-5)
-  const uptrend = last5.length === 5 && last5[4] > last5[0]
+  const uptrend = last5.length === 5 && (last5[4] ?? 0) > (last5[0] ?? 0)
 
   const bullish: string[] = []
   const risks: string[] = []
@@ -127,8 +127,8 @@ export default function StockAnalysisPanel() {
   const chartData = (data ?? []).slice(-60).map(c => ({ time: c.time, value: c.close }))
 
   const vol = data?.[data.length - 1]?.volume
-  const change20 = closes.length >= 20 ? fmtPct(price, closes[closes.length - 20]) : 'N/A'
-  const change50 = closes.length >= 50 ? fmtPct(price, closes[closes.length - 50]) : 'N/A'
+  const change20 = closes.length >= 20 ? fmtPct(price, closes[closes.length - 20] ?? price) : 'N/A'
+  const change50 = closes.length >= 50 ? fmtPct(price, closes[closes.length - 50] ?? price) : 'N/A'
 
   return (
     <PanelWrapper title="Stock Analysis" loading={loading && !data} error={error} onRetry={refresh}>

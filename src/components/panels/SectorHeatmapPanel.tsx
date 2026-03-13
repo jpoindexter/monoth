@@ -50,13 +50,6 @@ export default function SectorHeatmapPanel() {
     })
   })()
 
-  const quadrantColor: Record<string, string> = {
-    Leading: 'text-emerald-500',
-    Weakening: 'text-yellow-500',
-    Lagging: 'text-red-500',
-    Improving: 'text-blue-400',
-  }
-
   // Performance tab derived data
   const DEFENSIVE = ['XLU', 'XLP', 'XLV']
   const CYCLICAL = ['XLY', 'XLI', 'XLB']
@@ -66,7 +59,7 @@ export default function SectorHeatmapPanel() {
     const defAvg = sorted.filter((s) => DEFENSIVE.includes(s.symbol)).reduce((sum, s) => sum + s.changePercent, 0) / DEFENSIVE.length
     const cycAvg = sorted.filter((s) => CYCLICAL.includes(s.symbol)).reduce((sum, s) => sum + s.changePercent, 0) / CYCLICAL.length
     const riskOn = cycAvg > defAvg
-    const spread = sorted[0].changePercent - sorted[sorted.length - 1].changePercent
+    const spread = (sorted[0]?.changePercent ?? 0) - (sorted[sorted.length - 1]?.changePercent ?? 0)
     const maxAbs = Math.max(...sorted.map((s) => Math.abs(s.changePercent)), 0.01)
     return { sectors: sorted, riskOn, spread, maxAbs }
   })()

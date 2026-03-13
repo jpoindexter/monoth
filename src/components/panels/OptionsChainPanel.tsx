@@ -44,38 +44,6 @@ function fmtK(n: number): string {
   return fmtVol(n)
 }
 
-function ContractRow({
-  c,
-  side,
-  underlyingPrice,
-  expanded,
-}: {
-  c: Contract
-  side: 'call' | 'put'
-  underlyingPrice: number
-  expanded: boolean
-}) {
-  const itm = c.inTheMoney
-  const isAtMoney = Math.abs(c.strike - underlyingPrice) / underlyingPrice < 0.005
-  const itmCls = itm
-    ? side === 'call'
-      ? 'bg-emerald-500/8'
-      : 'bg-red-500/8'
-    : ''
-
-  return (
-    <tr className={`border-t border-border/20 text-[10px] tabular-nums ${itmCls} ${isAtMoney ? 'border-t border-yellow-500/40' : ''}`}>
-      <td className={`py-0.5 pl-0.5 ${itm ? (side === 'call' ? 'text-emerald-400' : 'text-red-400') : 'text-muted-foreground'}`}>
-        {fmtPrice(c.bid)}
-      </td>
-      <td className="py-0.5 text-foreground/80">{fmtPrice(c.ask)}</td>
-      <td className="py-0.5 text-foreground">{fmtPrice(c.lastPrice)}</td>
-      <td className="py-0.5 text-muted-foreground">{fmtK(c.volume)}</td>
-      <td className="py-0.5 text-muted-foreground">{fmtK(c.openInterest)}</td>
-      {expanded && <td className="py-0.5 text-muted-foreground">{fmtIV(c.impliedVolatility)}</td>}
-    </tr>
-  )
-}
 
 function ChainRow({
   strike,

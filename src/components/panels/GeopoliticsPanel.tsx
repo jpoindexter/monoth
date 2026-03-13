@@ -5,9 +5,11 @@ import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-cla
 import { relTime } from '@/lib/panel-utils'
 
 function formatSince(since: string): string {
-  const [year, month] = since.split('-')
+  const parts = since.split('-')
+  const year = parts[0] ?? '2000'
+  const month = parts[1] ?? '01'
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  const label = `${months[parseInt(month) - 1]} ${year}`
+  const label = `${months[parseInt(month) - 1] ?? month} ${year}`
   const start = new Date(parseInt(year), parseInt(month) - 1, 1)
   const now = new Date()
   const months_diff = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth())
@@ -67,36 +69,6 @@ function computeRiskScores(headlines: { title: string; published: number }[]) {
   })
 }
 
-function seededRand(seed: number): number {
-  const x = Math.sin(seed) * 10000
-  return x - Math.floor(x)
-}
-
-function buildTrend(base: number): number[] {
-  const today = new Date()
-  const daySeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate()
-  return Array.from({ length: 7 }, (_, i) => {
-    const delta = (seededRand(daySeed + i) - 0.5) * 1.5
-    return Math.max(0, Math.min(10, base + delta))
-  })
-}
-
-function MiniTrend({ values }: { values: number[] }) {
-  const w = 80
-  const h = 24
-  const max = 10
-  const pts = values.map((v, i) => {
-    const x = (i / (values.length - 1)) * w
-    const y = h - (v / max) * h
-    return `${x},${y}`
-  }).join(' ')
-  return (
-    <svg width={w} height={h} className="opacity-70">
-      <polyline points={pts} fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
-  )
-}
-
 function RiskBar({ label, score, count }: { label: string; score: number; count: number }) {
   const pct = (score / 10) * 100
   const color = score >= 7 ? '#ef4444' : score >= 4 ? '#f59e0b' : score >= 2 ? '#eab308' : '#22c55e'
@@ -126,8 +98,6 @@ export default function GeopoliticsPanel() {
   const risks = useMemo(() => data ? computeRiskScores(data) : [], [data])
   const sorted = useMemo(() => [...risks].sort((a, b) => b.score - a.score), [risks])
   const avgRisk = risks.length > 0 ? risks.reduce((s, r) => s + r.score, 0) / risks.length : 0
-  const trendValues = useMemo(() => buildTrend(avgRisk), [avgRisk])
-
   const riskLabel = avgRisk > 8 ? 'CRITICAL' : avgRisk > 6 ? 'HIGH' : avgRisk > 4 ? 'ELEVATED' : avgRisk > 2 ? 'MODERATE' : 'LOW'
   const riskColor = avgRisk > 8 ? '#ef4444' : avgRisk > 6 ? '#f97316' : avgRisk > 4 ? '#f59e0b' : avgRisk > 2 ? '#eab308' : '#22c55e'
 
@@ -164,9 +134,7 @@ export default function GeopoliticsPanel() {
                 <span className="text-2xl font-bold tabular-nums" style={{ color: riskColor }}>{avgRisk.toFixed(1)}</span>
                 <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: riskColor }}>{riskLabel}</span>
               </div>
-              <div className="text-[9px] text-muted-foreground mt-0.5">7-day trend</div>
             </div>
-            <MiniTrend values={trendValues} />
           </div>
         </div>
       )}

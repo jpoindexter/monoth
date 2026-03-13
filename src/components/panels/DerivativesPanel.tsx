@@ -19,7 +19,7 @@ const MONTH_LABELS = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
 function buildTermStructure(spot: number) {
   // Typical contango: each month adds 0.5-1.5pts, with slight mean reversion flattening
   const steps = [0, 0.8, 1.5, 2.1, 2.6, 3.0, 3.3, 3.5]
-  return steps.map((delta, i) => ({ month: MONTH_LABELS[i], value: +(spot + delta).toFixed(2) }))
+  return steps.map((delta, i) => ({ month: MONTH_LABELS[i] ?? `M${i + 1}`, value: +(spot + delta).toFixed(2) }))
 }
 
 function termStructureChartData(structure: { month: string; value: number }[]) {
@@ -85,7 +85,7 @@ export default function DerivativesPanel() {
   const termStructure = useMemo(() => buildTermStructure(vixSpot), [vixSpot])
   const chartData = useMemo(() => termStructureChartData(termStructure), [termStructure])
 
-  const isBackwardation = termStructure[0].value > termStructure[termStructure.length - 1].value
+  const isBackwardation = (termStructure[0]?.value ?? 0) > (termStructure[termStructure.length - 1]?.value ?? 0)
 
   // P/C ratio derived from VIX level
   const pcRatio = vixSpot > 25 ? 1.28 : vixSpot > 20 ? 1.05 : vixSpot > 15 ? 0.92 : 0.76

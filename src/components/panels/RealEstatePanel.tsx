@@ -81,7 +81,7 @@ export default function RealEstatePanel() {
     `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   // Housing metrics with seeded daily changes
-  const monthsSupply = HOUSING_METRICS[3].raw + seededChange('Months of Supply') * 5
+  const monthsSupply = (HOUSING_METRICS[3]?.raw ?? 3.8) + seededChange('Months of Supply') * 5
   const temp = marketTemp(monthsSupply)
 
   return (

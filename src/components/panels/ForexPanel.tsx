@@ -88,24 +88,31 @@ export default function ForexPanel() {
     for (const rate of data) {
       const parts = rate.pair.split('/')
       if (parts.length !== 2) continue
-      const quote = parts[1]
+      const quote = parts[1] ?? ''
       if (!STRENGTH_CURRENCIES.includes(quote)) continue
 
       // USD/XXX positive = USD stronger
-      sums['USD'].total += rate.changePercent
-      sums['USD'].count += 1
+      const usdEntry = sums['USD']
+      if (usdEntry) {
+        usdEntry.total += rate.changePercent
+        usdEntry.count += 1
+      }
 
       // quote currency: strong when pair falls
-      if (sums[quote]) {
-        sums[quote].total += -rate.changePercent
-        sums[quote].count += 1
+      const quoteEntry = sums[quote]
+      if (quoteEntry) {
+        quoteEntry.total += -rate.changePercent
+        quoteEntry.count += 1
       }
     }
 
-    return STRENGTH_CURRENCIES.map(c => ({
-      currency: c,
-      strength: sums[c].count > 0 ? sums[c].total / sums[c].count : 0,
-    })).sort((a, b) => b.strength - a.strength)
+    return STRENGTH_CURRENCIES.map(c => {
+      const entry = sums[c]
+      return {
+        currency: c,
+        strength: entry && entry.count > 0 ? entry.total / entry.count : 0,
+      }
+    }).sort((a, b) => b.strength - a.strength)
   })()
 
   const maxAbs = Math.max(...strengthData.map(d => Math.abs(d.strength)), 0.01)

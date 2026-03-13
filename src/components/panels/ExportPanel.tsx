@@ -19,7 +19,7 @@ function downloadFile(content: string, filename: string, type: string) {
 
 function toCSV(rows: Record<string, unknown>[]): string {
   if (!rows.length) return ''
-  const headers = Object.keys(rows[0])
+  const headers = Object.keys(rows[0]!)
   const lines = [
     headers.join(','),
     ...rows.map((r) =>

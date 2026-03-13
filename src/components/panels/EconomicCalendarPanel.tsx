@@ -346,7 +346,7 @@ function UpcomingTab({ events }: { events: EconEvent[] }) {
   const grouped: Record<string, EconEvent[]> = {}
   for (const e of filtered) {
     if (!grouped[e.date]) grouped[e.date] = []
-    grouped[e.date].push(e)
+    grouped[e.date]!.push(e)
   }
 
   if (filtered.length === 0) {

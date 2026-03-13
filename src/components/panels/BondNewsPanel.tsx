@@ -97,7 +97,7 @@ export default function BondNewsPanel() {
                     {isPos ? '+' : ''}{(p.changePercent ?? 0).toFixed(2)}%
                   </td>
                   <td className="text-right tabular-nums text-muted-foreground">
-                    {BOND_YTM[p.symbol] != null ? `${BOND_YTM[p.symbol].toFixed(1)}%` : '—'}
+                    {BOND_YTM[p.symbol] != null ? `${BOND_YTM[p.symbol]!.toFixed(1)}%` : '—'}
                   </td>
                 </tr>
               )

@@ -71,7 +71,7 @@ export default function VolatilityPanel() {
   const minIv = Math.min(...allIvs)
   const maxIv = Math.max(...allIvs)
 
-  const skew = surface[0].values[0] - surface[0].values[4]
+  const skew = (surface[0]?.values[0] ?? 0) - (surface[0]?.values[4] ?? 0)
   const skewLabel = skew > 5 ? 'Heavy put demand' : skew >= 2 ? 'Normal skew' : 'Low skew / complacency'
   const skewColor = skew > 5 ? 'text-red-500' : skew >= 2 ? 'text-muted-foreground' : 'text-amber-500'
 

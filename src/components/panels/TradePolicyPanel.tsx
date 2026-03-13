@@ -59,64 +59,13 @@ const RESTRICTIONS = [
   },
 ]
 
-function seededRand(seed: number): number {
-  const x = Math.sin(seed) * 10000
-  return x - Math.floor(x)
-}
-
-function dailySeed(): number {
-  const d = new Date()
-  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
-}
-
-function jitter(base: number, range: number, seedOffset: number): number {
-  const s = dailySeed() + seedOffset
-  return base + (seededRand(s) - 0.5) * 2 * range
-}
-
 const FLOWS = [
-  {
-    label: 'US-China Trade Deficit',
-    value: () => `$${(279 + jitter(0, 8, 1)).toFixed(0)}B`,
-    sub: 'TTM',
-    trend: 'up' as const,
-    detail: 'Deficit widening despite tariffs; imports via Vietnam/Mexico up',
-  },
-  {
-    label: 'US Total Exports',
-    value: () => `$${(3.1 + jitter(0, 0.15, 2)).toFixed(2)}T`,
-    sub: 'Ann.',
-    trend: 'flat' as const,
-    detail: 'Services +4% YoY; goods exports flat amid tariff uncertainty',
-  },
-  {
-    label: 'US Total Imports',
-    value: () => `$${(3.8 + jitter(0, 0.15, 3)).toFixed(2)}T`,
-    sub: 'Ann.',
-    trend: 'up' as const,
-    detail: 'Pre-tariff frontloading drove Q1 surge; Q2 slowdown expected',
-  },
-  {
-    label: 'US-Mexico Trade',
-    value: () => `$${(803 + jitter(0, 20, 4)).toFixed(0)}B`,
-    sub: 'Ann.',
-    trend: 'up' as const,
-    detail: 'Mexico surpassed China as top partner; nearshoring accelerating',
-  },
-  {
-    label: 'US-Canada Trade',
-    value: () => `$${(762 + jitter(0, 18, 5)).toFixed(0)}B`,
-    sub: 'Ann.',
-    trend: 'down' as const,
-    detail: 'Tariffs dampening bilateral flows; energy still dominant',
-  },
-  {
-    label: 'Global Trade Growth',
-    value: () => `${(2.3 + jitter(0, 0.4, 6)).toFixed(1)}%`,
-    sub: 'WTO Est.',
-    trend: 'down' as const,
-    detail: 'WTO revised down from 3.3%; tariff shock primary factor',
-  },
+  { label: 'US-China Trade Deficit', value: '$279B', sub: 'TTM', trend: 'up' as const, detail: 'Deficit widening despite tariffs; imports via Vietnam/Mexico up' },
+  { label: 'US Total Exports', value: '$3.10T', sub: 'Ann.', trend: 'flat' as const, detail: 'Services +4% YoY; goods exports flat amid tariff uncertainty' },
+  { label: 'US Total Imports', value: '$3.80T', sub: 'Ann.', trend: 'up' as const, detail: 'Pre-tariff frontloading drove Q1 surge; Q2 slowdown expected' },
+  { label: 'US-Mexico Trade', value: '$803B', sub: 'Ann.', trend: 'up' as const, detail: 'Mexico surpassed China as top partner; nearshoring accelerating' },
+  { label: 'US-Canada Trade', value: '$762B', sub: 'Ann.', trend: 'down' as const, detail: 'Tariffs dampening bilateral flows; energy still dominant' },
+  { label: 'Global Trade Growth', value: '2.3%', sub: 'WTO Est.', trend: 'down' as const, detail: 'WTO revised down from 3.3%; tariff shock primary factor' },
 ]
 
 const STATUS_STYLE: Record<string, { bg: string; text: string }> = {
@@ -222,10 +171,13 @@ export default function TradePolicyPanel() {
 
       {tab === 'flows' && (
         <div className="space-y-0">
+          <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-border/20 border border-border/30">
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Reference data · BEA/WTO estimates</span>
+          </div>
           {FLOWS.map((f) => {
             const arrow = TREND_ARROW[f.trend]
             const color = TREND_COLOR[f.trend]
-            const val = f.value()
+            const val = f.value
             return (
               <div key={f.label} className="py-1 border-b border-border/20 last:border-0">
                 <div className="flex items-center justify-between gap-2">

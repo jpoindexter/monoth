@@ -12,7 +12,7 @@ export function Sparkline({ data, width = 48, height = 16, color }: SparklinePro
   const max = Math.max(...data)
   const range = max - min || 1
 
-  const resolvedColor = color ?? (data[data.length - 1] >= data[0] ? '#10b981' : '#ef4444')
+  const resolvedColor = color ?? ((data[data.length - 1] ?? 0) >= (data[0] ?? 0) ? '#10b981' : '#ef4444')
 
   const points = data
     .map((v, i) => {

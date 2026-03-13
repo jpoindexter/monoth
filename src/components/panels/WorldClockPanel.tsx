@@ -150,7 +150,9 @@ function ConvertTab() {
   })
 
   const baseDate = (() => {
-    const [hh, mm] = inputTime.split(':').map(Number)
+    const parts = inputTime.split(':').map(Number)
+    const hh = parts[0] ?? 0
+    const mm = parts[1] ?? 0
     const d = new Date()
     d.setHours(isNaN(hh) ? 0 : hh, isNaN(mm) ? 0 : mm, 0, 0)
     return d
@@ -249,7 +251,7 @@ function OverlapTab() {
               ))}
               <span
                 className="absolute text-[6px] font-medium text-foreground/60 leading-2 pl-0.5 truncate"
-                style={{ top: 0, left: `${bars[0].l}%`, maxWidth: `${bars[0].w}%` }}
+                style={{ top: 0, left: `${bars[0]?.l ?? 0}%`, maxWidth: `${bars[0]?.w ?? 0}%` }}
               >
                 {city.market}
               </span>

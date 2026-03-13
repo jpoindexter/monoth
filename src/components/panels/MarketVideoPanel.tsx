@@ -84,7 +84,7 @@ function timeAgo(published: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-function ChannelVideos({ channelId, channelName, expanded }: { channelId: string; channelName: string; expanded: boolean }) {
+function ChannelVideos({ channelId, channelName: _channelName, expanded }: { channelId: string; channelName: string; expanded: boolean }) {
   const fetcher = useCallback(
     () => fetch(`/api/market/youtube-feed?channelId=${channelId}`).then((r) => r.json() as Promise<{ videos: Video[] }>),
     [channelId]

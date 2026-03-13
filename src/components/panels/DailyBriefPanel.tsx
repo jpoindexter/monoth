@@ -26,7 +26,7 @@ function generateBrief(
 
     sections.push({
       title: 'Equities',
-      content: `${bullish} of ${indices.length} indices positive. ${leader?.name || leader?.symbol} leads at ${leader?.changePercent > 0 ? '+' : ''}${leader?.changePercent.toFixed(2)}%. Broad market ${sentiment === 'bullish' ? 'risk-on' : sentiment === 'bearish' ? 'risk-off' : 'mixed'}.`,
+      content: `${bullish} of ${indices.length} indices positive. ${leader?.name || leader?.symbol} leads at ${(leader?.changePercent ?? 0) > 0 ? '+' : ''}${(leader?.changePercent ?? 0).toFixed(2)}%. Broad market ${sentiment === 'bullish' ? 'risk-on' : sentiment === 'bearish' ? 'risk-off' : 'mixed'}.`,
       sentiment,
     })
   }
@@ -178,8 +178,6 @@ function Scorecard({
   const gold  = commodities.find((c) => c.symbol === 'GC' || c.symbol === 'GOLD' || c.symbol === 'gold' || (c.name || '').toLowerCase().includes('gold'))
   const tnote = yields.find((y)  => y.maturity === '10Y' || y.maturity === '10y')
   const vix   = indices.find((i) => i.symbol === 'VIX'  || i.symbol === 'vix')
-
-  const fmt = (v: number, decimals = 2) => `${v > 0 ? '+' : ''}${v.toFixed(decimals)}%`
 
   const rows: ScorecardRow[] = [
     spy   ? { asset: 'US Equities',   value: `$${spy.price.toFixed(2)}`,                                     change: spy.changePercent }              : { asset: 'US Equities',   value: '—', change: null },

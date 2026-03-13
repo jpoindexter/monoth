@@ -73,7 +73,7 @@ export function LightweightChart({
 
   if (!data || data.length === 0) return <div style={{ height }} className={className} />
 
-  const dataKey = getDataKey(data[0])
+  const dataKey = getDataKey(data[0]!)
   const tickCount = Math.min(4, data.length)
 
   const shared = {

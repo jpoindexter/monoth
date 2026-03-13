@@ -91,7 +91,7 @@ export default function HedgeFundsPanel() {
   }))
   const maxFlowAbs = Math.max(...flowData.map(f => Math.abs(f.flow)), 0.1)
   const last3FlowSum = flowData.slice(-3).reduce((acc, f) => acc + f.flow, 0)
-  const currentMonthFlow = flowData[flowData.length - 1]
+  const currentMonthFlow = flowData[flowData.length - 1]!
   let cumulative = 0
   const flowWithCumulative = flowData.map(f => {
     cumulative += f.flow
@@ -301,7 +301,7 @@ export default function HedgeFundsPanel() {
               <span>Cumulative Flow (Jan base)</span>
             </div>
             <div className="flex items-end gap-1 h-6">
-              {flowWithCumulative.map((f, i) => {
+              {flowWithCumulative.map((f) => {
                 const allCum = flowWithCumulative.map(x => x.cumulative)
                 const minCum = Math.min(...allCum)
                 const maxCum = Math.max(...allCum)

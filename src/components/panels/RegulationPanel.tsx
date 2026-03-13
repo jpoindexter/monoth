@@ -24,7 +24,7 @@ interface RegEvent {
   description: string
 }
 
-const TIMELINE_EVENTS: RegEvent[] = [
+const TIMELINE_EVENTS: RegEvent[] = ([
   {
     id: '1',
     title: 'SEC Climate Disclosure Rules Effective',
@@ -105,7 +105,7 @@ const TIMELINE_EVENTS: RegEvent[] = [
     impact: 'LOW',
     description: 'New reporting and margin requirements for digital asset derivatives on U.S. platforms.',
   },
-].sort((a, b) => a.date.getTime() - b.date.getTime())
+] as RegEvent[]).sort((a, b) => a.date.getTime() - b.date.getTime())
 
 const IMPACT_SECTORS = [
   {
@@ -145,14 +145,14 @@ function categorizeNews(headlines: { title: string; published: number; id: strin
     for (const cat of CATEGORIES) {
       if (cat.keywords.some((kw) => lower.includes(kw))) {
         const ageHours = (now - h.published) / 3_600_000
-        counts[cat.key] += ageHours < 6 ? 2 : 1
+        counts[cat.key] = (counts[cat.key] ?? 0) + (ageHours < 6 ? 2 : 1)
       }
     }
   }
 
   return CATEGORIES.map((cat) => ({
     ...cat,
-    activity: Math.min(counts[cat.key], 10),
+    activity: Math.min(counts[cat.key] ?? 0, 10),
   })).sort((a, b) => b.activity - a.activity)
 }
 

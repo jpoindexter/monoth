@@ -59,7 +59,7 @@ function buildFallback(): EarningsEntry[] {
     const d = new Date(thisMon)
     d.setDate(thisMon.getDate() + weekOffset * 7 + dayOffset)
     const dateStr = d.toISOString().slice(0, 10)
-    const hour = hours[Math.floor(rng() * 3)]
+    const hour = hours[Math.floor(rng() * 3)] ?? 'dmh'
     const reported = weekOffset === 0 && d < today
     const surprise = (rng() - 0.48) * 0.3
     const epsActual = reported ? +(t.eps * (1 + surprise)).toFixed(2) : null

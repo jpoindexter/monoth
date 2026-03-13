@@ -89,7 +89,7 @@ export default function CommoditiesPanel() {
   const priceMap = Object.fromEntries((data ?? []).map((q) => [q.symbol, q]))
 
   const sectorData = SECTORS.map((s) => {
-    const quotes = s.symbols.map((sym) => priceMap[sym]).filter(Boolean)
+    const quotes = s.symbols.map((sym) => priceMap[sym]).filter((q): q is NonNullable<typeof q> => q != null)
     const avg = quotes.length > 0
       ? quotes.reduce((sum, q) => sum + q.changePercent, 0) / quotes.length
       : 0

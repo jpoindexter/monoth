@@ -91,8 +91,8 @@ function computeRegime() {
 
   const avg = count > 0 ? sum / count : 0
   const sorted = [...pairs].sort((x, y) => y.val - x.val)
-  const highest = sorted[0]
-  const lowest = sorted[sorted.length - 1]
+  const highest = sorted[0]!
+  const lowest = sorted[sorted.length - 1]!
 
   let regime: 'RISK-ON' | 'RISK-OFF' | 'TRANSITIONAL'
   if (avg < 0.4) regime = 'RISK-ON'

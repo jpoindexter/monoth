@@ -86,8 +86,8 @@ const DOT_PLOT_MEDIAN = (() => {
   }
   flat.sort((a, b) => a - b)
   const mid = Math.floor(flat.length / 2)
-  return flat.length % 2 === 0 ? (flat[mid - 1] + flat[mid]) / 2 : flat[mid]
-})()
+  return flat.length % 2 === 0 ? (flat[mid - 1]! + flat[mid]!) / 2 : flat[mid]!
+})() as number
 
 const BALANCE_SHEETS = [
   { name: 'Fed', currency: 'USD', current: 7.4, peak: 8.9, unit: 'T', usdEq: 7.4, qtPace: 'STEADY' as const },

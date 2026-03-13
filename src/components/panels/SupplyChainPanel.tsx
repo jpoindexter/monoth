@@ -249,7 +249,7 @@ export default function SupplyChainPanel() {
           </div>
           <div className="space-y-0.5">
             {TRADE_ROUTES.map((route, i) => {
-              const status = routeStatuses[i]
+              const status = routeStatuses[i] ?? 'ON TIME'
               return (
                 <div key={route.name} className="flex items-center gap-2 py-0.5 border-t border-border/20 first:border-0">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${ROUTE_STATUS_DOT[status]}`} />

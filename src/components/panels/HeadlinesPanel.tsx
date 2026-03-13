@@ -7,7 +7,7 @@ import { relTime } from '@/lib/panel-utils'
 function extractDomain(url: string): string {
   try {
     const host = new URL(url).hostname.replace(/^www\./, '')
-    return host.split('.')[0]
+    return host.split('.')[0] ?? '?'
   } catch {
     return '?'
   }
@@ -83,7 +83,7 @@ export default function HeadlinesPanel() {
     data?.forEach((item) => {
       const domain = extractDomain(item.url)
       if (!map.has(domain)) {
-        map.set(domain, SOURCE_COLORS[i % SOURCE_COLORS.length])
+        map.set(domain, SOURCE_COLORS[i % SOURCE_COLORS.length] ?? SOURCE_COLORS[0] ?? '')
         i++
       }
     })
