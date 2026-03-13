@@ -7,7 +7,7 @@ import { PanelIdProvider } from '@/components/layout/PanelWrapper'
 export function PanelGrid() {
   const { enabledPanels, reorderPanels } = usePanelStore()
   const panels = enabledPanels()
-  const getSpan = useSpanStore((s) => s.getSpan)
+  const spans = useSpanStore((s) => s.spans)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const dragId = useRef<string | null>(null)
 
@@ -37,7 +37,7 @@ export function PanelGrid() {
       }}
     >
       {panels.map((p) => {
-        const span = getSpan(p.id)
+        const span = spans[p.id] ?? { col: 1, row: 1 }
         return (
           <div
             key={p.id}
