@@ -3,6 +3,7 @@ import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { useMacroData } from '@/hooks/use-macro-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
+import { fetchFredData } from '@/services/api/macro'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
 const YIELD_SERIES = {
@@ -10,6 +11,12 @@ const YIELD_SERIES = {
   DGS5: '5Y',
   DGS10: '10Y',
   DGS30: '30Y',
+}
+
+const CURVE_SERIES = ['DGS1MO', 'DGS3MO', 'DGS6MO', 'DGS1', 'DGS2', 'DGS5', 'DGS10', 'DGS30']
+const CURVE_LABELS: Record<string, string> = {
+  DGS1MO: '1M', DGS3MO: '3M', DGS6MO: '6M', DGS1: '1Y',
+  DGS2: '2Y', DGS5: '5Y', DGS10: '10Y', DGS30: '30Y',
 }
 
 const BOND_ETFS = ['TLT', 'IEF', 'SHY', 'HYG', 'LQD', 'AGG', 'BND', 'TIPS']
@@ -20,13 +27,19 @@ const ETF_NAMES: Record<string, string> = {
 }
 
 export default function FixedIncomePanel() {
-  const [tab, setTab] = useState<'yields' | 'etfs' | 'spreads'>('yields')
+  const [tab, setTab] = useState<'yields' | 'etfs' | 'spreads' | 'curve'>('yields')
   const { data, loading, error, refresh } = useMacroData()
 
   const { data: etfData, loading: etfLoading } = usePolling({
     fetcher: useCallback(() => fetchQuotes(BOND_ETFS), []),
     interval: 300_000,
     enabled: tab === 'etfs',
+  })
+
+  const { data: curveRaw } = usePolling({
+    fetcher: useCallback(() => fetchFredData(CURVE_SERIES), []),
+    interval: 300_000,
+    enabled: tab === 'curve',
   })
 
   const yieldData = data?.filter((series) => series.seriesId in YIELD_SERIES)
@@ -50,6 +63,17 @@ export default function FixedIncomePanel() {
     y30 != null && y2 != null && { label: '30Y-2Y', value: y30 - y2, signal: y30 - y2 < 0 ? 'Inverted' : y30 - y2 < 0.5 ? 'Flat' : 'Normal' },
   ].filter(Boolean) as { label: string; value: number; signal: string }[]
 
+  const curvePoints = CURVE_SERIES.map((id) => {
+    const s = curveRaw?.find((r) => r.seriesId === id)
+    return s ? { label: CURVE_LABELS[id], value: s.value } : null
+  }).filter(Boolean) as { label: string; value: number }[]
+
+  const curveY2 = curveRaw?.find((s) => s.seriesId === 'DGS2')?.value
+  const curveY10 = curveRaw?.find((s) => s.seriesId === 'DGS10')?.value
+  const spread210 = curveY2 != null && curveY10 != null ? curveY10 - curveY2 : null
+  const isInverted = spread210 != null && spread210 < 0
+  const curveColor = isInverted ? '#ef4444' : '#059669'
+
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
@@ -59,6 +83,7 @@ export default function FixedIncomePanel() {
         <button className={tabCls(tab === 'yields')} onClick={() => setTab('yields')}>Yields</button>
         <button className={tabCls(tab === 'etfs')} onClick={() => setTab('etfs')}>ETFs</button>
         <button className={tabCls(tab === 'spreads')} onClick={() => setTab('spreads')}>Spreads</button>
+        <button className={tabCls(tab === 'curve')} onClick={() => setTab('curve')}>Curve</button>
       </div>
 
       {tab === 'yields' && (
@@ -160,6 +185,58 @@ export default function FixedIncomePanel() {
               The 10Y-2Y spread is the most widely watched recession indicator.
             </p>
           </div>
+        </div>
+      )}
+      {tab === 'curve' && (
+        <div>
+          {curvePoints.length < 2 ? (
+            <p className="text-[10px] text-muted-foreground">Yield data loading...</p>
+          ) : (() => {
+            const W = 320
+            const H = 140
+            const padL = 28
+            const padR = 8
+            const padT = 12
+            const padB = 16
+            const minY = Math.min(...curvePoints.map((p) => p.value))
+            const maxY = Math.max(...curvePoints.map((p) => p.value))
+            const rangeY = maxY - minY || 1
+            const n = curvePoints.length
+            const xOf = (i: number) => padL + (i / (n - 1)) * (W - padL - padR)
+            const yOf = (v: number) => padT + (1 - (v - minY) / rangeY) * (H - padT - padB)
+            const d = curvePoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${xOf(i).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ')
+            return (
+              <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }}>
+                {[minY, (minY + maxY) / 2, maxY].map((tick) => (
+                  <g key={tick}>
+                    <line x1={padL} x2={W - padR} y1={yOf(tick)} y2={yOf(tick)} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
+                    <text x={padL - 3} y={yOf(tick) + 3} textAnchor="end" fontSize={7} fill="currentColor" fillOpacity={0.5}>{tick.toFixed(1)}</text>
+                  </g>
+                ))}
+                <path d={d} fill="none" stroke={curveColor} strokeWidth={2} strokeLinejoin="round" />
+                {curvePoints.map((p, i) => (
+                  <g key={p.label}>
+                    <circle cx={xOf(i)} cy={yOf(p.value)} r={3} fill={curveColor} />
+                    <text x={xOf(i)} y={yOf(p.value) - 5} textAnchor="middle" fontSize={8} fill="currentColor" fillOpacity={0.7}>{p.value.toFixed(2)}</text>
+                    <text x={xOf(i)} y={H - 3} textAnchor="middle" fontSize={7} fill="currentColor" fillOpacity={0.5}>{p.label}</text>
+                  </g>
+                ))}
+              </svg>
+            )
+          })()}
+          {spread210 != null && (
+            <div className="mt-2 flex items-center gap-2 border-t border-border/20 pt-2">
+              <span className="text-[11px] text-muted-foreground">2Y-10Y Spread:</span>
+              <span className={`text-[11px] tabular-nums font-medium ${isInverted ? 'text-red-500' : 'text-emerald-600'}`}>
+                {spread210 > 0 ? '+' : ''}{spread210.toFixed(2)}%
+              </span>
+              <span className={`ml-auto text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${
+                isInverted ? 'bg-red-500/15 text-red-500' : 'bg-emerald-600/15 text-emerald-600'
+              }`}>
+                {isInverted ? 'Inverted' : 'Normal'}
+              </span>
+            </div>
+          )}
         </div>
       )}
     </PanelWrapper>
