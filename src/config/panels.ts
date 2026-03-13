@@ -42,4 +42,6 @@ export const PANELS: PanelConfig[] = [
   { id: 'economic-calendar', name: 'Economic Calendar', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'stock-analysis', name: 'Stock Analysis', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'trade-policy', name: 'Trade Policy', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'fundamentals', name: 'Fundamentals', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'stock-screener', name: 'Stock Screener', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
 ]

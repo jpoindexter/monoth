@@ -131,6 +131,9 @@ export default function OptionsFlowPanel() {
 
   return (
     <PanelWrapper title="Options Flow">
+      <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
+        <span className="text-[8px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real trades</span>
+      </div>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'unusual')} onClick={() => setTab('unusual')}>Unusual</button>
         <button className={tabCls(tab === 'putscalls')} onClick={() => setTab('putscalls')}>Puts/Calls</button>

@@ -14,6 +14,7 @@ export type PanelId =
   | 'options-flow' | 'insider-trading' | 'earnings-calendar'
   | 'analyst-ratings' | 'fund-flows' | 'short-interest' | 'economic-calendar'
   | 'stock-analysis' | 'trade-policy'
+  | 'fundamentals' | 'stock-screener'
 
 export type PanelTier = 1 | 2 | 3
 

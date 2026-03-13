@@ -157,6 +157,9 @@ export default function InsiderTradingPanel() {
 
   return (
     <PanelWrapper title="Insider Trading">
+      <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
+        <span className="text-[8px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real filings</span>
+      </div>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'buys')} onClick={() => setTab('buys')}>Buys</button>
         <button className={tabCls(tab === 'sells')} onClick={() => setTab('sells')}>Sells</button>

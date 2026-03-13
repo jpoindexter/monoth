@@ -215,6 +215,9 @@ export default function ShortInterestPanel() {
 
   return (
     <PanelWrapper title="Short Interest">
+      <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
+        <span className="text-[8px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real short data</span>
+      </div>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'shorted')} onClick={() => setTab('shorted')}>Most Shorted</button>
         <button className={tabCls(tab === 'squeeze')} onClick={() => setTab('squeeze')}>Squeeze Watch</button>
