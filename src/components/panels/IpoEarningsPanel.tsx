@@ -16,6 +16,24 @@ interface Earning {
   year: number
 }
 
+const STATIC_IPOS = [
+  { company: 'CoreWeave', ticker: 'CRWV', date: '2026-03-28', sector: 'Cloud/AI', valuation: '$35B', status: 'priced' },
+  { company: 'Databricks', ticker: 'DBR', date: '2026-Q2', sector: 'Data/AI', valuation: '$62B', status: 'expected' },
+  { company: 'Stripe', ticker: 'STRP', date: '2026-Q3', sector: 'Fintech', valuation: '$91B', status: 'rumored' },
+  { company: 'Discord', ticker: 'DSCD', date: '2026-H2', sector: 'Social', valuation: '$15B', status: 'rumored' },
+  { company: 'Plaid', ticker: 'PLAD', date: '2026-Q4', sector: 'Fintech', valuation: '$13B', status: 'expected' },
+  { company: 'Canva', ticker: 'CNVA', date: '2027', sector: 'Design/SaaS', valuation: '$26B', status: 'rumored' },
+]
+
+const STATIC_EARNINGS = [
+  { company: 'Apple', ticker: 'AAPL', date: 'May 1', expected: '$1.62', time: 'AMC' },
+  { company: 'Amazon', ticker: 'AMZN', date: 'May 1', expected: '$1.37', time: 'AMC' },
+  { company: 'Meta', ticker: 'META', date: 'Apr 30', expected: '$5.28', time: 'AMC' },
+  { company: 'Microsoft', ticker: 'MSFT', date: 'Apr 29', expected: '$3.22', time: 'AMC' },
+  { company: 'Alphabet', ticker: 'GOOGL', date: 'Apr 29', expected: '$2.02', time: 'AMC' },
+  { company: 'NVIDIA', ticker: 'NVDA', date: 'May 28', expected: '$0.89', time: 'AMC' },
+]
+
 function relTime(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000)
   if (diff < 60) return 'now'
@@ -31,8 +49,20 @@ function fmtRev(n: number | null): string {
   return '$' + n.toFixed(0)
 }
 
+function epsSurprise(actual: number | null, estimate: number | null): string | null {
+  if (actual == null || estimate == null || estimate === 0) return null
+  const pct = ((actual - estimate) / Math.abs(estimate)) * 100
+  return (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%'
+}
+
+const STATUS_CLS: Record<string, string> = {
+  priced: 'bg-emerald-500/20 text-emerald-600',
+  expected: 'bg-amber-500/20 text-amber-600',
+  rumored: 'bg-zinc-500/20 text-muted-foreground',
+}
+
 export default function IpoEarningsPanel() {
-  const [tab, setTab] = useState<'earnings' | 'news'>('news')
+  const [tab, setTab] = useState<'earnings' | 'pipeline' | 'news'>('news')
   const { data: newsData, loading: newsLoading, error: newsError, refresh } = useNewsData('ipo')
 
   const { data: earningsData, loading: earningsLoading } = usePolling<Earning[]>({
@@ -48,10 +78,13 @@ export default function IpoEarningsPanel() {
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
+  const hasEarnings = earningsData && earningsData.length > 0
+
   return (
     <PanelWrapper title="IPOs & Earnings" loading={newsLoading && earningsLoading} error={newsError} onRetry={refresh}>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'earnings')} onClick={() => setTab('earnings')}>Earnings</button>
+        <button className={tabCls(tab === 'pipeline')} onClick={() => setTab('pipeline')}>Pipeline</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
@@ -59,20 +92,22 @@ export default function IpoEarningsPanel() {
         <div className="py-4 text-center text-muted-foreground text-[10px]">Loading...</div>
       )}
 
-      {tab === 'earnings' && earningsData && (
+      {tab === 'earnings' && !earningsLoading && hasEarnings && (
         <table className="w-full text-[11px]">
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Symbol</th>
               <th className="text-left font-medium pb-1.5">Date</th>
               <th className="text-right font-medium pb-1.5">EPS</th>
+              <th className="text-right font-medium pb-1.5">Surprise</th>
               <th className="text-right font-medium pb-1.5">Rev</th>
             </tr>
           </thead>
           <tbody>
-            {earningsData.map((e, i) => {
+            {earningsData!.map((e, i) => {
               const beat = e.epsActual != null && e.epsEstimate != null && e.epsActual > e.epsEstimate
               const miss = e.epsActual != null && e.epsEstimate != null && e.epsActual < e.epsEstimate
+              const surprise = epsSurprise(e.epsActual, e.epsEstimate)
               return (
                 <tr key={`${e.symbol}-${i}`} className="border-t border-border/20">
                   <td className="py-0.5">
@@ -81,11 +116,14 @@ export default function IpoEarningsPanel() {
                   </td>
                   <td className="py-0.5 text-muted-foreground text-[10px]">
                     {e.date}
-                    {e.hour === 'bmo' && <span className="ml-0.5">AM</span>}
-                    {e.hour === 'amc' && <span className="ml-0.5">PM</span>}
+                    {e.hour === 'bmo' && <span className="ml-0.5 text-[8px] bg-zinc-500/15 px-1 py-px rounded-sm">BMO</span>}
+                    {e.hour === 'amc' && <span className="ml-0.5 text-[8px] bg-zinc-500/15 px-1 py-px rounded-sm">AMC</span>}
                   </td>
                   <td className={`text-right tabular-nums font-medium ${beat ? 'text-emerald-600' : miss ? 'text-red-500' : ''}`}>
                     {e.epsActual != null ? e.epsActual.toFixed(2) : e.epsEstimate != null ? `(${e.epsEstimate.toFixed(2)})` : '-'}
+                  </td>
+                  <td className={`text-right tabular-nums text-[10px] ${beat ? 'text-emerald-600' : miss ? 'text-red-500' : 'text-muted-foreground'}`}>
+                    {surprise ?? '-'}
                   </td>
                   <td className="text-right tabular-nums text-muted-foreground">
                     {fmtRev(e.revenueActual ?? e.revenueEstimate)}
@@ -95,6 +133,40 @@ export default function IpoEarningsPanel() {
             })}
           </tbody>
         </table>
+      )}
+
+      {tab === 'earnings' && !earningsLoading && !hasEarnings && (
+        <div className="space-y-0">
+          <p className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1.5">Upcoming</p>
+          {STATIC_EARNINGS.map((e) => (
+            <div key={e.ticker} className="flex items-center gap-2 py-1 border-b border-border/20 last:border-0">
+              <div className="flex-1 min-w-0">
+                <span className="font-medium text-[11px]">{e.company}</span>
+                <span className="text-[9px] text-muted-foreground ml-1">{e.ticker}</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground">{e.date}</span>
+              <span className="text-[10px] tabular-nums text-muted-foreground">{e.expected}</span>
+              <span className="text-[8px] font-bold uppercase bg-zinc-500/15 text-muted-foreground px-1 py-px rounded-sm">{e.time}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === 'pipeline' && (
+        <div className="space-y-0">
+          {STATIC_IPOS.map((ipo) => (
+            <div key={ipo.ticker} className="flex items-center gap-2 py-1.5 border-b border-border/20 last:border-0">
+              <div className="flex-1 min-w-0">
+                <span className="font-medium text-[11px]">{ipo.company}</span>
+                <span className="text-[9px] text-muted-foreground ml-1">{ipo.ticker}</span>
+              </div>
+              <span className="text-[9px] bg-zinc-500/15 text-muted-foreground px-1 py-px rounded-sm">{ipo.sector}</span>
+              <span className="text-[10px] tabular-nums text-muted-foreground">{ipo.valuation}</span>
+              <span className="text-[9px] text-muted-foreground">{ipo.date}</span>
+              <span className={`text-[8px] font-bold uppercase px-1 py-px rounded-sm ${STATUS_CLS[ipo.status]}`}>{ipo.status}</span>
+            </div>
+          ))}
+        </div>
       )}
 
       {tab === 'news' && (
