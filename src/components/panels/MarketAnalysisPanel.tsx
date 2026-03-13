@@ -77,8 +77,50 @@ function deriveSentiment(indices: ReturnType<typeof useMarketStore.getState>['in
   ]
 }
 
+// --- Static data for Technicals tab ---
+const SPY_PRICE = 528
+const DMA_50 = 520
+const DMA_200 = 495
+const RSI = 58
+const MACD_POSITIVE = true
+const SUPPORT_LEVELS = [510, 500, 490]
+const RESISTANCE_LEVELS = [535, 545, 560]
+
+function deriveTechnicalOutlook(): Signal {
+  const aboveBoth = SPY_PRICE > DMA_50 && SPY_PRICE > DMA_200
+  const belowBoth = SPY_PRICE < DMA_50 && SPY_PRICE < DMA_200
+  if (aboveBoth && RSI >= 50 && RSI <= 70) return 'bullish'
+  if (belowBoth && RSI < 40) return 'bearish'
+  return 'neutral'
+}
+
+// --- Static data for Flows tab ---
+interface FlowItem {
+  name: string
+  flow: number // in billions
+}
+
+const ETF_FLOWS: FlowItem[] = [
+  { name: 'US Equity', flow: 2.1 },
+  { name: 'Intl Equity', flow: -0.8 },
+  { name: 'Fixed Income', flow: 1.5 },
+  { name: 'Money Market', flow: 3.2 },
+  { name: 'Commodities', flow: 0.4 },
+  { name: 'Crypto', flow: 0.6 },
+]
+
+const MAX_FLOW = Math.max(...ETF_FLOWS.map((f) => Math.abs(f.flow)))
+
+function deriveRiskAppetite(): Signal {
+  const usEquity = ETF_FLOWS.find((f) => f.name === 'US Equity')?.flow ?? 0
+  const moneyMkt = ETF_FLOWS.find((f) => f.name === 'Money Market')?.flow ?? 0
+  if (usEquity > 0 && usEquity > moneyMkt * 0.5) return 'bullish'
+  if (moneyMkt > usEquity * 1.5) return 'bearish'
+  return 'neutral'
+}
+
 export default function MarketAnalysisPanel() {
-  const [tab, setTab] = useState<'events' | 'news' | 'sentiment'>('news')
+  const [tab, setTab] = useState<'events' | 'news' | 'sentiment' | 'technicals' | 'flows'>('news')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('analysis')
   const { data: events, loading: evLoading } = usePolling<CorrelationEvent[]>({
     fetcher: useCallback(async () => {
@@ -130,6 +172,8 @@ export default function MarketAnalysisPanel() {
         <button className={tabCls(tab === 'events')} onClick={() => setTab('events')}>Surprises</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
         <button className={tabCls(tab === 'sentiment')} onClick={() => setTab('sentiment')}>Sentiment</button>
+        <button className={tabCls(tab === 'technicals')} onClick={() => setTab('technicals')}>Technicals</button>
+        <button className={tabCls(tab === 'flows')} onClick={() => setTab('flows')}>Flows</button>
       </div>
 
       {tab === 'events' && (
@@ -235,6 +279,142 @@ export default function MarketAnalysisPanel() {
           )}
         </div>
       )}
+
+      {tab === 'technicals' && (() => {
+        const outlook = deriveTechnicalOutlook()
+        const rsiPct = RSI
+        const rsiColor = RSI > 70 ? 'bg-red-500' : RSI < 30 ? 'bg-emerald-500' : 'bg-blue-500'
+        const rsiLabel = RSI > 70 ? 'Overbought' : RSI < 30 ? 'Oversold' : 'Neutral'
+        return (
+          <div className="space-y-3">
+            {/* Moving Averages */}
+            <div className="space-y-1.5">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Moving Averages</span>
+              {[{ label: '50 DMA', level: DMA_50 }, { label: '200 DMA', level: DMA_200 }].map(({ label, level }) => {
+                const above = SPY_PRICE > level
+                return (
+                  <div key={label} className="flex items-center justify-between">
+                    <span className="text-[10px] text-muted-foreground w-16">{label}</span>
+                    <span className="text-[10px] tabular-nums font-medium">${level}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-px rounded-sm ${above ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
+                      SPY {above ? `+$${(SPY_PRICE - level).toFixed(0)}` : `-$${(level - SPY_PRICE).toFixed(0)}`}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* RSI Gauge */}
+            <div className="space-y-1 pt-2 border-t border-border/30">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">RSI (14)</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] tabular-nums font-medium">{RSI}</span>
+                  <span className={`text-[9px] text-muted-foreground`}>{rsiLabel}</span>
+                </div>
+              </div>
+              <div className="relative h-2 w-full rounded-full bg-border/30">
+                {/* zone markers */}
+                <div className="absolute inset-y-0 left-[30%] w-px bg-border/60" />
+                <div className="absolute inset-y-0 left-[70%] w-px bg-border/60" />
+                <div className={`h-2 rounded-full ${rsiColor} transition-all`} style={{ width: `${rsiPct}%` }} />
+              </div>
+              <div className="flex justify-between text-[8px] text-muted-foreground">
+                <span>Oversold 30</span>
+                <span>Neutral</span>
+                <span>70 Overbought</span>
+              </div>
+            </div>
+
+            {/* MACD */}
+            <div className="flex items-center justify-between pt-2 border-t border-border/30">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">MACD</span>
+              <span className={`text-[9px] font-bold px-1.5 py-px rounded-sm ${MACD_POSITIVE ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
+                {MACD_POSITIVE ? 'POSITIVE CROSSOVER' : 'NEGATIVE CROSSOVER'}
+              </span>
+            </div>
+
+            {/* Levels */}
+            <div className="pt-2 border-t border-border/30 grid grid-cols-2 gap-x-3 gap-y-1">
+              <div>
+                <span className="text-[9px] uppercase tracking-wider text-emerald-600 block mb-1">Support</span>
+                {SUPPORT_LEVELS.map((lvl) => (
+                  <div key={lvl} className="flex items-center justify-between">
+                    <div className="h-1 flex-1 mr-2 rounded-full bg-emerald-500/20">
+                      <div className="h-1 rounded-full bg-emerald-500" style={{ width: `${(lvl / SPY_PRICE) * 100}%` }} />
+                    </div>
+                    <span className="text-[10px] tabular-nums font-medium">${lvl}</span>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-wider text-red-500 block mb-1">Resistance</span>
+                {RESISTANCE_LEVELS.map((lvl) => (
+                  <div key={lvl} className="flex items-center justify-between">
+                    <div className="h-1 flex-1 mr-2 rounded-full bg-red-500/20">
+                      <div className="h-1 rounded-full bg-red-500" style={{ width: `${(SPY_PRICE / lvl) * 100}%` }} />
+                    </div>
+                    <span className="text-[10px] tabular-nums font-medium">${lvl}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Technical Outlook */}
+            <div className="flex items-center justify-between pt-2 border-t border-border/30">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Technical Outlook</span>
+              <span className={`text-[13px] font-bold ${SIGNAL_TEXT[outlook]}`}>{outlook.toUpperCase()}</span>
+            </div>
+          </div>
+        )
+      })()}
+
+      {tab === 'flows' && (() => {
+        const riskAppetite = deriveRiskAppetite()
+        const totalEquity = ETF_FLOWS.filter((f) => f.name.includes('Equity')).reduce((s, f) => s + f.flow, 0)
+        const moneyMkt = ETF_FLOWS.find((f) => f.name === 'Money Market')?.flow ?? 0
+        return (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              {ETF_FLOWS.map((item) => {
+                const pos = item.flow >= 0
+                const barPct = (Math.abs(item.flow) / MAX_FLOW) * 100
+                const fmt = (v: number) => `${v >= 0 ? '+' : ''}$${Math.abs(v) >= 1 ? `${v.toFixed(1)}B` : `${(v * 1000).toFixed(0)}M`}`
+                return (
+                  <div key={item.name} className="space-y-0.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground w-24">{item.name}</span>
+                      <div className="flex-1 mx-2 h-2 rounded-full bg-border/30 overflow-hidden">
+                        <div
+                          className={`h-2 rounded-full ${pos ? 'bg-emerald-500' : 'bg-red-500'} transition-all`}
+                          style={{ width: `${barPct}%`, marginLeft: pos ? '0' : 'auto' }}
+                        />
+                      </div>
+                      <div className="flex items-center gap-1 w-16 justify-end">
+                        <span className={`text-[10px] tabular-nums font-medium ${pos ? 'text-emerald-600' : 'text-red-500'}`}>{fmt(item.flow)}</span>
+                        <span className={`text-[9px] ${pos ? 'text-emerald-600' : 'text-red-500'}`}>{pos ? '▲' : '▼'}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Risk Appetite */}
+            <div className="pt-2 border-t border-border/30 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Risk Appetite</span>
+                <span className={`text-[13px] font-bold ${SIGNAL_TEXT[riskAppetite]}`}>{riskAppetite.toUpperCase()}</span>
+              </div>
+              <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+                <span>Equity flows {totalEquity >= 0 ? '+' : ''}${totalEquity.toFixed(1)}B</span>
+                <span>Money Mkt +${moneyMkt.toFixed(1)}B</span>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
     </PanelWrapper>
   )
 }
