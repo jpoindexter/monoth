@@ -14,16 +14,18 @@ function parseRSSItems(xml: string, sourceName: string, category: string) {
     []
   const itemArray = Array.isArray(items) ? items : [items]
 
-  return itemArray.map((item: any) => {
+  return itemArray.map((item: any, idx: number) => {
     const url = typeof item.link === 'string'
       ? item.link
       : item.link?.['@_href'] ?? ''
     const guidStr = typeof item.guid === 'string'
       ? item.guid
       : item.guid?.['#text'] ?? url
+    // Include source + index so IDs are globally unique even when feeds share GUIDs
+    const idSeed = `${sourceName}:${idx}:${guidStr || url}`
 
     return {
-      id: Buffer.from(guidStr || url).toString('base64').slice(0, 32),
+      id: Buffer.from(idSeed).toString('base64').slice(0, 32),
       title: item.title ?? '',
       url,
       source: sourceName,

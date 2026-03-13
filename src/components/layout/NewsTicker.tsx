@@ -10,7 +10,7 @@ function timeAgo(published: number): string {
 }
 
 export function NewsTicker() {
-  useNewsData('headlines')
+  useNewsData('markets')
 
   const items = useNewsStore((s) => s.items)
   const headlines = items.sort((a, b) => b.published - a.published).slice(0, 20)

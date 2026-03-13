@@ -132,7 +132,7 @@ const TREND_ARROW = { up: '▲', down: '▼', flat: '→' }
 export default function TradePolicyPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<'tariffs' | 'restrictions' | 'flows' | 'news'>('tariffs')
-  const { data: newsData, loading, error, refresh } = useNewsData('trade')
+  const { data: newsData, loading, error, refresh } = useNewsData('regulation')
 
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
