@@ -131,7 +131,7 @@ export default function OptionsFlowPanel() {
   return (
     <PanelWrapper title="Options Flow">
       <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
-        <span className="text-[8px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real trades</span>
+        <span className="text-[9px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real trades</span>
       </div>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'unusual')} onClick={() => setTab('unusual')}>Unusual</button>
@@ -157,13 +157,13 @@ export default function OptionsFlowPanel() {
               <tr key={i} className="border-t border-border/20">
                 <td className="py-0.5 font-medium text-foreground">{f.ticker}</td>
                 <td className="py-0.5">
-                  <span className={`px-1 rounded-sm text-[9px] font-semibold ${typeBadge(f.type)}`}>{f.type}</span>
+                  <span className={`px-1 rounded-sm text-[10px] font-semibold ${typeBadge(f.type)}`}>{f.type}</span>
                 </td>
                 <td className="py-0.5 text-right tabular-nums">${f.strike}</td>
                 <td className="py-0.5 text-right text-muted-foreground">{f.expiry}</td>
                 <td className="py-0.5 text-right tabular-nums font-medium">{fmtPremium(f.premium)}</td>
                 <td className="py-0.5 text-right">
-                  <span className={`px-1 rounded-sm text-[9px] ${sizeBadge(f.size)}`}>{f.size}</span>
+                  <span className={`px-1 rounded-sm text-[10px] ${sizeBadge(f.size)}`}>{f.size}</span>
                 </td>
                 <td className={`py-0.5 text-right font-medium ${sentimentColor(f.sentiment)}`}>
                   {f.sentiment === 'Bullish' ? 'Bull' : f.sentiment === 'Bearish' ? 'Bear' : 'Neut'}
@@ -177,7 +177,7 @@ export default function OptionsFlowPanel() {
       {tab === 'putscalls' && (
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <div className="flex justify-between text-[9px] text-muted-foreground uppercase tracking-wider">
+            <div className="flex justify-between text-[10px] text-muted-foreground uppercase tracking-wider">
               <span>Put/Call Ratio</span>
               <span className={`font-bold ${pcRatio > 1 ? 'text-red-500' : 'text-emerald-500'}`}>
                 {pcRatio.toFixed(2)} {pcRatio > 1 ? 'Bearish' : 'Bullish'}
@@ -187,19 +187,19 @@ export default function OptionsFlowPanel() {
               <div className="bg-emerald-500 h-full" style={{ width: `${(callTotal / (callTotal + putTotal)) * 100}%` }} />
               <div className="bg-red-500 h-full flex-1" />
             </div>
-            <div className="flex justify-between text-[9px] text-muted-foreground">
+            <div className="flex justify-between text-[10px] text-muted-foreground">
               <span className="text-emerald-500">Calls {fmtPremium(callTotal)}</span>
               <span className="text-red-500">Puts {fmtPremium(putTotal)}</span>
             </div>
           </div>
 
           <div>
-            <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Top Calls</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Top Calls</div>
             {topCalls.map((f, i) => (
               <div key={i} className="flex justify-between items-center border-t border-border/20 py-0.5">
                 <div className="flex items-center gap-1.5">
                   <span className="font-medium text-foreground text-[10px]">{f.ticker}</span>
-                  <span className="text-muted-foreground text-[9px]">${f.strike} {f.expiry}</span>
+                  <span className="text-muted-foreground text-[10px]">${f.strike} {f.expiry}</span>
                 </div>
                 <span className="tabular-nums text-[10px] text-emerald-500">{fmtPremium(f.premium)}</span>
               </div>
@@ -207,12 +207,12 @@ export default function OptionsFlowPanel() {
           </div>
 
           <div>
-            <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Top Puts</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Top Puts</div>
             {topPuts.map((f, i) => (
               <div key={i} className="flex justify-between items-center border-t border-border/20 py-0.5">
                 <div className="flex items-center gap-1.5">
                   <span className="font-medium text-foreground text-[10px]">{f.ticker}</span>
-                  <span className="text-muted-foreground text-[9px]">${f.strike} {f.expiry}</span>
+                  <span className="text-muted-foreground text-[10px]">${f.strike} {f.expiry}</span>
                 </div>
                 <span className="tabular-nums text-[10px] text-red-500">{fmtPremium(f.premium)}</span>
               </div>
@@ -226,21 +226,21 @@ export default function OptionsFlowPanel() {
           {expiryGroups.map((g) => (
             <div key={g.label}>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">{g.label}</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{g.label}</span>
                 <span className="text-[10px] font-semibold tabular-nums">{fmtPremium(g.total)}</span>
               </div>
               {g.flows.length === 0 ? (
-                <div className="text-[9px] text-muted-foreground">No flow</div>
+                <div className="text-[10px] text-muted-foreground">No flow</div>
               ) : (
                 g.flows.slice(0, expanded ? undefined : 4).map((f, i) => (
                   <div key={i} className="flex justify-between items-center border-t border-border/20 py-0.5">
                     <div className="flex items-center gap-1.5">
-                      <span className={`px-1 rounded-sm text-[9px] font-semibold ${typeBadge(f.type)}`}>{f.type}</span>
+                      <span className={`px-1 rounded-sm text-[10px] font-semibold ${typeBadge(f.type)}`}>{f.type}</span>
                       <span className="font-medium text-foreground text-[10px]">{f.ticker}</span>
-                      <span className="text-muted-foreground text-[9px]">${f.strike}</span>
+                      <span className="text-muted-foreground text-[10px]">${f.strike}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground text-[9px]">{f.expiry}</span>
+                      <span className="text-muted-foreground text-[10px]">{f.expiry}</span>
                       <span className="tabular-nums text-[10px]">{fmtPremium(f.premium)}</span>
                     </div>
                   </div>

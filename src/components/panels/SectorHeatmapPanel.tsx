@@ -32,7 +32,7 @@ export default function SectorHeatmapPanel() {
   const worst = sorted?.[sorted.length - 1]
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   // Rotation tab derived data
   const rotationData = (() => {
@@ -93,11 +93,11 @@ export default function SectorHeatmapPanel() {
                 className="flex flex-col items-center justify-center rounded px-1 py-2 text-white overflow-hidden"
                 style={{ ...getBlockStyle(sector.changePercent), minHeight: expanded ? '90px' : '55px' }}
               >
-                <span className={`font-medium text-center leading-tight break-words hyphens-auto ${expanded ? 'text-[11px]' : 'text-[8px]'}`}>{sector.name}</span>
+                <span className={`font-medium text-center leading-tight break-words hyphens-auto ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{sector.name}</span>
                 <span className={`font-bold tabular-nums whitespace-nowrap ${expanded ? 'text-[16px]' : 'text-[13px]'}`}>
                   {sector.changePercent >= 0 ? '+' : ''}{sector.changePercent.toFixed(2)}%
                 </span>
-                <span className={`opacity-70 whitespace-nowrap ${expanded ? 'text-[10px]' : 'text-[8px]'}`}>{sector.symbol}</span>
+                <span className={`opacity-70 whitespace-nowrap ${expanded ? 'text-[10px]' : 'text-[9px]'}`}>{sector.symbol}</span>
               </div>
             ))}
           </div>
@@ -152,7 +152,7 @@ export default function SectorHeatmapPanel() {
                 <div className="flex-1 min-w-0">
                   {cls && (
                     <span
-                      className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                      className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}
                     >
                       {CATEGORY_LABELS[cls.category]}
@@ -173,66 +173,66 @@ export default function SectorHeatmapPanel() {
 
       {tab === 'rotation' && rotationData && (
         <div className="flex flex-col gap-1.5">
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Sector Rotation Cycle</div>
+          <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Sector Rotation Cycle</div>
           <div className="grid grid-cols-2 gap-1" style={{ minHeight: '160px' }}>
             {/* Top-left: Improving */}
             <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-blue-500/5">
-              <div className="text-[8px] font-bold uppercase tracking-wider text-blue-400 mb-0.5">Improving</div>
-              <div className="text-[8px] text-muted-foreground mb-1">Negative but recovering</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-blue-400 mb-0.5">Improving</div>
+              <div className="text-[9px] text-muted-foreground mb-1">Negative but recovering</div>
               {rotationData.filter((s) => s.quadrant === 'Improving').map((s) => (
                 <div key={s.symbol} className="flex items-center justify-between">
-                  <span className="text-[9px] font-medium text-blue-400">{s.name}</span>
-                  <span className="text-[9px] tabular-nums text-blue-400">{s.changePercent.toFixed(2)}%</span>
+                  <span className="text-[10px] font-medium text-blue-400">{s.name}</span>
+                  <span className="text-[10px] tabular-nums text-blue-400">{s.changePercent.toFixed(2)}%</span>
                 </div>
               ))}
               {rotationData.filter((s) => s.quadrant === 'Improving').length === 0 && (
-                <span className="text-[9px] text-muted-foreground italic">None</span>
+                <span className="text-[10px] text-muted-foreground italic">None</span>
               )}
             </div>
             {/* Top-right: Leading */}
             <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-emerald-500/5">
-              <div className="text-[8px] font-bold uppercase tracking-wider text-emerald-500 mb-0.5">Leading</div>
-              <div className="text-[8px] text-muted-foreground mb-1">Positive and strong</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-emerald-500 mb-0.5">Leading</div>
+              <div className="text-[9px] text-muted-foreground mb-1">Positive and strong</div>
               {rotationData.filter((s) => s.quadrant === 'Leading').map((s) => (
                 <div key={s.symbol} className="flex items-center justify-between">
-                  <span className="text-[9px] font-medium text-emerald-500">{s.name}</span>
-                  <span className="text-[9px] tabular-nums text-emerald-500">+{s.changePercent.toFixed(2)}%</span>
+                  <span className="text-[10px] font-medium text-emerald-500">{s.name}</span>
+                  <span className="text-[10px] tabular-nums text-emerald-500">+{s.changePercent.toFixed(2)}%</span>
                 </div>
               ))}
               {rotationData.filter((s) => s.quadrant === 'Leading').length === 0 && (
-                <span className="text-[9px] text-muted-foreground italic">None</span>
+                <span className="text-[10px] text-muted-foreground italic">None</span>
               )}
             </div>
             {/* Bottom-left: Lagging */}
             <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-red-500/5">
-              <div className="text-[8px] font-bold uppercase tracking-wider text-red-500 mb-0.5">Lagging</div>
-              <div className="text-[8px] text-muted-foreground mb-1">Negative and weak</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-red-500 mb-0.5">Lagging</div>
+              <div className="text-[9px] text-muted-foreground mb-1">Negative and weak</div>
               {rotationData.filter((s) => s.quadrant === 'Lagging').map((s) => (
                 <div key={s.symbol} className="flex items-center justify-between">
-                  <span className="text-[9px] font-medium text-red-500">{s.name}</span>
-                  <span className="text-[9px] tabular-nums text-red-500">{s.changePercent.toFixed(2)}%</span>
+                  <span className="text-[10px] font-medium text-red-500">{s.name}</span>
+                  <span className="text-[10px] tabular-nums text-red-500">{s.changePercent.toFixed(2)}%</span>
                 </div>
               ))}
               {rotationData.filter((s) => s.quadrant === 'Lagging').length === 0 && (
-                <span className="text-[9px] text-muted-foreground italic">None</span>
+                <span className="text-[10px] text-muted-foreground italic">None</span>
               )}
             </div>
             {/* Bottom-right: Weakening */}
             <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-yellow-500/5">
-              <div className="text-[8px] font-bold uppercase tracking-wider text-yellow-500 mb-0.5">Weakening</div>
-              <div className="text-[8px] text-muted-foreground mb-1">Positive but fading</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-yellow-500 mb-0.5">Weakening</div>
+              <div className="text-[9px] text-muted-foreground mb-1">Positive but fading</div>
               {rotationData.filter((s) => s.quadrant === 'Weakening').map((s) => (
                 <div key={s.symbol} className="flex items-center justify-between">
-                  <span className="text-[9px] font-medium text-yellow-500">{s.name}</span>
-                  <span className="text-[9px] tabular-nums text-yellow-500">+{s.changePercent.toFixed(2)}%</span>
+                  <span className="text-[10px] font-medium text-yellow-500">{s.name}</span>
+                  <span className="text-[10px] tabular-nums text-yellow-500">+{s.changePercent.toFixed(2)}%</span>
                 </div>
               ))}
               {rotationData.filter((s) => s.quadrant === 'Weakening').length === 0 && (
-                <span className="text-[9px] text-muted-foreground italic">None</span>
+                <span className="text-[10px] text-muted-foreground italic">None</span>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-1 text-[8px] text-muted-foreground mt-0.5">
+          <div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-0.5">
             <span className="text-blue-400">Improving</span>
             <span>→</span>
             <span className="text-emerald-500">Leading</span>
@@ -249,9 +249,9 @@ export default function SectorHeatmapPanel() {
       {tab === 'performance' && perfData && (
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Sector Performance</span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Sector Performance</span>
             <span
-              className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${
+              className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${
                 perfData.riskOn
                   ? 'bg-emerald-500/20 text-emerald-500'
                   : 'bg-blue-500/20 text-blue-400'
@@ -266,14 +266,14 @@ export default function SectorHeatmapPanel() {
               const barWidth = `${Math.round((Math.abs(s.changePercent) / perfData.maxAbs) * 100)}%`
               return (
                 <div key={s.symbol} className="flex items-center gap-1.5">
-                  <span className="text-[9px] text-muted-foreground w-[26px] shrink-0 text-right tabular-nums">{s.symbol}</span>
+                  <span className="text-[10px] text-muted-foreground w-[26px] shrink-0 text-right tabular-nums">{s.symbol}</span>
                   <div className="flex-1 h-3 bg-border/20 rounded-sm overflow-hidden">
                     <div
                       className={`h-full rounded-sm ${isPos ? 'bg-emerald-500' : 'bg-red-500'}`}
                       style={{ width: barWidth }}
                     />
                   </div>
-                  <span className={`text-[9px] tabular-nums font-medium w-[36px] text-right shrink-0 ${isPos ? 'text-emerald-500' : 'text-red-500'}`}>
+                  <span className={`text-[10px] tabular-nums font-medium w-[36px] text-right shrink-0 ${isPos ? 'text-emerald-500' : 'text-red-500'}`}>
                     {isPos ? '+' : ''}{s.changePercent.toFixed(2)}%
                   </span>
                 </div>
@@ -281,8 +281,8 @@ export default function SectorHeatmapPanel() {
             })}
           </div>
           <div className="border-t border-border/30 mt-1 pt-1 flex items-center justify-between">
-            <span className="text-[9px] text-muted-foreground">Spread (best - worst)</span>
-            <span className="text-[9px] font-bold tabular-nums text-foreground">
+            <span className="text-[10px] text-muted-foreground">Spread (best - worst)</span>
+            <span className="text-[10px] font-bold tabular-nums text-foreground">
               {perfData.spread.toFixed(2)}%
             </span>
           </div>

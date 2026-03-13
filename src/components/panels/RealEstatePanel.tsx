@@ -78,7 +78,7 @@ export default function RealEstatePanel() {
   }, [tab, chartSymbol])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   // Housing metrics with seeded daily changes
   const monthsSupply = HOUSING_METRICS[3].raw + seededChange('Months of Supply') * 5
@@ -129,7 +129,7 @@ export default function RealEstatePanel() {
             <p className="text-[11px] text-muted-foreground">Loading treasury data...</p>
           ) : (
             <>
-              <p className="text-[9px] text-muted-foreground mb-2 uppercase tracking-wider">
+              <p className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wider">
                 Based on 10Y Treasury {tenYear.toFixed(2)}%
               </p>
               <table className="w-full text-[11px]">
@@ -168,9 +168,9 @@ export default function RealEstatePanel() {
           {/* Market Temp gauge */}
           <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-sm border border-border/30"
             style={{ borderLeftColor: temp.color, borderLeftWidth: 3 }}>
-            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Market Temp</span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Market Temp</span>
             <span className="font-bold text-[11px] ml-auto" style={{ color: temp.color }}>{temp.label}</span>
-            <span className="text-[9px] text-muted-foreground">{monthsSupply.toFixed(1)}mo supply</span>
+            <span className="text-[10px] text-muted-foreground">{monthsSupply.toFixed(1)}mo supply</span>
           </div>
 
           <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
@@ -235,7 +235,7 @@ export default function RealEstatePanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>

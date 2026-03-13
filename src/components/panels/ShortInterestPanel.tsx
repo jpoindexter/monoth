@@ -130,7 +130,7 @@ function MostShortedTab() {
     <div className="space-y-0.5">
       <div className="grid grid-cols-[2fr_3fr_1fr_1fr_1fr] gap-x-1 px-1 mb-1">
         {['Ticker', 'Name', 'Short%', 'DTC', 'Shrs(M)'].map(h => (
-          <div key={h} className="text-[9px] uppercase tracking-wider text-muted-foreground">{h}</div>
+          <div key={h} className="text-[10px] uppercase tracking-wider text-muted-foreground">{h}</div>
         ))}
       </div>
       {rows.map((s) => (
@@ -154,7 +154,7 @@ function SqueezeWatchTab() {
     <div className="space-y-0.5">
       <div className="grid grid-cols-[2fr_1fr_1fr_1fr_2fr] gap-x-1 px-1 mb-1">
         {['Ticker', 'Short%', 'DTC', '5D Chg', 'Score'].map(h => (
-          <div key={h} className="text-[9px] uppercase tracking-wider text-muted-foreground">{h}</div>
+          <div key={h} className="text-[10px] uppercase tracking-wider text-muted-foreground">{h}</div>
         ))}
       </div>
       {rows.map((s) => (
@@ -191,7 +191,7 @@ function BorrowRatesTab() {
     <div className="space-y-0.5">
       <div className="grid grid-cols-[2fr_3fr_1fr_2fr_1fr] gap-x-1 px-1 mb-1">
         {['Ticker', 'Name', 'Rate%', 'Avail.', 'Short%'].map(h => (
-          <div key={h} className="text-[9px] uppercase tracking-wider text-muted-foreground">{h}</div>
+          <div key={h} className="text-[10px] uppercase tracking-wider text-muted-foreground">{h}</div>
         ))}
       </div>
       {rows.map((s) => (
@@ -211,12 +211,12 @@ export default function ShortInterestPanel() {
   const [tab, setTab] = useState<'shorted' | 'squeeze' | 'borrow'>('shorted')
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Short Interest">
       <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
-        <span className="text-[8px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real short data</span>
+        <span className="text-[9px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real short data</span>
       </div>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'shorted')} onClick={() => setTab('shorted')}>Most Shorted</button>

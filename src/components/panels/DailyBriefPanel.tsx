@@ -194,7 +194,7 @@ function Scorecard({
   return (
     <table className="w-full text-[11px] border-collapse">
       <thead>
-        <tr className="text-[9px] uppercase tracking-wider text-muted-foreground border-b border-border/40">
+        <tr className="text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border/40">
           <th className="text-left pb-1 font-medium">Asset Class</th>
           <th className="text-right pb-1 font-medium">Value</th>
           <th className="text-right pb-1 font-medium pl-2">Signal</th>
@@ -223,16 +223,16 @@ function Scorecard({
               </td>
               <td className="py-1 text-right pl-2">
                 {sig && (
-                  <span className={`text-[8px] font-bold uppercase px-1 py-px rounded-sm ${signalCls(sig)}`}>
+                  <span className={`text-[9px] font-bold uppercase px-1 py-px rounded-sm ${signalCls(sig)}`}>
                     {sig}
                   </span>
                 )}
                 {vixInfo && (
-                  <span className={`text-[8px] font-bold uppercase px-1 py-px rounded-sm ${vixInfo.cls}`}>
+                  <span className={`text-[9px] font-bold uppercase px-1 py-px rounded-sm ${vixInfo.cls}`}>
                     {vixInfo.label}
                   </span>
                 )}
-                {!sig && !vixInfo && <span className="text-muted-foreground text-[9px]">—</span>}
+                {!sig && !vixInfo && <span className="text-muted-foreground text-[10px]">—</span>}
               </td>
             </tr>
           )
@@ -273,7 +273,7 @@ export default function DailyBriefPanel() {
   const hasData = indices.length > 0 || crypto.length > 0 || forex.length > 0
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Daily Brief">
@@ -293,7 +293,7 @@ export default function DailyBriefPanel() {
             <div key={section.title}>
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className={`font-semibold uppercase tracking-wider text-muted-foreground ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{section.title}</span>
-                <span className={`font-bold uppercase tracking-wider px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[8px]'} ${
+                <span className={`font-bold uppercase tracking-wider px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[9px]'} ${
                   section.sentiment === 'bullish' ? 'bg-emerald-500/10 text-emerald-600' :
                   section.sentiment === 'bearish' ? 'bg-red-500/10 text-red-500' :
                   'bg-yellow-500/10 text-yellow-600'

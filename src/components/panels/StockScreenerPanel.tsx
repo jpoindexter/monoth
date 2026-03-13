@@ -78,10 +78,10 @@ export default function StockScreenerPanel() {
 
       {/* Sort controls */}
       <div className="flex gap-1 mb-1.5">
-        <span className="text-[8px] text-muted-foreground self-center">Sort:</span>
+        <span className="text-[9px] text-muted-foreground self-center">Sort:</span>
         {(['changePercent', 'volume', 'marketCap', 'peRatio'] as const).map(col => (
           <button key={col} onClick={() => setSortCol(col)}
-            className={`text-[8px] px-1 py-0.5 rounded-sm transition-colors ${sortCol === col ? 'text-foreground bg-border/30' : 'text-muted-foreground hover:text-foreground'}`}>
+            className={`text-[9px] px-1 py-0.5 rounded-sm transition-colors ${sortCol === col ? 'text-foreground bg-border/30' : 'text-muted-foreground hover:text-foreground'}`}>
             {col === 'changePercent' ? '% Chg' : col === 'marketCap' ? 'Mkt Cap' : col === 'peRatio' ? 'P/E' : 'Vol'}
           </button>
         ))}
@@ -102,8 +102,8 @@ export default function StockScreenerPanel() {
                   <div className="text-[10px] font-bold text-foreground tabular-nums">{item.symbol}</div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[9px] text-muted-foreground truncate">{item.name}</div>
-                  <div className="flex gap-2 text-[8px] text-muted-foreground">
+                  <div className="text-[10px] text-muted-foreground truncate">{item.name}</div>
+                  <div className="flex gap-2 text-[9px] text-muted-foreground">
                     <span>Vol: {fmtVol(item.volume)}</span>
                     <span>Cap: {fmtCap(item.marketCap)}</span>
                     {item.peRatio != null && <span>P/E: {item.peRatio.toFixed(1)}</span>}
@@ -113,7 +113,7 @@ export default function StockScreenerPanel() {
                   <div className="text-[10px] font-medium tabular-nums text-foreground">
                     {item.price != null ? '$' + item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
                   </div>
-                  <div className={`text-[9px] tabular-nums font-medium ${isPos ? 'text-emerald-400' : 'text-red-400'}`}>
+                  <div className={`text-[10px] tabular-nums font-medium ${isPos ? 'text-emerald-400' : 'text-red-400'}`}>
                     {isPos ? '+' : ''}{chg.toFixed(2)}%
                   </div>
                 </div>
@@ -124,7 +124,7 @@ export default function StockScreenerPanel() {
       )}
 
       {data && !expanded && data.length > 15 && (
-        <div className="text-center text-[8px] text-muted-foreground mt-1">+{data.length - 15} more · expand to see all</div>
+        <div className="text-center text-[9px] text-muted-foreground mt-1">+{data.length - 15} more · expand to see all</div>
       )}
     </PanelWrapper>
   )

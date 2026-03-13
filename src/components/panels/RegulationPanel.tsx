@@ -192,7 +192,7 @@ function ImpactBadge({ level }: { level: ImpactLevel }) {
       ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30'
       : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
   return (
-    <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm ${cls}`}>
+    <span className={`text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm ${cls}`}>
       {level}
     </span>
   )
@@ -229,7 +229,7 @@ export default function RegulationPanel() {
   }, [data, filter])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Regulation" loading={loading} error={error} onRetry={refresh}>
@@ -248,7 +248,7 @@ export default function RegulationPanel() {
               onClick={() => { setFilter(cat.key); setTab('news') }}
               className="w-full flex items-center gap-2 py-1.5 px-1.5 rounded-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors text-left"
             >
-              <div className="w-5 h-5 rounded-sm bg-foreground/5 flex items-center justify-center text-[9px] font-bold text-foreground/60">
+              <div className="w-5 h-5 rounded-sm bg-foreground/5 flex items-center justify-center text-[10px] font-bold text-foreground/60">
                 {cat.icon}
               </div>
               <div className="flex-1 min-w-0">
@@ -291,7 +291,7 @@ export default function RegulationPanel() {
                   className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                   <div className="flex-1 min-w-0">
                     {cls && (
-                      <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                      <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                         style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                         {CATEGORY_LABELS[cls.category]}
                       </span>
@@ -321,17 +321,17 @@ export default function RegulationPanel() {
                   <ImpactBadge level={ev.impact} />
                 </div>
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-[9px] text-muted-foreground">
+                  <span className="text-[10px] text-muted-foreground">
                     {ev.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
-                  <span className="text-[8px] px-1 py-px rounded-sm bg-foreground/5 text-muted-foreground font-medium">
+                  <span className="text-[9px] px-1 py-px rounded-sm bg-foreground/5 text-muted-foreground font-medium">
                     {ev.agency}
                   </span>
-                  <span className={`text-[9px] font-bold ml-auto ${isPast ? 'text-zinc-400 dark:text-zinc-600' : isUrgent ? 'text-red-500' : 'text-foreground/70'}`}>
+                  <span className={`text-[10px] font-bold ml-auto ${isPast ? 'text-zinc-400 dark:text-zinc-600' : isUrgent ? 'text-red-500' : 'text-foreground/70'}`}>
                     {isPast ? `${Math.abs(days)}d ago` : days === 0 ? 'TODAY' : `${days}d`}
                   </span>
                 </div>
-                <p className={`text-muted-foreground leading-snug ${expanded ? 'text-[11px]' : 'text-[9px] line-clamp-2'}`}>{ev.description}</p>
+                <p className={`text-muted-foreground leading-snug ${expanded ? 'text-[11px]' : 'text-[10px] line-clamp-2'}`}>{ev.description}</p>
               </div>
             )
           })}
@@ -341,7 +341,7 @@ export default function RegulationPanel() {
       {tab === 'impact' && (
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Regulatory Climate</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Regulatory Climate</span>
             <span className={`text-[10px] font-bold tracking-wider ${climate.cls}`}>{climate.label}</span>
           </div>
           {impactScores.map(({ sector, score }) => {
@@ -351,7 +351,7 @@ export default function RegulationPanel() {
               <div key={sector}>
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-[10px] font-medium text-foreground">{sector}</span>
-                  <span className="text-[9px] text-muted-foreground tabular-nums">{score.toFixed(1)}/10</span>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">{score.toFixed(1)}/10</span>
                 </div>
                 <div className="h-1.5 w-full bg-border/20 rounded-full overflow-hidden">
                   <div
@@ -362,7 +362,7 @@ export default function RegulationPanel() {
               </div>
             )
           })}
-          <p className="text-[9px] text-muted-foreground mt-2 leading-snug">
+          <p className="text-[10px] text-muted-foreground mt-2 leading-snug">
             Scores derived from recent news volume. Higher = more regulatory activity.
           </p>
         </div>

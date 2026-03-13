@@ -147,7 +147,7 @@ function WeekTab({ entries, expanded }: { entries: EarningsEntry[]; expanded: bo
               return (
                 <div key={e.symbol} className="flex items-center gap-1.5 border-t border-border/15 pt-1">
                   <span className="text-[11px] font-bold text-foreground w-[52px] shrink-0 tabular-nums">{e.symbol}</span>
-                  <span className={`text-[8px] font-bold px-1 rounded-sm shrink-0 ${badge.cls}`}>{badge.label}</span>
+                  <span className={`text-[9px] font-bold px-1 rounded-sm shrink-0 ${badge.cls}`}>{badge.label}</span>
                   <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
                     EPS {e.epsActual !== null ? (
                       <span className="text-foreground">{e.epsActual.toFixed(2)}</span>
@@ -156,7 +156,7 @@ function WeekTab({ entries, expanded }: { entries: EarningsEntry[]; expanded: bo
                     )}
                   </span>
                   {surp && (
-                    <span className={`text-[9px] font-bold tabular-nums ${surp.cls}`}>{surp.pct}</span>
+                    <span className={`text-[10px] font-bold tabular-nums ${surp.cls}`}>{surp.pct}</span>
                   )}
                   {expanded && (
                     <span className="text-[10px] text-muted-foreground tabular-nums ml-auto">
@@ -184,11 +184,11 @@ function EstimatesTab({ entries, expanded }: { entries: EarningsEntry[]; expande
   return (
     <div className="space-y-0.5">
       <div className="flex items-center gap-1.5 pb-1">
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground w-[52px]">Ticker</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground w-[36px]">Date</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground tabular-nums flex-1 text-right">EPS Est</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[52px]">Ticker</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[36px]">Date</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground tabular-nums flex-1 text-right">EPS Est</span>
         {expanded && (
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground tabular-nums w-[64px] text-right">Rev Est</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground tabular-nums w-[64px] text-right">Rev Est</span>
         )}
       </div>
       {upcoming.map((e) => {
@@ -199,7 +199,7 @@ function EstimatesTab({ entries, expanded }: { entries: EarningsEntry[]; expande
           <div key={e.symbol} className="flex items-center gap-1.5 border-t border-border/15 pt-1">
             <span className="text-[11px] font-bold text-foreground w-[52px] shrink-0 tabular-nums">{e.symbol}</span>
             <span className="text-[10px] text-muted-foreground tabular-nums w-[36px] shrink-0">{dateShort}</span>
-            <span className={`text-[8px] font-bold px-1 rounded-sm shrink-0 ${badge.cls}`}>{badge.label}</span>
+            <span className={`text-[9px] font-bold px-1 rounded-sm shrink-0 ${badge.cls}`}>{badge.label}</span>
             <span className="text-[11px] tabular-nums text-foreground flex-1 text-right">
               {e.epsEstimate !== null ? e.epsEstimate.toFixed(2) : '--'}
             </span>
@@ -251,7 +251,7 @@ export default function EarningsCalendarPanel() {
   })
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const thisEntries = thisWeekData ?? FALLBACK.filter((e) => e.date >= thisBounds.from && e.date <= thisBounds.to)
   const nextEntries = nextWeekData ?? FALLBACK.filter((e) => e.date >= nextBounds.from && e.date <= nextBounds.to)

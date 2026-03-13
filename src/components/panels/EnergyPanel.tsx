@@ -130,10 +130,10 @@ export default function EnergyPanel() {
               { label: 'EU TTF Gas', value: ttf, unit: '/MWh' },
             ].map(({ label, value, unit }) => (
               <div key={label}>
-                <div className="text-[9px] text-muted-foreground">{label}</div>
+                <div className="text-[10px] text-muted-foreground">{label}</div>
                 <div className="flex items-baseline gap-0.5">
                   <span className="text-[12px] tabular-nums font-bold text-foreground">${value.toFixed(2)}</span>
-                  <span className="text-[9px] text-muted-foreground">{unit}</span>
+                  <span className="text-[10px] text-muted-foreground">{unit}</span>
                 </div>
               </div>
             ))}
@@ -143,12 +143,12 @@ export default function EnergyPanel() {
 
       {(tab === 'chart' || expanded) && (
         <div className={expanded ? 'mb-4' : ''}>
-          {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Chart</div>}
+          {expanded && <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Chart</div>}
           <div className="flex gap-1 mb-1">
             {CHART_SYMBOLS.map((sym) => (
               <button
                 key={sym}
-                className={`text-[8px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+                className={`text-[9px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
                 onClick={() => setChartSymbol(sym)}
               >
                 {sym}
@@ -172,7 +172,7 @@ export default function EnergyPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>

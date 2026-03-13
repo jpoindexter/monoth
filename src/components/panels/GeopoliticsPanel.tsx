@@ -107,8 +107,8 @@ function RiskBar({ label, score, count }: { label: string; score: number; count:
       <div className="flex items-center justify-between mb-0.5">
         <span className="text-[10px] font-medium text-foreground">{label}</span>
         <div className="flex items-center gap-1.5">
-          <span className="text-[8px] text-muted-foreground">{count} stories</span>
-          <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color }}>{level}</span>
+          <span className="text-[9px] text-muted-foreground">{count} stories</span>
+          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color }}>{level}</span>
         </div>
       </div>
       <div className="h-1 bg-border/20 rounded-full overflow-hidden">
@@ -132,7 +132,7 @@ export default function GeopoliticsPanel() {
   const riskColor = avgRisk > 8 ? '#ef4444' : avgRisk > 6 ? '#f97316' : avgRisk > 4 ? '#f59e0b' : avgRisk > 2 ? '#eab308' : '#22c55e'
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Geopolitics" loading={loading} error={error} onRetry={refresh}>
@@ -143,7 +143,7 @@ export default function GeopoliticsPanel() {
           <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-[8px] text-muted-foreground">Global Risk</span>
+          <span className="text-[9px] text-muted-foreground">Global Risk</span>
           <span className={`text-[10px] font-bold ${avgRisk >= 5 ? 'text-red-500' : avgRisk >= 3 ? 'text-amber-500' : 'text-emerald-500'}`}>
             {avgRisk.toFixed(1)}/10
           </span>
@@ -159,12 +159,12 @@ export default function GeopoliticsPanel() {
           </div>
           <div className="border-t border-border/20 pt-2 flex items-center justify-between">
             <div>
-              <div className="text-[8px] text-muted-foreground uppercase tracking-wider mb-0.5">Global Risk Index</div>
+              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Global Risk Index</div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-2xl font-bold tabular-nums" style={{ color: riskColor }}>{avgRisk.toFixed(1)}</span>
-                <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: riskColor }}>{riskLabel}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: riskColor }}>{riskLabel}</span>
               </div>
-              <div className="text-[8px] text-muted-foreground mt-0.5">7-day trend</div>
+              <div className="text-[9px] text-muted-foreground mt-0.5">7-day trend</div>
             </div>
             <MiniTrend values={trendValues} />
           </div>
@@ -181,12 +181,12 @@ export default function GeopoliticsPanel() {
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
                   <span className="text-[11px] font-semibold text-foreground leading-none">{s.name}</span>
-                  <span className="text-[8px] font-bold uppercase px-1 py-px rounded-sm leading-none"
+                  <span className="text-[9px] font-bold uppercase px-1 py-px rounded-sm leading-none"
                     style={{ backgroundColor: badge.bg, color: badge.text }}>
                     {s.status}
                   </span>
                 </div>
-                <div className="text-[9px] text-muted-foreground">{formatSince(s.since)}</div>
+                <div className="text-[10px] text-muted-foreground">{formatSince(s.since)}</div>
                 <div className="text-[10px] text-muted-foreground italic">{s.impact}</div>
               </div>
             )
@@ -203,7 +203,7 @@ export default function GeopoliticsPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>

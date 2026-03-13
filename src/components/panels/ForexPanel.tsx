@@ -125,7 +125,7 @@ export default function ForexPanel() {
   }
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Forex" loading={loading} error={error} onRetry={refresh}>
@@ -142,7 +142,7 @@ export default function ForexPanel() {
         <div>
           <div className="flex gap-1 mb-1">
             <button
-              className={`text-[8px] px-1 rounded-sm ${chartPair === 'DXY' ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+              className={`text-[9px] px-1 rounded-sm ${chartPair === 'DXY' ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
               onClick={() => setChartPair('DXY')}
             >
               DXY
@@ -150,7 +150,7 @@ export default function ForexPanel() {
             {['EUR', 'GBP', 'JPY', 'CHF'].map((c) => (
               <button
                 key={c}
-                className={`text-[8px] px-1 rounded-sm ${chartPair === c ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+                className={`text-[9px] px-1 rounded-sm ${chartPair === c ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
                 onClick={() => setChartPair(c)}
               >
                 USD/{c}
@@ -214,7 +214,7 @@ export default function ForexPanel() {
 
           {top3.length >= 3 && bottom3.length >= 3 && (
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Cross Rates</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Cross Rates</div>
               <table className="w-full text-[10px] tabular-nums">
                 <thead>
                   <tr className="text-muted-foreground">
@@ -251,10 +251,10 @@ export default function ForexPanel() {
         return (
           <div className="space-y-2">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Carry Trade Risk</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Carry Trade Risk</span>
               <div className="flex items-center gap-1">
-                <span className="text-[9px] text-muted-foreground">VIX ~{STATIC_VIX}</span>
-                <span className={`text-[9px] font-bold uppercase ${riskColor}`}>{riskLabel}</span>
+                <span className="text-[10px] text-muted-foreground">VIX ~{STATIC_VIX}</span>
+                <span className={`text-[10px] font-bold uppercase ${riskColor}`}>{riskLabel}</span>
               </div>
             </div>
             <div className="space-y-1.5">
@@ -270,7 +270,7 @@ export default function ForexPanel() {
                   <span className="text-[10px] tabular-nums text-emerald-600 w-10 text-right shrink-0">
                     +{carry.toFixed(2)}%
                   </span>
-                  <span className={`text-[8px] uppercase font-bold px-1 py-0.5 rounded-sm shrink-0 ${RISK_COLORS[risk]}`}>
+                  <span className={`text-[9px] uppercase font-bold px-1 py-0.5 rounded-sm shrink-0 ${RISK_COLORS[risk]}`}>
                     {risk}
                   </span>
                 </div>

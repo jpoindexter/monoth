@@ -129,12 +129,12 @@ export default function CommoditiesPanel() {
 
       {(tab === 'chart' || expanded) && (
         <div className={expanded ? 'mb-4' : ''}>
-          {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Chart</div>}
+          {expanded && <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Chart</div>}
           <div className="flex gap-1 mb-1">
             {CHART_SYMBOLS.map((sym) => (
               <button
                 key={sym}
-                className={`text-[8px] px-1.5 py-0.5 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`text-[9px] px-1.5 py-0.5 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`}
                 onClick={() => setChartSymbol(sym)}
               >
                 {sym}
@@ -178,7 +178,7 @@ export default function CommoditiesPanel() {
               {SUPERCYCLE_SECTORS.map((sector) => (
                 <div key={sector.name} className="flex items-center justify-between">
                   <span className="text-[11px] text-foreground">{sector.name}</span>
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${CYCLE_PHASE_CLS[sector.phase]}`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm ${CYCLE_PHASE_CLS[sector.phase]}`}>
                     {sector.phase}
                   </span>
                 </div>

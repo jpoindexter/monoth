@@ -62,7 +62,7 @@ function GaugeChart({ value, label }: { value: number; label: string }) {
       </svg>
       <div className="text-center -mt-1">
         <span className="text-lg font-bold tabular-nums" style={{ color }}>{value}</span>
-        <span className="block text-[8px] uppercase tracking-wider text-muted-foreground">{label}</span>
+        <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">{label}</span>
       </div>
     </div>
   )
@@ -106,7 +106,7 @@ function RegimeTab({ indices, fredData }: { indices: MarketDataPoint[]; fredData
       </div>
 
       <div>
-        <div className="flex justify-between text-[9px] text-muted-foreground mb-1">
+        <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
           <span>Confidence</span>
           <span>{r.confidence}%</span>
         </div>
@@ -121,7 +121,7 @@ function RegimeTab({ indices, fredData }: { indices: MarketDataPoint[]; fredData
       <p className="text-[11px] leading-relaxed text-foreground/80">{r.description}</p>
 
       <div className="space-y-1 pt-1 border-t border-border/20">
-        <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Inputs</div>
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Inputs</div>
         <div className="flex justify-between text-[10px]">
           <span className="text-muted-foreground">SPY Change</span>
           <span className={r.spyChg >= 0 ? 'text-emerald-500' : 'text-red-500'}>
@@ -164,9 +164,9 @@ function JpyIndicator({ forex }: { forex: ForexRate[] }) {
   return (
     <div className="space-y-2 pt-1 border-t border-border/20">
       <div className="flex items-center justify-between">
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground">JPY Liquidity Proxy</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">JPY Liquidity Proxy</span>
         {isCarryUnwind && (
-          <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-sm bg-orange-500/20 text-orange-400 tracking-wider">
+          <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-sm bg-orange-500/20 text-orange-400 tracking-wider">
             CARRY UNWIND
           </span>
         )}
@@ -174,14 +174,14 @@ function JpyIndicator({ forex }: { forex: ForexRate[] }) {
 
       <div className="flex items-center gap-3">
         <div>
-          <div className="text-[9px] text-muted-foreground">{jpyPair.pair}</div>
+          <div className="text-[10px] text-muted-foreground">{jpyPair.pair}</div>
           <div className="text-sm font-bold tabular-nums">{rate.toFixed(2)}</div>
-          <div className={`text-[9px] tabular-nums ${chg >= 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+          <div className={`text-[10px] tabular-nums ${chg >= 0 ? 'text-red-500' : 'text-emerald-500'}`}>
             {chg >= 0 ? '+' : ''}{chg.toFixed(2)}%
           </div>
         </div>
         <div className="flex-1">
-          <div className="flex justify-between text-[9px] text-muted-foreground mb-1">
+          <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
             <span>JPY Strength</span>
             <span>{normalized.toFixed(0)}</span>
           </div>
@@ -194,7 +194,7 @@ function JpyIndicator({ forex }: { forex: ForexRate[] }) {
               }}
             />
           </div>
-          <div className="flex justify-between text-[8px] text-muted-foreground mt-0.5">
+          <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
             <span>Weak</span>
             <span>Strong</span>
           </div>
@@ -279,11 +279,11 @@ function IndicatorsTab() {
         style={{ backgroundColor: color + '1a', border: `1px solid ${color}33` }}
       >
         <div>
-          <div className="text-[9px] uppercase tracking-wider text-muted-foreground">LEI Composite</div>
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">LEI Composite</div>
           <div className={`font-bold tracking-wider ${expanded ? 'text-xl' : 'text-base'}`} style={{ color }}>{composite}</div>
         </div>
         <div className="text-right">
-          <div className="text-[9px] text-muted-foreground">Score</div>
+          <div className="text-[10px] text-muted-foreground">Score</div>
           <div className={`font-bold tabular-nums ${expanded ? 'text-2xl' : 'text-lg'}`} style={{ color }}>{score}</div>
         </div>
       </div>
@@ -293,9 +293,9 @@ function IndicatorsTab() {
           <div key={ind.name} className={`flex items-center justify-between px-1.5 rounded-sm ${SIGNAL_BG[ind.signal]} ${expanded ? 'py-1.5' : 'py-1'}`}>
             <div className="min-w-0">
               <div className={`font-medium text-foreground leading-tight ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{ind.name}</div>
-              <div className={`text-muted-foreground tabular-nums ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{ind.reading}</div>
+              <div className={`text-muted-foreground tabular-nums ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{ind.reading}</div>
             </div>
-            <span className={`font-bold uppercase tracking-wider shrink-0 ml-2 ${expanded ? 'text-[11px]' : 'text-[9px]'} ${SIGNAL_COLORS[ind.signal]}`}>
+            <span className={`font-bold uppercase tracking-wider shrink-0 ml-2 ${expanded ? 'text-[11px]' : 'text-[10px]'} ${SIGNAL_COLORS[ind.signal]}`}>
               {ind.badgeLabel}
             </span>
           </div>
@@ -361,7 +361,7 @@ function CycleTab() {
         className="rounded-md px-3 py-2 text-center"
         style={{ backgroundColor: current.bgColor, border: `1px solid ${current.borderColor}` }}
       >
-        <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-0.5">Current Phase</div>
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Current Phase</div>
         <div className="text-base font-bold tracking-wide" style={{ color: current.color }}>{current.label}</div>
         <div className="text-[10px] text-muted-foreground mt-0.5">
           Favors: <span style={{ color: current.color }}>{current.assets.join(', ')}</span>
@@ -388,7 +388,7 @@ function CycleTab() {
                   style={{ backgroundColor: cfg.color }}
                 />
                 <div
-                  className="text-[9px] font-bold uppercase tracking-wider leading-tight"
+                  className="text-[10px] font-bold uppercase tracking-wider leading-tight"
                   style={{ color: isActive ? cfg.color : undefined }}
                 >
                   {cfg.label}
@@ -402,7 +402,7 @@ function CycleTab() {
                   </span>
                 )}
               </div>
-              <div className="text-[9px] text-muted-foreground leading-tight">
+              <div className="text-[10px] text-muted-foreground leading-tight">
                 {cfg.assets.join(' · ')}
               </div>
             </div>
@@ -411,7 +411,7 @@ function CycleTab() {
       </div>
 
       <div className="pt-1 border-t border-border/20">
-        <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5">Cycle Position</div>
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Cycle Position</div>
         <div className="relative h-3 rounded-full bg-border/20 overflow-hidden">
           {PHASE_ORDER.map((phase, i) => {
             const cfg = CYCLE_PHASES[phase]
@@ -437,7 +437,7 @@ function CycleTab() {
             }}
           />
         </div>
-        <div className="flex justify-between text-[8px] text-muted-foreground mt-1">
+        <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
           <span>Early Exp.</span>
           <span>Late Exp.</span>
           <span>Early Con.</span>
@@ -474,7 +474,7 @@ export default function MacroSignalsPanel() {
   const total = data?.length ?? 0
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Macro Signals" loading={loading} error={error} onRetry={refresh}>
@@ -513,7 +513,7 @@ export default function MacroSignalsPanel() {
               <div key={signal.name} className={`flex items-center justify-between px-1.5 rounded-sm ${STATUS_BG[signal.status]} ${expanded ? 'py-2' : 'py-1.5'}`}>
                 <div className="min-w-0">
                   <div className={`font-medium text-foreground ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{signal.name}</div>
-                  <div className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{signal.detail}</div>
+                  <div className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{signal.detail}</div>
                 </div>
                 <div className="text-right shrink-0 ml-2">
                   <div className={`font-bold uppercase tracking-wider ${expanded ? 'text-[13px]' : 'text-[11px]'} ${STATUS_COLORS[signal.status]}`}>

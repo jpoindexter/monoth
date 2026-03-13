@@ -139,7 +139,7 @@ export default function IpoEarningsPanel() {
   })
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const hasEarnings = earningsData && earningsData.length > 0
 
@@ -177,12 +177,12 @@ export default function IpoEarningsPanel() {
                 <tr key={`${e.symbol}-${i}`} className="border-t border-border/20">
                   <td className="py-0.5">
                     <span className="font-medium">{e.symbol}</span>
-                    <span className="text-[8px] text-muted-foreground ml-1">Q{e.quarter}</span>
+                    <span className="text-[9px] text-muted-foreground ml-1">Q{e.quarter}</span>
                   </td>
                   <td className="py-0.5 text-muted-foreground text-[10px]">
                     {e.date}
-                    {e.hour === 'bmo' && <span className="ml-0.5 text-[8px] bg-zinc-500/15 px-1 py-px rounded-sm">BMO</span>}
-                    {e.hour === 'amc' && <span className="ml-0.5 text-[8px] bg-zinc-500/15 px-1 py-px rounded-sm">AMC</span>}
+                    {e.hour === 'bmo' && <span className="ml-0.5 text-[9px] bg-zinc-500/15 px-1 py-px rounded-sm">BMO</span>}
+                    {e.hour === 'amc' && <span className="ml-0.5 text-[9px] bg-zinc-500/15 px-1 py-px rounded-sm">AMC</span>}
                   </td>
                   <td className={`text-right tabular-nums font-medium ${beat ? 'text-emerald-600' : miss ? 'text-red-500' : ''}`}>
                     {e.epsActual != null ? e.epsActual.toFixed(2) : e.epsEstimate != null ? `(${e.epsEstimate.toFixed(2)})` : '-'}
@@ -202,17 +202,17 @@ export default function IpoEarningsPanel() {
 
       {tab === 'earnings' && !earningsLoading && !hasEarnings && (
         <div className="space-y-0">
-          <p className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1.5">Upcoming</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Upcoming</p>
           {STATIC_EARNINGS.map((e) => (
             <div key={e.ticker} className={`flex items-center gap-2 border-b border-border/20 last:border-0 ${expanded ? 'py-1.5' : 'py-1'}`}>
               <div className="flex-1 min-w-0">
                 <span className={`font-medium ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{e.company}</span>
-                <span className={`text-muted-foreground ml-1 ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{e.ticker}</span>
+                <span className={`text-muted-foreground ml-1 ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{e.ticker}</span>
               </div>
               <span className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{e.date}</span>
               {expanded && <span className="text-[10px] text-muted-foreground">EPS est.</span>}
               <span className={`tabular-nums text-muted-foreground ${expanded ? 'text-[12px] font-medium' : 'text-[10px]'}`}>{e.expected}</span>
-              <span className={`font-bold uppercase bg-zinc-500/15 text-muted-foreground px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[8px]'}`}>{e.time}</span>
+              <span className={`font-bold uppercase bg-zinc-500/15 text-muted-foreground px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[9px]'}`}>{e.time}</span>
             </div>
           ))}
         </div>
@@ -225,12 +225,12 @@ export default function IpoEarningsPanel() {
               <div className="flex items-center gap-2">
                 <div className="flex-1 min-w-0">
                   <span className={`font-medium ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{ipo.company}</span>
-                  <span className={`text-muted-foreground ml-1 ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{ipo.ticker}</span>
+                  <span className={`text-muted-foreground ml-1 ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{ipo.ticker}</span>
                 </div>
-                <span className={`bg-zinc-500/15 text-muted-foreground px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[9px]'}`}>{ipo.sector}</span>
+                <span className={`bg-zinc-500/15 text-muted-foreground px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[10px]'}`}>{ipo.sector}</span>
                 <span className={`tabular-nums font-medium ${expanded ? 'text-[12px]' : 'text-[10px] text-muted-foreground'}`}>{ipo.valuation}</span>
-                <span className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{ipo.date}</span>
-                <span className={`font-bold uppercase px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[8px]'} ${STATUS_CLS[ipo.status]}`}>{ipo.status}</span>
+                <span className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{ipo.date}</span>
+                <span className={`font-bold uppercase px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[9px]'} ${STATUS_CLS[ipo.status]}`}>{ipo.status}</span>
               </div>
             </div>
           ))}
@@ -305,8 +305,8 @@ export default function IpoEarningsPanel() {
         <div className="space-y-0">
           {CALENDAR_DATA.map((day) => (
             <div key={day.day}>
-              <div className={`uppercase tracking-wider py-1 mt-1 font-medium ${day.today ? 'text-foreground' : 'text-muted-foreground'} ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>
-                {day.day}{day.today && <span className="ml-1 bg-foreground text-background text-[8px] px-1 py-px rounded-sm">Today</span>}
+              <div className={`uppercase tracking-wider py-1 mt-1 font-medium ${day.today ? 'text-foreground' : 'text-muted-foreground'} ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>
+                {day.day}{day.today && <span className="ml-1 bg-foreground text-background text-[9px] px-1 py-px rounded-sm">Today</span>}
               </div>
               {day.entries.map((e) => (
                 <div
@@ -315,11 +315,11 @@ export default function IpoEarningsPanel() {
                 >
                   <div className="flex-1 min-w-0">
                     <span className={`font-medium ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{e.company}</span>
-                    <span className={`text-muted-foreground ml-1 ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{e.ticker}</span>
+                    <span className={`text-muted-foreground ml-1 ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{e.ticker}</span>
                   </div>
                   {expanded && <span className="text-[10px] text-muted-foreground">EPS</span>}
                   <span className={`tabular-nums text-muted-foreground ${expanded ? 'text-[12px] font-medium' : 'text-[10px]'}`}>{e.eps}</span>
-                  <span className={`font-bold uppercase px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[8px]'} ${e.time === 'BMO' ? 'bg-amber-500/20 text-amber-600' : 'bg-zinc-500/15 text-muted-foreground'}`}>{e.time}</span>
+                  <span className={`font-bold uppercase px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[9px]'} ${e.time === 'BMO' ? 'bg-amber-500/20 text-amber-600' : 'bg-zinc-500/15 text-muted-foreground'}`}>{e.time}</span>
                 </div>
               ))}
             </div>
@@ -342,7 +342,7 @@ export default function IpoEarningsPanel() {
                 <div className="flex-1 min-w-0">
                   {cls && (
                     <span
-                      className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                      className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}
                     >
                       {CATEGORY_LABELS[cls.category]}

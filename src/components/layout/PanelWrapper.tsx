@@ -61,7 +61,7 @@ function SpanPicker({ panelId }: { panelId: string }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="px-1 py-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors text-[8px] font-medium tabular-nums"
+        className="px-1 py-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors text-[9px] font-medium tabular-nums"
         title={`Resize (${spanLabel})`}
       >
         {spanLabel}
@@ -91,7 +91,7 @@ function SpanPicker({ panelId }: { panelId: string }) {
               })
             )}
           </div>
-          <span className="text-[8px] text-muted-foreground tabular-nums">{hoverLabel}</span>
+          <span className="text-[9px] text-muted-foreground tabular-nums">{hoverLabel}</span>
         </div>
       )}
     </div>
@@ -163,7 +163,7 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
           <div className="flex flex-col items-center justify-center h-full gap-1 p-2">
             <p className="text-[10px] text-destructive">{error}</p>
             {onRetry && (
-              <button onClick={onRetry} className="text-[9px] text-muted-foreground hover:text-foreground underline">
+              <button onClick={onRetry} className="text-[10px] text-muted-foreground hover:text-foreground underline">
                 Retry
               </button>
             )}

@@ -92,7 +92,7 @@ export default function DerivativesPanel() {
   const putsWidth = Math.min(Math.max((pcRatio / (pcRatio + 1)) * 100, 20), 80)
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Derivatives & Vol" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
@@ -137,7 +137,7 @@ export default function DerivativesPanel() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-muted-foreground">VIX Futures Term Structure</span>
-            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-sm ${isBackwardation ? 'text-red-500 bg-red-500/10' : 'text-amber-500 bg-amber-500/10'}`}>
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-px rounded-sm ${isBackwardation ? 'text-red-500 bg-red-500/10' : 'text-amber-500 bg-amber-500/10'}`}>
               {isBackwardation ? 'Backwardation' : 'Contango'}
             </span>
           </div>
@@ -154,7 +154,7 @@ export default function DerivativesPanel() {
           <div className="grid grid-cols-8 gap-0.5 mt-1">
             {termStructure.map((pt) => (
               <div key={pt.month} className="text-center">
-                <div className="text-[9px] text-muted-foreground">{pt.month}</div>
+                <div className="text-[10px] text-muted-foreground">{pt.month}</div>
                 <div className="text-[10px] tabular-nums font-medium">{pt.value.toFixed(1)}</div>
               </div>
             ))}
@@ -172,8 +172,8 @@ export default function DerivativesPanel() {
               <div className="bg-emerald-500 rounded-r-full flex-1" />
             </div>
             <div className="flex justify-between mt-0.5">
-              <span className="text-[9px] text-muted-foreground">Puts</span>
-              <span className="text-[9px] text-muted-foreground">Calls</span>
+              <span className="text-[10px] text-muted-foreground">Puts</span>
+              <span className="text-[10px] text-muted-foreground">Calls</span>
             </div>
           </div>
         </div>
@@ -183,28 +183,28 @@ export default function DerivativesPanel() {
         <div className="space-y-2">
           <div className="grid grid-cols-4 gap-1 p-1.5 rounded-sm bg-zinc-100 dark:bg-zinc-800/60 mb-2">
             <div className="text-center">
-              <div className="text-[8px] text-muted-foreground uppercase tracking-wider mb-0.5">Net Delta</div>
+              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Net Delta</div>
               <div className={`text-[11px] font-bold tabular-nums ${NET_GREEKS.delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                 {NET_GREEKS.delta.toFixed(2)}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-[8px] text-muted-foreground uppercase tracking-wider mb-0.5">Net Gamma</div>
+              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Net Gamma</div>
               <div className="text-[11px] font-bold tabular-nums text-amber-500">{NET_GREEKS.gamma.toFixed(3)}</div>
             </div>
             <div className="text-center">
-              <div className="text-[8px] text-muted-foreground uppercase tracking-wider mb-0.5">Net Theta</div>
+              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Net Theta</div>
               <div className="text-[11px] font-bold tabular-nums text-red-500">{NET_GREEKS.theta.toFixed(2)}</div>
             </div>
             <div className="text-center">
-              <div className="text-[8px] text-muted-foreground uppercase tracking-wider mb-0.5">Net Vega</div>
+              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Net Vega</div>
               <div className="text-[11px] font-bold tabular-nums text-violet-500">{NET_GREEKS.vega.toFixed(2)}</div>
             </div>
           </div>
 
           <table className="w-full text-[10px]">
             <thead>
-              <tr className="text-muted-foreground text-[9px]">
+              <tr className="text-muted-foreground text-[10px]">
                 <th className="text-left font-medium pb-1">Position</th>
                 <th className="text-right font-medium pb-1">Delta</th>
                 <th className="text-right font-medium pb-1">Gamma</th>
@@ -217,7 +217,7 @@ export default function DerivativesPanel() {
                 <tr key={i} className="border-t border-border/20">
                   <td className="py-0.5">
                     <span className="font-medium">{r.symbol}</span>
-                    <span className={`ml-1 text-[9px] font-bold ${r.type === 'CALL' ? 'text-emerald-600' : 'text-red-500'}`}>{r.type}</span>
+                    <span className={`ml-1 text-[10px] font-bold ${r.type === 'CALL' ? 'text-emerald-600' : 'text-red-500'}`}>{r.type}</span>
                     <span className="text-muted-foreground ml-1">{r.strike} {r.expiry}</span>
                   </td>
                   <td className={`text-right tabular-nums font-medium ${r.delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{r.delta.toFixed(2)}</td>
@@ -240,7 +240,7 @@ export default function DerivativesPanel() {
                 {FLOW_PC_RATIO}
               </span>
             </div>
-            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-sm ${CALL_PREMIUM >= PUT_PREMIUM ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'}`}>
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-px rounded-sm ${CALL_PREMIUM >= PUT_PREMIUM ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'}`}>
               {CALL_PREMIUM >= PUT_PREMIUM ? 'Bullish' : 'Bearish'} Signal
             </span>
           </div>
@@ -250,20 +250,20 @@ export default function DerivativesPanel() {
             <div className="bg-emerald-500 rounded-r-full flex-1" />
           </div>
           <div className="flex justify-between -mt-1.5 mb-2">
-            <span className="text-[9px] text-muted-foreground">Puts ${PUT_PREMIUM.toFixed(1)}M</span>
-            <span className="text-[9px] text-muted-foreground">Calls ${CALL_PREMIUM.toFixed(1)}M</span>
+            <span className="text-[10px] text-muted-foreground">Puts ${PUT_PREMIUM.toFixed(1)}M</span>
+            <span className="text-[10px] text-muted-foreground">Calls ${CALL_PREMIUM.toFixed(1)}M</span>
           </div>
 
           <div className="space-y-0">
             {FLOW_DATA.map((r, i) => (
               <div key={i} className={`flex items-center gap-1 py-0.5 border-b border-border/20 last:border-0 rounded-sm px-0.5 ${r.type === 'CALL' ? 'bg-emerald-500/5' : 'bg-red-500/5'}`}>
                 <span className={`font-bold ${expanded ? 'text-[12px]' : 'text-[10px]'} w-10 shrink-0`}>{r.symbol}</span>
-                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} font-bold w-8 shrink-0 ${r.type === 'CALL' ? 'text-emerald-600' : 'text-red-500'}`}>{r.type}</span>
-                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} text-muted-foreground w-10 shrink-0`}>${r.strike}</span>
-                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} text-muted-foreground w-10 shrink-0`}>{r.expiry}</span>
-                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} tabular-nums text-muted-foreground flex-1 text-right`}>{(r.volume / 1000).toFixed(1)}K</span>
-                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} tabular-nums font-medium flex-1 text-right`}>${r.premium}M</span>
-                <span className={`text-[8px] font-bold px-1 py-px rounded-sm shrink-0 ${r.tag === 'SWEEP' ? 'text-amber-600 bg-amber-500/15' : 'text-violet-600 bg-violet-500/15'}`}>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[10px]'} font-bold w-8 shrink-0 ${r.type === 'CALL' ? 'text-emerald-600' : 'text-red-500'}`}>{r.type}</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[10px]'} text-muted-foreground w-10 shrink-0`}>${r.strike}</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[10px]'} text-muted-foreground w-10 shrink-0`}>{r.expiry}</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[10px]'} tabular-nums text-muted-foreground flex-1 text-right`}>{(r.volume / 1000).toFixed(1)}K</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[10px]'} tabular-nums font-medium flex-1 text-right`}>${r.premium}M</span>
+                <span className={`text-[9px] font-bold px-1 py-px rounded-sm shrink-0 ${r.tag === 'SWEEP' ? 'text-amber-600 bg-amber-500/15' : 'text-violet-600 bg-violet-500/15'}`}>
                   {r.tag}
                 </span>
               </div>
@@ -281,7 +281,7 @@ export default function DerivativesPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>

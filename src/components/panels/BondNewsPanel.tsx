@@ -110,7 +110,7 @@ export default function BondNewsPanel() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] text-muted-foreground">Credit Stress</span>
-            <span className={`text-[8px] font-bold uppercase px-1 py-px rounded-sm ${hyStressed ? 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'}`}>
+            <span className={`text-[9px] font-bold uppercase px-1 py-px rounded-sm ${hyStressed ? 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'}`}>
               {hyStressed ? 'ELEVATED' : 'NORMAL'}
             </span>
           </div>
@@ -141,18 +141,18 @@ export default function BondNewsPanel() {
               )
             })}
           </div>
-          <p className="text-[9px] text-muted-foreground mt-1">Spreads estimated from ETF relative performance vs AGG. IG base ~250bp, HY base ~380bp.</p>
+          <p className="text-[10px] text-muted-foreground mt-1">Spreads estimated from ETF relative performance vs AGG. IG base ~250bp, HY base ~380bp.</p>
         </div>
       )}
 
       {(tab === 'chart' || expanded) && (
         <div className={expanded ? 'mb-4' : ''}>
-          {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Chart</div>}
+          {expanded && <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Chart</div>}
           <div className="flex gap-1 mb-1">
             {CHART_SYMBOLS.map((sym) => (
               <button
                 key={sym}
-                className={`text-[8px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+                className={`text-[9px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
                 onClick={() => setChartSymbol(sym)}
               >
                 {sym}
@@ -179,7 +179,7 @@ export default function BondNewsPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>

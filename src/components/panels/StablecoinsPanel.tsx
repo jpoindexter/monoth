@@ -125,7 +125,7 @@ function ReservesTab() {
     <div>
       <div className="mb-3 flex items-center gap-2">
         <span className="text-[10px] text-muted-foreground">Reserve Quality Score</span>
-        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${overallCls}`}>
+        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${overallCls}`}>
           {overallLabel} — {overallScore}% T-Bills avg
         </span>
       </div>
@@ -134,7 +134,7 @@ function ReservesTab() {
         {(Object.keys(RESERVE_LABELS) as ReserveSegment['type'][]).map((type) => (
           <div key={type} className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: RESERVE_COLORS[type] }} />
-            <span className="text-[9px] text-muted-foreground">{RESERVE_LABELS[type]}</span>
+            <span className="text-[10px] text-muted-foreground">{RESERVE_LABELS[type]}</span>
           </div>
         ))}
       </div>
@@ -150,7 +150,7 @@ function ReservesTab() {
                   <span className="text-[10px] font-medium text-foreground w-10">{entry.symbol}</span>
                   <span className="text-[10px] tabular-nums text-muted-foreground">${entry.totalBn}B</span>
                 </div>
-                <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full ${cls}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full ${cls}`}>
                   {label}
                 </span>
               </div>
@@ -165,7 +165,7 @@ function ReservesTab() {
               </div>
               <div className="flex flex-wrap gap-x-2 mt-0.5">
                 {entry.segments.map((seg) => (
-                  <span key={seg.type} className="text-[9px] text-muted-foreground">
+                  <span key={seg.type} className="text-[10px] text-muted-foreground">
                     {RESERVE_LABELS[seg.type]} {seg.pct}%
                   </span>
                 ))}
@@ -214,7 +214,7 @@ function YieldTab() {
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-medium text-foreground">{entry.protocol}</span>
               <span className="text-[10px] text-muted-foreground">{entry.asset}</span>
-              <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm ${RISK_CLS[entry.risk]}`}>
+              <span className={`text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm ${RISK_CLS[entry.risk]}`}>
                 {entry.risk}
               </span>
             </div>
@@ -233,7 +233,7 @@ function YieldTab() {
           </div>
         </div>
       ))}
-      <p className="text-[9px] text-muted-foreground pt-1">APY sorted descending. Rates indicative, not live.</p>
+      <p className="text-[10px] text-muted-foreground pt-1">APY sorted descending. Rates indicative, not live.</p>
     </div>
   )
 }
@@ -251,7 +251,7 @@ function PegMonitor({ data, expanded }: { data: Stablecoin[]; expanded: boolean 
   return (
     <div>
       <div className="mb-3">
-        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${healthCls}`}>
+        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${healthCls}`}>
           Peg Health: {healthLabel}
         </span>
       </div>
@@ -269,7 +269,7 @@ function PegMonitor({ data, expanded }: { data: Stablecoin[]; expanded: boolean 
                 <div className={`${expanded ? 'text-[12px]' : 'text-[10px]'} font-medium text-foreground`}>
                   {coin.symbol.toUpperCase()}
                 </div>
-                {expanded && <div className="text-[9px] text-muted-foreground">{coin.name}</div>}
+                {expanded && <div className="text-[10px] text-muted-foreground">{coin.name}</div>}
               </div>
               <div className="flex items-center gap-px" style={{ width: expanded ? 160 : 100 }}>
                 <div className="flex-1 flex justify-end" style={{ height: 8 }}>
@@ -375,7 +375,7 @@ export default function StablecoinsPanel() {
   }, [loading, data, tab])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Stablecoins" loading={loading} error={error} onRetry={refresh}>
@@ -461,7 +461,7 @@ export default function StablecoinsPanel() {
                 <div className="flex-1 min-w-0">
                   {cls && (
                     <span
-                      className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                      className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}
                     >
                       {CATEGORY_LABELS[cls.category]}

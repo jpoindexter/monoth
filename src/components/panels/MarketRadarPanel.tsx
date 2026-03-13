@@ -108,7 +108,7 @@ function BreadthBar({ advances, declines }: { advances: number; declines: number
             style={{ width: `${advPct}%` }}
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[9px] font-semibold text-foreground/80 leading-none">
+            <span className="text-[10px] font-semibold text-foreground/80 leading-none">
               {advPct.toFixed(0)}% adv
             </span>
           </div>
@@ -281,7 +281,7 @@ function SignalsTab({ indices, movers }: { indices: MarketDataPoint[]; movers: M
         {signals.map((s) => (
           <div key={s.name} className={`flex items-center justify-between px-1 ${expanded ? 'py-1.5' : 'py-1'}`}>
             <span className={`text-muted-foreground ${expanded ? 'text-[12px] w-28' : 'text-[10px] w-20'}`}>{s.name}</span>
-            <span className={`font-semibold px-1.5 py-0.5 rounded ${expanded ? 'text-[11px]' : 'text-[9px]'} ${signalBadgeCls(s.direction)}`}>
+            <span className={`font-semibold px-1.5 py-0.5 rounded ${expanded ? 'text-[11px]' : 'text-[10px]'} ${signalBadgeCls(s.direction)}`}>
               {s.value}
             </span>
           </div>
@@ -386,12 +386,12 @@ function AlertsTab({
           className={`flex items-center justify-between px-2 rounded-md bg-muted/20 border border-border ${expanded ? 'py-2.5' : 'py-1.5'}`}
         >
           <div className="flex items-center gap-2">
-            <span className={`font-bold px-1.5 py-0.5 rounded ${expanded ? 'text-[11px]' : 'text-[9px]'} ${severityCls(a.severity)}`}>
+            <span className={`font-bold px-1.5 py-0.5 rounded ${expanded ? 'text-[11px]' : 'text-[10px]'} ${severityCls(a.severity)}`}>
               {a.severity}
             </span>
             <span className={`text-foreground font-medium ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{a.title}</span>
           </div>
-          <span className="text-[9px] text-muted-foreground">{fmtTime(a.ts)}</span>
+          <span className="text-[10px] text-muted-foreground">{fmtTime(a.ts)}</span>
         </div>
       ))}
     </div>
@@ -431,7 +431,7 @@ export default function MarketRadarPanel() {
   ]
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Market Radar">

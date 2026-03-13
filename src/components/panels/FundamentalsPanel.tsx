@@ -111,13 +111,13 @@ export default function FundamentalsPanel() {
           placeholder="Symbol"
           className="flex-1 h-5 px-1.5 text-[11px] rounded-sm bg-muted border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
         />
-        <button type="submit" className="h-5 px-2 text-[9px] uppercase tracking-wider font-medium rounded-sm bg-foreground text-background hover:opacity-80">Go</button>
+        <button type="submit" className="h-5 px-2 text-[10px] uppercase tracking-wider font-medium rounded-sm bg-foreground text-background hover:opacity-80">Go</button>
       </form>
 
       {data && (
         <div className="mb-2">
           <div className="text-[11px] font-semibold text-foreground truncate">{data.name}</div>
-          {data.sector && <div className="text-[9px] text-muted-foreground">{data.sector} · {data.industry}</div>}
+          {data.sector && <div className="text-[10px] text-muted-foreground">{data.sector} · {data.industry}</div>}
         </div>
       )}
 

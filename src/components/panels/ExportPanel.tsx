@@ -184,7 +184,7 @@ export default function ExportPanel() {
   }
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Settings">
@@ -196,8 +196,8 @@ export default function ExportPanel() {
       {tab === 'panels' && (
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[9px] text-muted-foreground">{enabledCount} of {panels.length} active</span>
-            <button onClick={resetPanels} className="text-[8px] text-muted-foreground hover:text-foreground underline">
+            <span className="text-[10px] text-muted-foreground">{enabledCount} of {panels.length} active</span>
+            <button onClick={resetPanels} className="text-[9px] text-muted-foreground hover:text-foreground underline">
               Reset
             </button>
           </div>
@@ -220,7 +220,7 @@ export default function ExportPanel() {
 
       {tab === 'export' && (
         <div>
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold mb-1.5">Export Data</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1.5">Export Data</p>
           <div className={`gap-1 mb-3 ${expanded ? 'grid grid-cols-2' : 'grid grid-cols-1'}`}>
             {exportButtons.map((btn) => (
               <button
@@ -233,12 +233,12 @@ export default function ExportPanel() {
                   {!expanded && <span className="text-muted-foreground font-normal ml-1.5">— {btn.hint}</span>}
                   {expanded && <div className="text-[10px] text-muted-foreground font-normal mt-0.5">{btn.hint}</div>}
                 </span>
-                <span className={`text-muted-foreground ml-2 shrink-0 ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{btn.size}</span>
+                <span className={`text-muted-foreground ml-2 shrink-0 ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{btn.size}</span>
               </button>
             ))}
           </div>
 
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold mb-1.5">Restore Config</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1.5">Restore Config</p>
           <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
           <button
             onClick={handleRestoreClick}
@@ -248,7 +248,7 @@ export default function ExportPanel() {
           </button>
 
           {toast && (
-            <div className="mt-2 text-[9px] text-foreground bg-foreground/10 px-2 py-1 rounded-sm">
+            <div className="mt-2 text-[10px] text-foreground bg-foreground/10 px-2 py-1 rounded-sm">
               {toast}
             </div>
           )}

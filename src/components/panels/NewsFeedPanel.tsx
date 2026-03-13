@@ -83,7 +83,7 @@ export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
           <button key={tab} className={tabCls(tab)} onClick={() => setActiveTab(tab)}>
             {tab}
             {tabCounts[tab] > 0 && (
-              <span className="text-[8px] bg-muted/50 px-1 rounded-full ml-0.5">{tabCounts[tab]}</span>
+              <span className="text-[9px] bg-muted/50 px-1 rounded-full ml-0.5">{tabCounts[tab]}</span>
             )}
           </button>
         ))}
@@ -109,18 +109,18 @@ export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
                 <div className="flex items-center gap-1 flex-wrap mb-0.5">
                   {cls && (
                     <span
-                      className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm"
+                      className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}
                     >
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
                   {domain && (
-                    <span className="text-[8px] text-muted-foreground bg-muted/50 px-1 rounded-sm">
+                    <span className="text-[9px] text-muted-foreground bg-muted/50 px-1 rounded-sm">
                       {domain}
                     </span>
                   )}
-                  <span className="text-[8px] text-muted-foreground">{readingTime(item.title)}</span>
+                  <span className="text-[9px] text-muted-foreground">{readingTime(item.title)}</span>
                 </div>
                 <span className={`font-medium leading-snug text-foreground ${expanded ? 'text-[13px]' : 'text-[11px] line-clamp-2'}`}>
                   {item.title}

@@ -145,7 +145,7 @@ export default function SupplyChainPanel() {
   }, [tab, chartSymbol])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const headlines = newsData?.map(n => n.title) ?? []
 
@@ -205,7 +205,7 @@ export default function SupplyChainPanel() {
                 <div key={region.name} className="flex items-center gap-2 py-0.5">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${RISK_DOT[level]}`} />
                   <span className={`${expanded ? 'text-[13px]' : 'text-[11px]'} flex-1`}>{region.name}</span>
-                  <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm ${RISK_BADGE[level]}`}>
+                  <span className={`text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm ${RISK_BADGE[level]}`}>
                     {level}
                   </span>
                 </div>
@@ -214,7 +214,7 @@ export default function SupplyChainPanel() {
           </div>
 
           <div className="border-t border-border/20 pt-2 space-y-1">
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5">Shipping Indices</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Shipping Indices</p>
             {[
               { label: 'Baltic Dry Index', abbr: 'BDI', value: bdi, chg: bdiChg },
               { label: 'Container Freight Index', abbr: 'CFI', value: cfi, chg: cfiChg },
@@ -224,7 +224,7 @@ export default function SupplyChainPanel() {
                 <div key={idx.abbr} className="flex items-center justify-between">
                   <div>
                     <span className="text-[11px] font-medium">{idx.label}</span>
-                    <span className="text-[9px] text-muted-foreground ml-1">{idx.abbr}</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">{idx.abbr}</span>
                   </div>
                   <div className="text-right">
                     <span className="text-[12px] font-bold tabular-nums">{idx.value.toFixed(0)}</span>
@@ -242,7 +242,7 @@ export default function SupplyChainPanel() {
       {tab === 'routes' && (
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Global Flow Score</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Global Flow Score</p>
             <span className={`text-[18px] font-bold tabular-nums leading-none ${flowScoreColor(flowScore)}`}>
               {flowScore}<span className="text-[10px] font-normal text-muted-foreground ml-0.5">/100</span>
             </span>
@@ -255,10 +255,10 @@ export default function SupplyChainPanel() {
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${ROUTE_STATUS_DOT[status]}`} />
                   <div className="flex-1 min-w-0">
                     <span className={`${expanded ? 'text-[13px]' : 'text-[11px]'} font-medium`}>{route.name}</span>
-                    <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} text-muted-foreground ml-1`}>{route.pair}</span>
+                    <span className={`${expanded ? 'text-[11px]' : 'text-[10px]'} text-muted-foreground ml-1`}>{route.pair}</span>
                   </div>
-                  <span className="text-[9px] text-muted-foreground tabular-nums shrink-0">~{route.transitDays}d</span>
-                  <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm shrink-0 ${ROUTE_STATUS_BADGE[status]}`}>
+                  <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">~{route.transitDays}d</span>
+                  <span className={`text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm shrink-0 ${ROUTE_STATUS_BADGE[status]}`}>
                     {status}
                   </span>
                 </div>
@@ -280,7 +280,7 @@ export default function SupplyChainPanel() {
                 {sym}
               </button>
             ))}
-            <span className="text-[9px] text-muted-foreground self-center ml-1">{SC_NAMES[chartSymbol]}</span>
+            <span className="text-[10px] text-muted-foreground self-center ml-1">{SC_NAMES[chartSymbol]}</span>
           </div>
           {candlesLoading ? (
             <div className="h-[120px] flex items-center justify-center text-[10px] text-muted-foreground">Loading…</div>
@@ -301,7 +301,7 @@ export default function SupplyChainPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>

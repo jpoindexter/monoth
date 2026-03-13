@@ -72,7 +72,7 @@ export function StatusBar() {
   ]
 
   return (
-    <div className="h-5 border-t border-border/40 bg-white dark:bg-[#0a0a0a] px-3 flex items-center justify-between text-[8px] text-muted-foreground/60 shrink-0 select-none">
+    <div className="h-5 border-t border-border/40 bg-white dark:bg-[#0a0a0a] px-3 flex items-center justify-between text-[9px] text-muted-foreground/60 shrink-0 select-none">
       <div className="flex items-center gap-3">
         <span className="uppercase tracking-wider font-medium">Monoth v0.8</span>
         <span className="hidden sm:inline">ET {etTime}</span>
@@ -81,14 +81,14 @@ export function StatusBar() {
 
         {/* Market status badge */}
         <span
-          className={`hidden sm:inline text-[8px] font-bold uppercase px-1 rounded-sm ${open ? 'bg-green-500/20 text-green-400' : 'bg-muted/50 text-muted-foreground/50'}`}
+          className={`hidden sm:inline text-[9px] font-bold uppercase px-1 rounded-sm ${open ? 'bg-green-500/20 text-green-400' : 'bg-muted/50 text-muted-foreground/50'}`}
         >
           {open ? 'US OPEN' : 'US CLOSED'}
         </span>
 
         {/* Live market indicators */}
         {spy && (
-          <span className="hidden md:inline text-[9px] tabular-nums">
+          <span className="hidden md:inline text-[10px] tabular-nums">
             <span className="text-muted-foreground/50 mr-0.5">SPY</span>
             <span>{fmt(spy.price)}</span>
             <span className={`ml-0.5 ${spy.changePercent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -97,7 +97,7 @@ export function StatusBar() {
           </span>
         )}
         {btc && (
-          <span className="hidden lg:inline text-[9px] tabular-nums">
+          <span className="hidden lg:inline text-[10px] tabular-nums">
             <span className="text-muted-foreground/50 mr-0.5">BTC</span>
             <span>{fmt(btc.price)}</span>
             <span className={`ml-0.5 ${btc.changePercent24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -106,7 +106,7 @@ export function StatusBar() {
           </span>
         )}
         {vix && (
-          <span className="hidden lg:inline text-[9px] tabular-nums">
+          <span className="hidden lg:inline text-[10px] tabular-nums">
             <span className="text-muted-foreground/50 mr-0.5">VIX</span>
             <span className={vixColor}>{fmt(vix.price)}</span>
           </span>

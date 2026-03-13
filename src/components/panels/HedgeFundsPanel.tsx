@@ -69,7 +69,7 @@ export default function HedgeFundsPanel() {
   })
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const strategyData = STRATEGIES.map(s => ({
     ...s,
@@ -153,7 +153,7 @@ export default function HedgeFundsPanel() {
 
       {tab === 'strategies' && (
         <div className="space-y-2">
-          <div className="flex justify-between text-[9px] text-muted-foreground uppercase tracking-wider mb-1">
+          <div className="flex justify-between text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
             <span>Strategy</span>
             <span>YTD / vs S&P</span>
           </div>
@@ -169,7 +169,7 @@ export default function HedgeFundsPanel() {
                     <span className={`text-[11px] tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
                       {isPos ? '+' : ''}{s.ytd.toFixed(1)}%
                     </span>
-                    <span className={`text-[9px] tabular-nums ${vsSpx >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+                    <span className={`text-[10px] tabular-nums ${vsSpx >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                       {vsSpx >= 0 ? '+' : ''}{vsSpx.toFixed(1)} vs S&P
                     </span>
                   </div>
@@ -183,7 +183,7 @@ export default function HedgeFundsPanel() {
               </div>
             )
           })}
-          <p className="text-[9px] text-muted-foreground mt-2">Simulated YTD. S&P ref: +{SP500_YTD}%</p>
+          <p className="text-[10px] text-muted-foreground mt-2">Simulated YTD. S&P ref: +{SP500_YTD}%</p>
         </div>
       )}
 
@@ -215,7 +215,7 @@ export default function HedgeFundsPanel() {
               })}
             </tbody>
           </table>
-          <p className="text-[9px] text-muted-foreground mt-2">Simulated 13F-style institutional ownership</p>
+          <p className="text-[10px] text-muted-foreground mt-2">Simulated 13F-style institutional ownership</p>
         </div>
       )}
 
@@ -228,7 +228,7 @@ export default function HedgeFundsPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>
@@ -245,15 +245,15 @@ export default function HedgeFundsPanel() {
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-1">
             <div>
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">HF Industry AUM</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">HF Industry AUM</span>
               <span className="text-[13px] font-semibold ml-1.5">~$4.5T</span>
             </div>
-            <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${smartMoneyDir === 'ALLOCATING' ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
+            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${smartMoneyDir === 'ALLOCATING' ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
               {smartMoneyDir}
             </span>
           </div>
 
-          <div className="flex items-center justify-between text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
             <span>Monthly Net Flows ($B)</span>
             <span className={`font-medium ${currentMonthFlow.flow >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
               {currentMonthFlow.month}: {currentMonthFlow.flow >= 0 ? '+' : ''}{currentMonthFlow.flow.toFixed(1)}B
@@ -292,12 +292,12 @@ export default function HedgeFundsPanel() {
 
           <div className="flex justify-between mt-0.5">
             {flowData.map((f) => (
-              <span key={f.month} className="flex-1 text-center text-[8px] text-muted-foreground">{f.month}</span>
+              <span key={f.month} className="flex-1 text-center text-[9px] text-muted-foreground">{f.month}</span>
             ))}
           </div>
 
           <div className="mt-2 pt-1.5 border-t border-border/20">
-            <div className="flex items-center justify-between text-[9px] text-muted-foreground uppercase tracking-wider mb-1">
+            <div className="flex items-center justify-between text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
               <span>Cumulative Flow (Jan base)</span>
             </div>
             <div className="flex items-end gap-1 h-6">
@@ -321,25 +321,25 @@ export default function HedgeFundsPanel() {
             </div>
             <div className="flex justify-between mt-0.5">
               {flowWithCumulative.map((f) => (
-                <span key={f.month} className="flex-1 text-center text-[8px] tabular-nums text-muted-foreground">
+                <span key={f.month} className="flex-1 text-center text-[9px] tabular-nums text-muted-foreground">
                   {f.cumulative >= 0 ? '+' : ''}{f.cumulative.toFixed(0)}
                 </span>
               ))}
             </div>
           </div>
-          <p className="text-[9px] text-muted-foreground mt-1">Simulated flows in $B. Smart Money badge based on last 3mo.</p>
+          <p className="text-[10px] text-muted-foreground mt-1">Simulated flows in $B. Smart Money badge based on last 3mo.</p>
         </div>
       )}
 
       {tab === 'crowding' && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Most Crowded HF Positions</span>
-            <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${crowdingRiskBg} ${crowdingRiskColor}`}>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Most Crowded HF Positions</span>
+            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${crowdingRiskBg} ${crowdingRiskColor}`}>
               Crowding Risk: {crowdingRisk}
             </span>
           </div>
-          <div className="flex justify-between text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
+          <div className="flex justify-between text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
             <span>Stock / Theme</span>
             <span>HFs Hold / Score</span>
           </div>
@@ -351,7 +351,7 @@ export default function HedgeFundsPanel() {
                 <div className="flex items-center justify-between mb-0.5">
                   <div>
                     <span className="text-[11px] font-medium">{c.symbol}</span>
-                    <span className="text-muted-foreground ml-1 text-[9px]">{c.theme}</span>
+                    <span className="text-muted-foreground ml-1 text-[10px]">{c.theme}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] tabular-nums text-muted-foreground">{c.hfPct.toFixed(0)}%</span>
@@ -366,7 +366,7 @@ export default function HedgeFundsPanel() {
               </div>
             )
           })}
-          <p className="text-[9px] text-muted-foreground mt-2">Simulated. Score 0-10; higher = more crowded. Red &gt;= 8.</p>
+          <p className="text-[10px] text-muted-foreground mt-2">Simulated. Score 0-10; higher = more crowded. Red &gt;= 8.</p>
         </div>
       )}
     </PanelWrapper>

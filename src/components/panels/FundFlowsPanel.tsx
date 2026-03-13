@@ -116,7 +116,7 @@ function EtfFlowsTab() {
     <div className="space-y-0.5">
       <div className="grid grid-cols-[2fr_3fr_1fr_1fr_1fr] gap-x-1 px-1 mb-1">
         {['Ticker', 'Name', '1D Flow', '1W Flow', 'AUM'].map(h => (
-          <div key={h} className="text-[9px] uppercase tracking-wider text-muted-foreground">{h}</div>
+          <div key={h} className="text-[10px] uppercase tracking-wider text-muted-foreground">{h}</div>
         ))}
       </div>
       {rows.map((etf) => (
@@ -145,8 +145,8 @@ function SectorTab() {
           <div key={s.ticker} className={expanded ? 'space-y-0.5' : ''}>
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0 w-[120px] shrink-0">
-                <span className="text-[9px] font-bold text-foreground w-10 shrink-0">{s.ticker}</span>
-                <span className="text-[9px] text-muted-foreground truncate">{s.sector}</span>
+                <span className="text-[10px] font-bold text-foreground w-10 shrink-0">{s.ticker}</span>
+                <span className="text-[10px] text-muted-foreground truncate">{s.sector}</span>
               </div>
               <div className="flex-1 flex items-center gap-1">
                 {positive ? (
@@ -194,7 +194,7 @@ function ThemesTab() {
     <div className="space-y-0.5">
       <div className="grid grid-cols-[3fr_2fr_1fr_1fr] gap-x-1 px-1 mb-1">
         {['Theme', 'Ticker', '1D Flow', 'YTD Flow'].map(h => (
-          <div key={h} className="text-[9px] uppercase tracking-wider text-muted-foreground">{h}</div>
+          <div key={h} className="text-[10px] uppercase tracking-wider text-muted-foreground">{h}</div>
         ))}
       </div>
       {rows.map((t) => (
@@ -213,7 +213,7 @@ export default function FundFlowsPanel() {
   const [tab, setTab] = useState<'etf' | 'sector' | 'themes'>('etf')
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Fund Flows">

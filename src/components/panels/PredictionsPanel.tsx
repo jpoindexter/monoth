@@ -119,7 +119,7 @@ export default function PredictionsPanel() {
     }`
 
   const catTabCls = (tab: Category) =>
-    `text-[9px] px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+    `text-[10px] px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
       activeCategory === tab
         ? 'bg-foreground text-background font-semibold'
         : 'text-muted-foreground hover:text-foreground'
@@ -139,7 +139,7 @@ export default function PredictionsPanel() {
         {topTab === 'Markets' && (
           <div>
             {data && data.length > 0 && (
-              <div className="text-[9px] text-muted-foreground mb-1.5">
+              <div className="text-[10px] text-muted-foreground mb-1.5">
                 {data.length} markets | {fmtVol(totalVolume)} total volume
               </div>
             )}
@@ -194,7 +194,7 @@ export default function PredictionsPanel() {
                         style={{ width: `${(p.volume / maxVolume) * 100}%` }}
                       />
                     </div>
-                    <span className="text-[9px] text-muted-foreground shrink-0">{fmtVol(p.volume)}</span>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{fmtVol(p.volume)}</span>
                   </div>
                 </div>
               ))}
@@ -223,7 +223,7 @@ export default function PredictionsPanel() {
                       style={{ width: `${p.yesPct}%` }}
                     >
                       {p.yesPct >= 15 && (
-                        <span className="text-[8px] font-bold text-white">Yes {p.yesPct}%</span>
+                        <span className="text-[9px] font-bold text-white">Yes {p.yesPct}%</span>
                       )}
                     </div>
                     <div
@@ -231,7 +231,7 @@ export default function PredictionsPanel() {
                       style={{ width: `${p.noPct}%` }}
                     >
                       {p.noPct >= 15 && (
-                        <span className="text-[8px] font-bold text-white">No {p.noPct}%</span>
+                        <span className="text-[9px] font-bold text-white">No {p.noPct}%</span>
                       )}
                     </div>
                   </div>
@@ -245,7 +245,7 @@ export default function PredictionsPanel() {
                     <span className="text-[10px] text-muted-foreground shrink-0">{fmtVol(p.volume)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] text-muted-foreground">Momentum</span>
+                    <span className="text-[10px] text-muted-foreground">Momentum</span>
                     <span className={`text-[10px] ${momentum.cls}`}>{momentum.label}</span>
                   </div>
                 </div>
@@ -259,50 +259,50 @@ export default function PredictionsPanel() {
             <div className={`grid gap-2 ${expanded ? 'grid-cols-4' : 'grid-cols-3'}`}>
               <div className="rounded-md border border-border/30 p-2 text-center">
                 <div className="text-[18px] font-bold text-foreground">{data?.length ?? 0}</div>
-                <div className="text-[8px] text-muted-foreground uppercase tracking-wide">Markets</div>
+                <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Markets</div>
               </div>
               <div className="rounded-md border border-border/30 p-2 text-center">
                 <div className="text-[18px] font-bold text-foreground">{fmtVol(totalVolume)}</div>
-                <div className="text-[8px] text-muted-foreground uppercase tracking-wide">Volume</div>
+                <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Volume</div>
               </div>
               <div className="rounded-md border border-border/30 p-2 text-center">
                 <div className="text-[18px] font-bold text-emerald-500">{avgYesPct.toFixed(0)}%</div>
-                <div className="text-[8px] text-muted-foreground uppercase tracking-wide">Avg Yes</div>
+                <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Avg Yes</div>
               </div>
               {expanded && (
                 <div className="rounded-md border border-border/30 p-2 text-center">
                   <div className="text-[18px] font-bold text-indigo-400">{avgSpread.toFixed(1)}%</div>
-                  <div className="text-[8px] text-muted-foreground uppercase tracking-wide">Avg Spread</div>
+                  <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Avg Spread</div>
                 </div>
               )}
             </div>
 
             <div className="rounded-md border border-border/30 p-2">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Market Conviction</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Market Conviction</span>
                 <span className={`text-[11px] font-bold ${conviction.cls}`}>{conviction.label}</span>
               </div>
-              <div className="text-[8px] text-muted-foreground">
+              <div className="text-[9px] text-muted-foreground">
                 Avg yes/no spread: {avgSpread.toFixed(1)}%
               </div>
             </div>
 
             <div className="rounded-md border border-border/30 p-2">
-              <div className="text-[9px] text-muted-foreground uppercase tracking-wide mb-2">Volume by Category</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">Volume by Category</div>
               <div className="space-y-1.5">
                 {STAT_CATEGORIES.map((cat) => {
                   const vol = volumeByCategory[cat] ?? 0
                   const pct = maxCatVolume > 0 ? (vol / maxCatVolume) * 100 : 0
                   return (
                     <div key={cat} className="flex items-center gap-2">
-                      <span className="text-[9px] text-muted-foreground w-12 shrink-0">{cat}</span>
+                      <span className="text-[10px] text-muted-foreground w-12 shrink-0">{cat}</span>
                       <div className="flex-1 h-2 rounded-full bg-foreground/10">
                         <div
                           className="h-2 rounded-full bg-indigo-500"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="text-[9px] text-muted-foreground w-10 text-right shrink-0">{fmtVol(vol)}</span>
+                      <span className="text-[10px] text-muted-foreground w-10 text-right shrink-0">{fmtVol(vol)}</span>
                     </div>
                   )
                 })}

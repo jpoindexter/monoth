@@ -145,7 +145,7 @@ export default function CorrelationPanel() {
   }
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const regime = computeRegime()
 
@@ -175,7 +175,7 @@ export default function CorrelationPanel() {
                 const corr = expanded ? STATIC_CORRELATIONS_EXPANDED : STATIC_CORRELATIONS
                 const cellW = expanded ? 48 : 44
                 const cellH = expanded ? 'h-10' : 'h-8'
-                const fontSize = expanded ? 'text-[10px]' : 'text-[9px]'
+                const fontSize = expanded ? 'text-[10px]' : 'text-[10px]'
                 return (
                   <>
                     <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(60px, 1fr) repeat(${assets.length}, ${cellW}px)` }}>
@@ -202,7 +202,7 @@ export default function CorrelationPanel() {
                         </>
                       ))}
                     </div>
-                    <div className="mt-2 text-[9px] text-muted-foreground">Static fallback — live data unavailable</div>
+                    <div className="mt-2 text-[10px] text-muted-foreground">Static fallback — live data unavailable</div>
                   </>
                 )
               })()}
@@ -228,7 +228,7 @@ export default function CorrelationPanel() {
                   </>
                 ))}
               </div>
-              <div className="mt-2 flex items-center gap-2 text-[9px] text-muted-foreground">
+              <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-emerald-600" /> positive</span>
                 <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-red-600" /> negative</span>
               </div>
@@ -244,7 +244,7 @@ export default function CorrelationPanel() {
             const corr = expanded ? STATIC_CORRELATIONS_EXPANDED : STATIC_CORRELATIONS
             const cellW = expanded ? 48 : 44
             const cellH = expanded ? 'h-10' : 'h-8'
-            const fontSize = expanded ? 'text-[10px]' : 'text-[9px]'
+            const fontSize = expanded ? 'text-[10px]' : 'text-[10px]'
             return (
           <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(36px, auto) repeat(${assets.length}, ${cellW}px)` }}>
             <div className="pb-1" />
@@ -272,7 +272,7 @@ export default function CorrelationPanel() {
           </div>
             )
           })()}
-          <div className="mt-2 flex items-center gap-2 text-[9px] text-muted-foreground">
+          <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-emerald-600" /> strong +</span>
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-muted border border-border" /> neutral</span>
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-red-600" /> strong -</span>
@@ -300,7 +300,7 @@ export default function CorrelationPanel() {
                 <tr key={event.id} className="border-t border-border/20">
                   <td className="py-0.5">
                     <div className="font-medium text-foreground">{event.indicator}</div>
-                    <div className="text-[9px] text-muted-foreground">{event.country}</div>
+                    <div className="text-[10px] text-muted-foreground">{event.country}</div>
                   </td>
                   <td className="text-right tabular-nums">{event.actual.toFixed(2)}</td>
                   <td className="text-right tabular-nums text-muted-foreground">{event.expected.toFixed(2)}</td>
@@ -326,7 +326,7 @@ export default function CorrelationPanel() {
 
           {/* Avg correlation bar */}
           <div>
-            <div className="flex justify-between text-[9px] text-muted-foreground mb-0.5">
+            <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
               <span>0.0 — independent</span>
               <span>1.0 — panic</span>
             </div>
@@ -341,14 +341,14 @@ export default function CorrelationPanel() {
           {/* Extremes */}
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-sm bg-muted/40 p-1.5">
-              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Highest pair</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Highest pair</div>
               <div className="text-[11px] font-semibold">{regime.highest.a} / {regime.highest.b}</div>
               <div className={`text-[10px] font-bold tabular-nums ${regime.highest.val >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                 {regime.highest.val >= 0 ? '+' : ''}{regime.highest.val.toFixed(2)}
               </div>
             </div>
             <div className="rounded-sm bg-muted/40 p-1.5">
-              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Lowest pair</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Lowest pair</div>
               <div className="text-[11px] font-semibold">{regime.lowest.a} / {regime.lowest.b}</div>
               <div className={`text-[10px] font-bold tabular-nums ${regime.lowest.val >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                 {regime.lowest.val >= 0 ? '+' : ''}{regime.lowest.val.toFixed(2)}
@@ -358,10 +358,10 @@ export default function CorrelationPanel() {
 
           {/* Diversification score */}
           <div className="rounded-sm bg-muted/40 p-1.5">
-            <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Diversification Score</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Diversification Score</div>
             <div className="flex items-end gap-2">
               <span className="text-2xl font-bold tabular-nums leading-none">{regime.divScore}</span>
-              <span className="text-[9px] text-muted-foreground mb-0.5">/ 100 — higher = better</span>
+              <span className="text-[10px] text-muted-foreground mb-0.5">/ 100 — higher = better</span>
             </div>
             <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted overflow-hidden">
               <div
@@ -371,13 +371,13 @@ export default function CorrelationPanel() {
             </div>
           </div>
 
-          <div className="text-[9px] text-muted-foreground">Based on cross-asset static matrix — 10 unique pairs</div>
+          <div className="text-[10px] text-muted-foreground">Based on cross-asset static matrix — 10 unique pairs</div>
         </div>
       )}
 
       {tab === 'history' && (
         <div>
-          <div className="grid text-[9px] text-muted-foreground font-medium uppercase tracking-wider mb-1"
+          <div className="grid text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1"
             style={{ gridTemplateColumns: 'minmax(64px,1fr) repeat(4, 40px)' }}>
             <div>Pair</div>
             <div className="text-center">1W</div>
@@ -390,14 +390,14 @@ export default function CorrelationPanel() {
               <div key={row.pair} className="grid items-center gap-px" style={{ gridTemplateColumns: 'minmax(64px,1fr) repeat(4, 40px)' }}>
                 <div className="text-[10px] font-semibold">{row.pair}</div>
                 {([row.w1, row.m1, row.m3, row.m6] as number[]).map((val, i) => (
-                  <div key={i} className={`text-center text-[9px] font-semibold tabular-nums rounded-sm py-1 ${rollingCellCls(val)}`}>
+                  <div key={i} className={`text-center text-[10px] font-semibold tabular-nums rounded-sm py-1 ${rollingCellCls(val)}`}>
                     {val >= 0 ? '+' : ''}{val.toFixed(2)}
                   </div>
                 ))}
               </div>
             ))}
           </div>
-          <div className="mt-2 flex items-center gap-2 text-[9px] text-muted-foreground">
+          <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-emerald-600" /> negative (diversifies)</span>
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-red-600" /> positive (no hedge)</span>
           </div>

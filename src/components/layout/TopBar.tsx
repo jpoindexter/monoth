@@ -62,13 +62,13 @@ export function TopBar() {
         ) : (
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-600" />
         )}
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
           {open ? 'Live' : 'Closed'}
         </span>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="ml-2 flex items-center gap-0.5 text-[9px] uppercase tracking-wider text-muted-foreground hover:text-foreground font-medium">
+          <button className="ml-2 flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground font-medium">
             {REGION_LABELS[region]}
             <svg width="6" height="6" viewBox="0 0 6 6" className="ml-0.5 opacity-50"><path d="M0.5 1.5L3 4L5.5 1.5" stroke="currentColor" strokeWidth="1" fill="none"/></svg>
           </button>
@@ -88,7 +88,7 @@ export function TopBar() {
       </DropdownMenu>
       <div className="flex-1" />
       <div className="flex items-center gap-1.5">
-        <kbd className="hidden sm:inline text-[8px] text-muted-foreground/60 bg-muted/50 px-1 py-0.5 rounded font-mono">
+        <kbd className="hidden sm:inline text-[9px] text-muted-foreground/60 bg-muted/50 px-1 py-0.5 rounded font-mono">
           /
         </kbd>
         <button
@@ -111,7 +111,7 @@ export function TopBar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="h-5 w-5 cursor-pointer">
-                <AvatarFallback className="text-[9px]">{initials}</AvatarFallback>
+                <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

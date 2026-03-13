@@ -75,7 +75,7 @@ export default function HeadlinesPanel() {
   const { data, loading, error, refresh } = useNewsData('markets')
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const sourceColorMap = useMemo(() => {
     const map = new Map<string, string>()
@@ -170,12 +170,12 @@ export default function HeadlinesPanel() {
         </div>
         <div className="flex items-center gap-2">
           {uniqueSources > 0 && (
-            <span className="text-[8px] text-muted-foreground/60">
+            <span className="text-[9px] text-muted-foreground/60">
               {uniqueSources} feed{uniqueSources !== 1 ? 's' : ''}
             </span>
           )}
           {breakingCount > 0 && (
-            <span className="text-[8px] font-bold text-red-500 animate-pulse">{breakingCount} NEW</span>
+            <span className="text-[9px] font-bold text-red-500 animate-pulse">{breakingCount} NEW</span>
           )}
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function HeadlinesPanel() {
           <div className="space-y-0">
             {grouped.map(({ label, items }) => (
               <div key={label}>
-                <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30">
                   {label}
                 </div>
                 {items.map((item) => {
@@ -227,7 +227,7 @@ export default function HeadlinesPanel() {
                         )}
                         {cls && (
                           <span
-                            className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                            className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                             style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}
                           >
                             {CATEGORY_LABELS[cls.category]}
@@ -241,7 +241,7 @@ export default function HeadlinesPanel() {
                         <span className={`text-muted-foreground whitespace-nowrap block ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>
                           {relTime(item.published)}
                         </span>
-                        <span className={`text-muted-foreground/60 whitespace-nowrap block ${expanded ? 'text-[10px]' : 'text-[8px]'}`}>
+                        <span className={`text-muted-foreground/60 whitespace-nowrap block ${expanded ? 'text-[10px]' : 'text-[9px]'}`}>
                           {expanded ? extractFullDomain(item.url) : domain}
                         </span>
                       </div>
@@ -264,7 +264,7 @@ export default function HeadlinesPanel() {
               {/* Gauge */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Sentiment Gauge</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Sentiment Gauge</span>
                   <span className={`text-[10px] font-bold tracking-wider ${sentimentLabel(sentimentData.gauge).color}`}>
                     {sentimentLabel(sentimentData.gauge).label}
                   </span>
@@ -276,24 +276,24 @@ export default function HeadlinesPanel() {
                   />
                 </div>
                 <div className="flex justify-between mt-0.5">
-                  <span className="text-[8px] text-red-400">0 Fear</span>
-                  <span className="text-[8px] text-muted-foreground/60">{sentimentData.gauge}</span>
-                  <span className="text-[8px] text-emerald-400">100 Greed</span>
+                  <span className="text-[9px] text-red-400">0 Fear</span>
+                  <span className="text-[9px] text-muted-foreground/60">{sentimentData.gauge}</span>
+                  <span className="text-[9px] text-emerald-400">100 Greed</span>
                 </div>
               </div>
 
               {/* Velocity */}
               <div className="flex items-center justify-between border border-border/30 rounded-sm px-2 py-1">
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Headline Velocity</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Headline Velocity</span>
                 <span className="text-[10px] font-bold text-foreground">
-                  {sentimentData.lastHourCount}<span className="text-[8px] text-muted-foreground font-normal ml-0.5">/hr</span>
+                  {sentimentData.lastHourCount}<span className="text-[9px] text-muted-foreground font-normal ml-0.5">/hr</span>
                 </span>
               </div>
 
               {/* Top positive */}
               {sentimentData.pos.length > 0 && (
                 <div>
-                  <div className="text-[9px] uppercase tracking-wider text-emerald-400 font-bold mb-1">Most Positive</div>
+                  <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold mb-1">Most Positive</div>
                   <div className="space-y-1">
                     {sentimentData.pos.map(({ item }) => (
                       <a
@@ -314,7 +314,7 @@ export default function HeadlinesPanel() {
               {/* Top negative */}
               {sentimentData.neg.length > 0 && (
                 <div>
-                  <div className="text-[9px] uppercase tracking-wider text-red-400 font-bold mb-1">Most Negative</div>
+                  <div className="text-[10px] uppercase tracking-wider text-red-400 font-bold mb-1">Most Negative</div>
                   <div className="space-y-1">
                     {sentimentData.neg.map(({ item }) => (
                       <a
@@ -345,9 +345,9 @@ export default function HeadlinesPanel() {
             <>
               {/* Diversity score */}
               <div className="flex items-center justify-between border border-border/30 rounded-sm px-2 py-1">
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Source Diversity Score</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Source Diversity Score</span>
                 <span className="text-[10px] font-bold text-foreground">
-                  {sourcesData.diversity}<span className="text-[8px] text-muted-foreground font-normal ml-0.5">/100</span>
+                  {sourcesData.diversity}<span className="text-[9px] text-muted-foreground font-normal ml-0.5">/100</span>
                 </span>
               </div>
 
@@ -357,7 +357,7 @@ export default function HeadlinesPanel() {
                   <div key={domain}>
                     <div className="flex items-center justify-between mb-0.5">
                       <span className="text-[10px] text-foreground font-medium truncate max-w-[70%]">{domain}</span>
-                      <span className="text-[9px] text-muted-foreground">{count}</span>
+                      <span className="text-[10px] text-muted-foreground">{count}</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-zinc-700/40 overflow-hidden">
                       <div

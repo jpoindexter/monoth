@@ -249,7 +249,7 @@ function MarketBar() {
       transition={{ duration: 0.4 }}
     >
       <div className="max-w-7xl mx-auto flex items-center gap-6 justify-center flex-wrap">
-        <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest hidden sm:block">Live</span>
+        <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest hidden sm:block">Live</span>
         {tickers.map((t) => {
           const up = t.changePercent >= 0
           return (
@@ -262,7 +262,7 @@ function MarketBar() {
             </div>
           )
         })}
-        <span className="text-[9px] font-mono text-zinc-700 hidden sm:block">Delayed data</span>
+        <span className="text-[10px] font-mono text-zinc-700 hidden sm:block">Delayed data</span>
       </div>
     </motion.div>
   )

@@ -126,7 +126,7 @@ export default function InsiderTradingPanel() {
               <tr key={i} className="border-t border-border/20">
                 {type === 'mixed' && (
                   <td className="py-0.5">
-                    <span className={`px-1 rounded-sm text-[9px] font-semibold ${isBuy ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
+                    <span className={`px-1 rounded-sm text-[10px] font-semibold ${isBuy ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
                       {t.transactionType}
                     </span>
                   </td>
@@ -136,7 +136,7 @@ export default function InsiderTradingPanel() {
                   {expanded ? t.name : t.name.split(' ')[1]}
                 </td>
                 {expanded && (
-                  <td className="py-0.5 text-right text-muted-foreground text-[9px]">{t.title}</td>
+                  <td className="py-0.5 text-right text-muted-foreground text-[10px]">{t.title}</td>
                 )}
                 <td className="py-0.5 text-right tabular-nums">{fmtShares(t.shares)}</td>
                 {expanded && (
@@ -157,7 +157,7 @@ export default function InsiderTradingPanel() {
   return (
     <PanelWrapper title="Insider Trading">
       <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
-        <span className="text-[8px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real filings</span>
+        <span className="text-[9px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real filings</span>
       </div>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'buys')} onClick={() => setTab('buys')}>Buys</button>
@@ -168,8 +168,8 @@ export default function InsiderTradingPanel() {
       {tab === 'buys' && (
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Insider Purchases</span>
-            <span className="text-[9px] text-emerald-500 font-medium">{buys.length} filings</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Insider Purchases</span>
+            <span className="text-[10px] text-emerald-500 font-medium">{buys.length} filings</span>
           </div>
           {renderRows(expanded ? buys : buys.slice(0, 8), 'buy')}
         </div>
@@ -178,8 +178,8 @@ export default function InsiderTradingPanel() {
       {tab === 'sells' && (
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Insider Sales</span>
-            <span className="text-[9px] text-red-500 font-medium">{sells.length} filings</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Insider Sales</span>
+            <span className="text-[10px] text-red-500 font-medium">{sells.length} filings</span>
           </div>
           {renderRows(expanded ? sells : sells.slice(0, 8), 'sell')}
         </div>
@@ -188,8 +188,8 @@ export default function InsiderTradingPanel() {
       {tab === 'recent' && (
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">All Filings (Last 30d)</span>
-            <span className="text-[9px] text-muted-foreground">{recent.length} total</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">All Filings (Last 30d)</span>
+            <span className="text-[10px] text-muted-foreground">{recent.length} total</span>
           </div>
           {renderRows(expanded ? recent : recent.slice(0, 10), 'mixed')}
         </div>

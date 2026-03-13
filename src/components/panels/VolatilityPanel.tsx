@@ -62,7 +62,7 @@ export default function VolatilityPanel() {
   }, [tab])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const activeStrikes = expanded ? STRIKES_EXPANDED : STRIKES
   const activeMonths = expanded ? MONTHS_EXPANDED : MONTHS
@@ -148,9 +148,9 @@ export default function VolatilityPanel() {
         <div className="space-y-3">
           {/* Vol surface heatmap */}
           <div>
-            <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1.5">IV Surface</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">IV Surface</div>
             <div className="overflow-x-auto">
-              <table className="text-[9px]">
+              <table className="text-[10px]">
                 <thead>
                   <tr>
                     <td className="w-7 pr-1" />
@@ -162,11 +162,11 @@ export default function VolatilityPanel() {
                 <tbody>
                   {surface.map((row) => (
                     <tr key={row.month}>
-                      <td className="text-muted-foreground font-medium pr-1 text-[9px]">{row.month}</td>
+                      <td className="text-muted-foreground font-medium pr-1 text-[10px]">{row.month}</td>
                       {row.values.map((iv, ci) => (
                         <td key={ci} className="pb-0.5 pr-0.5">
                           <div
-                            className="w-11 h-7 text-[9px] tabular-nums font-semibold rounded-sm flex items-center justify-center"
+                            className="w-11 h-7 text-[10px] tabular-nums font-semibold rounded-sm flex items-center justify-center"
                             style={{ backgroundColor: ivColor(iv, minIv, maxIv), color: '#fff' }}
                           >
                             {iv.toFixed(1)}
@@ -182,7 +182,7 @@ export default function VolatilityPanel() {
 
           {/* Skew indicator */}
           <div className="border-t border-border/20 pt-2">
-            <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Skew (1M)</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Skew (1M)</div>
             <div className="flex items-baseline gap-2">
               <span className="text-[12px] font-semibold tabular-nums">{skew.toFixed(1)} pts</span>
               <span className={`text-[10px] font-medium ${skewColor}`}>{skewLabel}</span>
@@ -191,7 +191,7 @@ export default function VolatilityPanel() {
 
           {/* VIX 52-week range */}
           <div className="border-t border-border/20 pt-2">
-            <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1.5">VIX 52-Week Range</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">VIX 52-Week Range</div>
             <div className="relative">
               <div className="h-3 rounded-full bg-muted/30 relative overflow-visible">
                 <div
@@ -200,9 +200,9 @@ export default function VolatilityPanel() {
                 />
               </div>
               <div className="flex justify-between mt-1">
-                <span className="text-[9px] text-muted-foreground tabular-nums">{VIX_RANGE.low52}</span>
-                <span className="text-[9px] font-semibold tabular-nums">{vixSpot.toFixed(1)} ({pct}th pct)</span>
-                <span className="text-[9px] text-muted-foreground tabular-nums">{VIX_RANGE.high52}</span>
+                <span className="text-[10px] text-muted-foreground tabular-nums">{VIX_RANGE.low52}</span>
+                <span className="text-[10px] font-semibold tabular-nums">{vixSpot.toFixed(1)} ({pct}th pct)</span>
+                <span className="text-[10px] text-muted-foreground tabular-nums">{VIX_RANGE.high52}</span>
               </div>
             </div>
           </div>

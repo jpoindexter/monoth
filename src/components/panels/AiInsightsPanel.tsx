@@ -119,7 +119,7 @@ function ThemesTab() {
       {dominant && dominant.count > 0 && (
         <div className="flex items-center gap-1.5">
           <span
-            className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-[2px]"
+            className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-[2px]"
             style={{ backgroundColor: `${THEME_COLORS[dominant.theme]}25`, color: THEME_COLORS[dominant.theme] }}
           >
             Dominant Narrative
@@ -139,7 +139,7 @@ function ThemesTab() {
                 <div className="flex items-center gap-1">
                   <span className={`text-foreground/80 ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{theme}</span>
                   <span
-                    className="text-[8px] font-medium"
+                    className="text-[9px] font-medium"
                     style={{
                       color: trend === 'rising' ? '#22c55e' : trend === 'falling' ? '#ef4444' : '#6b7280',
                     }}
@@ -147,7 +147,7 @@ function ThemesTab() {
                     {trend === 'rising' ? '▲' : trend === 'falling' ? '▼' : '—'}
                   </span>
                 </div>
-                <span className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{count} stories</span>
+                <span className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{count} stories</span>
               </div>
               <div className={`w-full bg-border/20 rounded-[2px] overflow-hidden ${expanded ? 'h-2.5' : 'h-1.5'}`}>
                 <div
@@ -247,9 +247,9 @@ function RisksTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-1.5">
-        <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Risk Level</span>
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Risk Level</span>
         <span
-          className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-[2px]"
+          className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-[2px]"
           style={{
             backgroundColor: `${compositeLevelColor(level)}20`,
             color: compositeLevelColor(level),
@@ -268,7 +268,7 @@ function RisksTab() {
             <div key={risk}>
               <div className="flex items-center justify-between mb-0.5">
                 <span className={`text-foreground/80 ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{risk}</span>
-                <span className={`tabular-nums font-medium ${expanded ? 'text-[11px]' : 'text-[9px]'}`} style={{ color }}>
+                <span className={`tabular-nums font-medium ${expanded ? 'text-[11px]' : 'text-[10px]'}`} style={{ color }}>
                   {score.toFixed(1)}/10
                 </span>
               </div>
@@ -283,7 +283,7 @@ function RisksTab() {
         })}
       </div>
 
-      <div className="text-[9px] text-muted-foreground">
+      <div className="text-[10px] text-muted-foreground">
         Scores derived from {(headlines ?? []).length} headlines. Scale 0–10.
       </div>
     </div>
@@ -342,12 +342,12 @@ function SentimentTab() {
       <div className="flex flex-col items-center py-2">
         <span className={`font-bold tabular-nums ${expanded ? 'text-5xl' : 'text-3xl'}`} style={{ color }}>{score}</span>
         <span className={`uppercase tracking-wider font-bold mt-0.5 ${expanded ? 'text-[13px]' : 'text-[10px]'}`} style={{ color }}>{label}</span>
-        <span className="text-[9px] text-muted-foreground mt-0.5">{(headlines ?? []).length} headlines analyzed</span>
+        <span className="text-[10px] text-muted-foreground mt-0.5">{(headlines ?? []).length} headlines analyzed</span>
       </div>
 
       {categoryBreakdown.length > 0 && (
         <div>
-          <div className="text-[9px] text-muted-foreground mb-1 uppercase tracking-wider">Category breakdown</div>
+          <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider">Category breakdown</div>
           <div className="flex h-2 w-full rounded-sm overflow-hidden">
             {categoryBreakdown.map(({ cat, count }) => (
               <div
@@ -364,7 +364,7 @@ function SentimentTab() {
             {categoryBreakdown.slice(0, 6).map(({ cat, count }) => (
               <div key={cat} className="flex items-center gap-0.5">
                 <div className="w-1.5 h-1.5 rounded-[1px]" style={{ backgroundColor: CATEGORY_COLORS[cat] ?? '#6b7280' }} />
-                <span className="text-[9px] text-muted-foreground">{CATEGORY_LABELS[cat]} {count}</span>
+                <span className="text-[10px] text-muted-foreground">{CATEGORY_LABELS[cat]} {count}</span>
               </div>
             ))}
           </div>
@@ -373,12 +373,12 @@ function SentimentTab() {
 
       {topThreats.length > 0 && (
         <div>
-          <div className="text-[9px] text-muted-foreground mb-1 uppercase tracking-wider">Top threats</div>
+          <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider">Top threats</div>
           <div className="space-y-1">
             {(expanded ? topThreats : topThreats.slice(0, 3)).map((t, i) => (
               <div key={i} className="flex items-start gap-1.5">
                 <span
-                  className="text-[8px] font-bold uppercase px-1 py-0.5 rounded-[2px] shrink-0 mt-px"
+                  className="text-[9px] font-bold uppercase px-1 py-0.5 rounded-[2px] shrink-0 mt-px"
                   style={{
                     backgroundColor: t.level === 'critical' ? '#ef444420' : '#f9731620',
                     color: t.level === 'critical' ? '#ef4444' : '#f97316',
@@ -501,7 +501,7 @@ export default function AiInsightsPanel() {
         <div>
           {!isPro && (
             <div className="mb-2">
-              <div className="text-[9px] text-muted-foreground mb-1">Anthropic API key (stored locally)</div>
+              <div className="text-[10px] text-muted-foreground mb-1">Anthropic API key (stored locally)</div>
               <input
                 type="password"
                 placeholder="sk-ant-..."

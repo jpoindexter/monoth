@@ -75,7 +75,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <button
                     key={cat.label}
                     onClick={() => setCategory(cat.label)}
-                    className={`text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${
+                    className={`text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${
                       category === cat.label
                         ? 'bg-foreground text-background'
                         : 'text-muted-foreground hover:text-foreground'

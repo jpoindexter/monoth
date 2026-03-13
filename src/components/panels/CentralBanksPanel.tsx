@@ -62,7 +62,7 @@ function ActionBadge({ dir }: { dir: 'cut' | 'hold' | 'hike' }) {
       ? 'bg-red-500/20 text-red-500'
       : 'bg-muted text-muted-foreground'
   return (
-    <span className={`text-[8px] font-bold uppercase px-1 py-px rounded-sm ${cls}`}>
+    <span className={`text-[9px] font-bold uppercase px-1 py-px rounded-sm ${cls}`}>
       {dir}
     </span>
   )
@@ -125,7 +125,7 @@ export default function CentralBanksPanel() {
   }, [sigLoading, signals, tab])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const maxRate = Math.max(...CENTRAL_BANKS.map((b) => b.rate))
 
@@ -174,7 +174,7 @@ export default function CentralBanksPanel() {
               <div key={bank.name} className="space-y-0.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[8px] font-bold bg-foreground/10 text-foreground px-1 py-px rounded-sm tabular-nums">
+                    <span className="text-[9px] font-bold bg-foreground/10 text-foreground px-1 py-px rounded-sm tabular-nums">
                       {CURRENCY_BADGE[bank.currency]}
                     </span>
                     <span className={`font-medium ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{bank.name}</span>
@@ -185,13 +185,13 @@ export default function CentralBanksPanel() {
                     <Arrow dir={dir} />
                     {expanded ? (
                       <div className="text-right">
-                        <div className="text-[9px] text-muted-foreground tabular-nums">{bank.next} ({days}d)</div>
-                        <div className={`text-[9px] tabular-nums font-medium ${dir === 'cut' ? 'text-emerald-500' : dir === 'hike' ? 'text-red-500' : 'text-muted-foreground'}`}>
+                        <div className="text-[10px] text-muted-foreground tabular-nums">{bank.next} ({days}d)</div>
+                        <div className={`text-[10px] tabular-nums font-medium ${dir === 'cut' ? 'text-emerald-500' : dir === 'hike' ? 'text-red-500' : 'text-muted-foreground'}`}>
                           {dir !== 'hold' ? `${changeBps > 0 ? '+' : ''}${changeBps}bps from ${bank.prev.toFixed(2)}%` : `Held at ${bank.prev.toFixed(2)}%`}
                         </div>
                       </div>
                     ) : (
-                      <span className="text-[9px] text-muted-foreground tabular-nums">{bank.next} ({days}d)</span>
+                      <span className="text-[10px] text-muted-foreground tabular-nums">{bank.next} ({days}d)</span>
                     )}
                   </div>
                 </div>
@@ -220,11 +220,11 @@ export default function CentralBanksPanel() {
                 className="flex items-center justify-between py-1 border-b border-border/20 last:border-0"
               >
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] tabular-nums font-medium text-muted-foreground w-12 shrink-0">{bank.next}</span>
+                  <span className="text-[10px] tabular-nums font-medium text-muted-foreground w-12 shrink-0">{bank.next}</span>
                   <span className="text-[11px] font-medium">{bank.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] text-muted-foreground tabular-nums">{days}d</span>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">{days}d</span>
                   <ActionBadge dir={dir} />
                 </div>
               </div>
@@ -272,7 +272,7 @@ export default function CentralBanksPanel() {
                     ))}
                   </div>
                   {isMedian && (
-                    <span className="text-[8px] font-bold uppercase tracking-wider text-amber-500 ml-1">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-amber-500 ml-1">
                       Median
                     </span>
                   )}
@@ -305,13 +305,13 @@ export default function CentralBanksPanel() {
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-1 pb-1.5 border-b border-border/20">
             <div>
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Global Liquidity</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Global Liquidity</span>
               <div className="text-[14px] font-bold tabular-nums">
                 ~${GLOBAL_LIQUIDITY_USD.toFixed(1)}T
               </div>
             </div>
             <div className="text-right">
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground block">QT Overall</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">QT Overall</span>
               <span className="text-[10px] font-bold text-yellow-500 uppercase tracking-wider">Steady</span>
             </div>
           </div>
@@ -322,7 +322,7 @@ export default function CentralBanksPanel() {
               <div key={b.name} className="space-y-0.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[8px] font-bold bg-foreground/10 text-foreground px-1 py-px rounded-sm">
+                    <span className="text-[9px] font-bold bg-foreground/10 text-foreground px-1 py-px rounded-sm">
                       {b.currency}
                     </span>
                     <span className="text-[11px] font-medium">{b.name}</span>
@@ -335,7 +335,7 @@ export default function CentralBanksPanel() {
                     <span className="text-muted-foreground tabular-nums">
                       peak {b.currency !== 'USD' ? b.currency + ' ' : '$'}{b.peak}{b.unit}
                     </span>
-                    <span className={`font-bold uppercase text-[8px] tracking-wider ${QT_PACE_COLORS[b.qtPace]}`}>
+                    <span className={`font-bold uppercase text-[9px] tracking-wider ${QT_PACE_COLORS[b.qtPace]}`}>
                       {b.qtPace}
                     </span>
                   </div>
@@ -348,7 +348,7 @@ export default function CentralBanksPanel() {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-[8px] text-muted-foreground">
+                <div className="flex justify-between text-[9px] text-muted-foreground">
                   <span>QT progress: {100 - pct}% drawn down</span>
                   <span>{pct}% of peak</span>
                 </div>
@@ -367,7 +367,7 @@ export default function CentralBanksPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>

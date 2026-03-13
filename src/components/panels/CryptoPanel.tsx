@@ -82,7 +82,7 @@ export default function CryptoPanel() {
   }, [tab])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Crypto" loading={loading} error={error} onRetry={refresh}>
@@ -184,12 +184,12 @@ export default function CryptoPanel() {
       {tab === 'defi' && (
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Total DeFi TVL</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Total DeFi TVL</span>
             <span className="text-[11px] font-semibold tabular-nums">${DEFI_TOTAL.toFixed(1)}B</span>
           </div>
 
           <div className="space-y-0.5">
-            <div className="flex gap-1 text-[9px] text-muted-foreground mb-1">
+            <div className="flex gap-1 text-[10px] text-muted-foreground mb-1">
               {CHAIN_BREAKDOWN.map(c => (
                 <span key={c.label} className="flex items-center gap-0.5">
                   <span className={`inline-block w-1.5 h-1.5 rounded-sm ${c.color}`} />
@@ -244,7 +244,7 @@ export default function CryptoPanel() {
         return (
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Fear &amp; Greed Proxy</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Fear &amp; Greed Proxy</span>
               <span className={`text-[11px] font-bold ${fgColor}`}>{fgLabel}</span>
             </div>
 
@@ -266,12 +266,12 @@ export default function CryptoPanel() {
               ))}
             </div>
 
-            <div className="border-t border-border/20 pt-2 flex justify-between text-[9px] text-muted-foreground">
+            <div className="border-t border-border/20 pt-2 flex justify-between text-[10px] text-muted-foreground">
               <span>Total MCap (top 15)</span>
               <span className="tabular-nums">{fmtCap(totalMcap)}</span>
             </div>
 
-            <div className="flex items-center gap-1 text-[9px]">
+            <div className="flex items-center gap-1 text-[10px]">
               <span className="text-muted-foreground">BTC dominance</span>
               <span className={`font-medium ${btcPct > 50 ? 'text-orange-500' : 'text-muted-foreground'}`}>
                 {btcPct.toFixed(1)}%

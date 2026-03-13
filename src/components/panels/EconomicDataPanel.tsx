@@ -242,7 +242,7 @@ function TrendsTab({ data, expanded }: { data: FredSeries[]; expanded: boolean }
               <div className="flex items-center justify-between mb-0.5">
                 <span className={`font-medium text-foreground ${expanded ? 'text-[12px]' : 'text-[11px] truncate max-w-[120px]'}`}>{s.name}</span>
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[9px] font-medium ${aa.cls}`}>{aa.text}</span>
+                  <span className={`text-[10px] font-medium ${aa.cls}`}>{aa.text}</span>
                   <span className={`tabular-nums text-foreground ${expanded ? 'text-[13px] font-bold' : 'text-[11px]'}`}>{s.value.toFixed(2)}</span>
                 </div>
               </div>
@@ -256,8 +256,8 @@ function TrendsTab({ data, expanded }: { data: FredSeries[]; expanded: boolean }
                 <div className="absolute left-1/2 top-0 w-px h-full bg-border/60" />
               </div>
               <div className="flex justify-between mt-0.5">
-                <span className="text-[8px] text-muted-foreground/60 tabular-nums">{range.min.toFixed(1)}</span>
-                <span className="text-[8px] text-muted-foreground/60 tabular-nums">{range.max.toFixed(1)}</span>
+                <span className="text-[9px] text-muted-foreground/60 tabular-nums">{range.min.toFixed(1)}</span>
+                <span className="text-[9px] text-muted-foreground/60 tabular-nums">{range.max.toFixed(1)}</span>
               </div>
             </div>
           )
@@ -313,7 +313,7 @@ function SurprisesTab() {
               <span className="text-[10px] text-muted-foreground tabular-nums flex-1">
                 A: {entry.actual} <span className="text-muted-foreground/50">/ E: {entry.estimate}</span>
               </span>
-              <span className={`text-[8px] font-bold uppercase px-1 rounded-sm bg-muted ${valCls} shrink-0`}>{label}</span>
+              <span className={`text-[9px] font-bold uppercase px-1 rounded-sm bg-muted ${valCls} shrink-0`}>{label}</span>
             </div>
           )
         })}
@@ -344,7 +344,7 @@ export default function EconomicDataPanel() {
   }, [loading, data, tab])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const calEvents: DayGroup[] =
     calData && calData.length > 0 ? groupByDay(calData) : STATIC_EVENTS
@@ -413,7 +413,7 @@ export default function EconomicDataPanel() {
                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${impactDot(evt.impact)}`} />
                     <span className="text-[11px] text-muted-foreground tabular-nums w-16 shrink-0">{evt.time}</span>
                     <span className={`text-[11px] text-foreground flex-1 ${expanded ? '' : 'truncate'}`}>{evt.name}</span>
-                    <span className="text-[8px] font-bold uppercase px-1 rounded-sm bg-muted text-muted-foreground shrink-0">
+                    <span className="text-[9px] font-bold uppercase px-1 rounded-sm bg-muted text-muted-foreground shrink-0">
                       {evt.country}
                     </span>
                   </div>

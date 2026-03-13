@@ -286,7 +286,7 @@ function CountdownBadge({ date, time, released }: { date: string; time: string; 
   const val = useCountdown(date, time)
   if (released) return null
   return (
-    <span className="text-[9px] font-mono text-yellow-400 bg-yellow-500/10 px-1.5 py-0.5 rounded-sm">
+    <span className="text-[10px] font-mono text-yellow-400 bg-yellow-500/10 px-1.5 py-0.5 rounded-sm">
       {val}
     </span>
   )
@@ -302,7 +302,7 @@ function EventRow({ event, showCountdown }: { event: EconEvent; showCountdown?: 
           <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-0.5 ${IMPACT_DOT[event.impact]}`} />
           <div className="min-w-0">
             <div className="text-[10px] font-medium text-foreground leading-tight truncate">{event.event}</div>
-            <div className="text-[9px] text-muted-foreground">
+            <div className="text-[10px] text-muted-foreground">
               {event.country} · {event.time} ET
             </div>
           </div>
@@ -320,12 +320,12 @@ function EventRow({ event, showCountdown }: { event: EconEvent; showCountdown?: 
       </div>
       <div className="flex gap-3 mt-0.5 pl-3">
         {event.estimate && (
-          <div className="text-[9px] text-muted-foreground">
+          <div className="text-[10px] text-muted-foreground">
             Est: <span className="text-foreground/70">{event.estimate}</span>
           </div>
         )}
         {event.previous && (
-          <div className="text-[9px] text-muted-foreground">
+          <div className="text-[10px] text-muted-foreground">
             Prev: <span className="text-foreground/70">{event.previous}</span>
           </div>
         )}
@@ -357,10 +357,10 @@ function UpcomingTab({ events }: { events: EconEvent[] }) {
     <div className="space-y-2">
       {Object.entries(grouped).map(([date, evts]) => (
         <div key={date}>
-          <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
             {fmtDate(date)}
             {isToday(date) && (
-              <span className="text-[8px] font-bold bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded-sm">TODAY</span>
+              <span className="text-[9px] font-bold bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded-sm">TODAY</span>
             )}
           </div>
           <div className="space-y-0.5">
@@ -408,7 +408,7 @@ function HighImpactTab({ events }: { events: EconEvent[] }) {
           <div className="flex items-center justify-between gap-1">
             <div className="min-w-0">
               <div className="text-[10px] font-medium text-foreground truncate">{e.event}</div>
-              <div className="text-[9px] text-muted-foreground">
+              <div className="text-[10px] text-muted-foreground">
                 {fmtDate(e.date)} · {e.time} ET · {e.country}
               </div>
             </div>
@@ -416,7 +416,7 @@ function HighImpactTab({ events }: { events: EconEvent[] }) {
               {e.actual ? (
                 <span className="text-[10px] font-bold tabular-nums text-red-400">{e.actual}</span>
               ) : (
-                <div className="text-[9px] text-muted-foreground">
+                <div className="text-[10px] text-muted-foreground">
                   {e.estimate ? `Est: ${e.estimate}` : 'TBD'}
                 </div>
               )}
@@ -425,12 +425,12 @@ function HighImpactTab({ events }: { events: EconEvent[] }) {
           {expanded && (e.estimate || e.previous) && (
             <div className="flex gap-3 mt-0.5 pl-0">
               {e.estimate && (
-                <div className="text-[9px] text-muted-foreground">
+                <div className="text-[10px] text-muted-foreground">
                   Est: <span className="text-foreground/70">{e.estimate}</span>
                 </div>
               )}
               {e.previous && (
-                <div className="text-[9px] text-muted-foreground">
+                <div className="text-[10px] text-muted-foreground">
                   Prev: <span className="text-foreground/70">{e.previous}</span>
                 </div>
               )}
@@ -465,7 +465,7 @@ export default function EconomicCalendarPanel() {
   const highCount = events.filter(e => e.impact === 'high' && isWithinDays(e.date, 14)).length
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Economic Calendar" loading={loading} error={error && !data ? error : null} onRetry={refresh}>
@@ -478,7 +478,7 @@ export default function EconomicCalendarPanel() {
           High Impact{highCount > 0 ? ` (${highCount})` : ''}
         </button>
         {error && data && (
-          <span className="ml-auto text-[8px] text-muted-foreground/50">mock</span>
+          <span className="ml-auto text-[9px] text-muted-foreground/50">mock</span>
         )}
       </div>
 

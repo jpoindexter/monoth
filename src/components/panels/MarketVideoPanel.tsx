@@ -109,7 +109,7 @@ function ChannelVideos({ channelId, channelName, expanded }: { channelId: string
         href={`https://www.youtube.com/channel/${channelId}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-[9px] text-blue-400 hover:text-blue-300 mt-1 block"
+        className="text-[10px] text-blue-400 hover:text-blue-300 mt-1 block"
       >
         Latest on YouTube →
       </a>
@@ -126,11 +126,11 @@ function ChannelVideos({ channelId, channelName, expanded }: { channelId: string
             href={v.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[9px] text-foreground hover:text-blue-400 line-clamp-1 block leading-snug"
+            className="text-[10px] text-foreground hover:text-blue-400 line-clamp-1 block leading-snug"
           >
             {v.title}
           </a>
-          <span className="text-[8px] text-muted-foreground">{timeAgo(v.published)}</span>
+          <span className="text-[9px] text-muted-foreground">{timeAgo(v.published)}</span>
           {expanded && (
             <div className="mt-1 mb-1">
               <iframe
@@ -153,7 +153,7 @@ export default function MarketVideoPanel() {
   const [tab, setTab] = useState<Tab>('latest')
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const sortedShows = [...SHOWS].sort((a, b) => a.freqOrder - b.freqOrder)
 
@@ -173,13 +173,13 @@ export default function MarketVideoPanel() {
               <div className="flex items-start justify-between gap-1">
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-medium text-foreground leading-tight">{ch.name}</div>
-                  <div className="text-[9px] text-muted-foreground">{ch.desc}</div>
+                  <div className="text-[10px] text-muted-foreground">{ch.desc}</div>
                 </div>
                 <a
                   href={`https://www.youtube.com/channel/${ch.channelId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[9px] text-blue-400 hover:text-blue-300 shrink-0"
+                  className="text-[10px] text-blue-400 hover:text-blue-300 shrink-0"
                 >
                   Channel
                 </a>
@@ -196,10 +196,10 @@ export default function MarketVideoPanel() {
             <div key={show.id} className="flex items-start justify-between gap-1">
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-medium text-foreground leading-tight">{show.name}</div>
-                <div className="text-[9px] text-muted-foreground truncate">{show.host}</div>
-                <div className="text-[9px] text-muted-foreground">{show.topic}</div>
+                <div className="text-[10px] text-muted-foreground truncate">{show.host}</div>
+                <div className="text-[10px] text-muted-foreground">{show.topic}</div>
               </div>
-              <span className={`text-[8px] font-medium px-1 py-0.5 rounded-sm shrink-0 ${freqColors[show.freq] ?? 'bg-muted text-muted-foreground'}`}>
+              <span className={`text-[9px] font-medium px-1 py-0.5 rounded-sm shrink-0 ${freqColors[show.freq] ?? 'bg-muted text-muted-foreground'}`}>
                 {show.freq}
               </span>
             </div>
@@ -213,10 +213,10 @@ export default function MarketVideoPanel() {
             <div key={v.id} className="border-t border-border/20 pt-1.5 first:border-t-0 first:pt-0">
               <div className={`text-[10px] font-medium text-foreground leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{v.title}</div>
               <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                <span className={`text-muted-foreground ${expanded ? 'text-[10px] font-medium' : 'text-[9px]'}`}>{v.channel}</span>
-                <span className="text-[9px] text-muted-foreground">{v.views}</span>
-                <span className="text-[9px] text-muted-foreground">{v.time}</span>
-                <span className={`text-[8px] px-1 py-0 rounded-sm ${topicColors[v.topic] ?? 'bg-muted text-muted-foreground'}`}>
+                <span className={`text-muted-foreground ${expanded ? 'text-[10px] font-medium' : 'text-[10px]'}`}>{v.channel}</span>
+                <span className="text-[10px] text-muted-foreground">{v.views}</span>
+                <span className="text-[10px] text-muted-foreground">{v.time}</span>
+                <span className={`text-[9px] px-1 py-0 rounded-sm ${topicColors[v.topic] ?? 'bg-muted text-muted-foreground'}`}>
                   {v.topic}
                 </span>
               </div>
@@ -231,7 +231,7 @@ export default function MarketVideoPanel() {
             <div key={track.id}>
               <div className="flex items-center justify-between mb-0.5">
                 <span className="text-[10px] font-medium text-foreground">{track.name}</span>
-                <span className={`text-[8px] font-medium px-1 py-0 rounded-sm ${diffColors[track.difficulty]}`}>
+                <span className={`text-[9px] font-medium px-1 py-0 rounded-sm ${diffColors[track.difficulty]}`}>
                   {track.difficulty}
                 </span>
               </div>
@@ -242,9 +242,9 @@ export default function MarketVideoPanel() {
                     style={{ width: `${track.progress}%` }}
                   />
                 </div>
-                <span className="text-[9px] text-muted-foreground shrink-0">{track.videos} videos</span>
+                <span className="text-[10px] text-muted-foreground shrink-0">{track.videos} videos</span>
               </div>
-              <div className="text-[9px] text-muted-foreground mt-0.5">{track.progress}% complete</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">{track.progress}% complete</div>
             </div>
           ))}
         </div>

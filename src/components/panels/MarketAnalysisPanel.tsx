@@ -158,7 +158,7 @@ export default function MarketAnalysisPanel() {
   }, [sectorData])
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Market Analysis" loading={newsLoading && evLoading} error={error} onRetry={refresh}>
@@ -178,7 +178,7 @@ export default function MarketAnalysisPanel() {
               <div key={`${ev.event}-${i}`} className="flex items-center justify-between py-1 border-b border-border/20 last:border-0">
                 <div className="flex-1 min-w-0">
                   <span className={`font-medium block ${expanded ? 'text-[13px]' : 'text-[11px] truncate'}`}>{ev.event}</span>
-                  <span className="text-[9px] text-muted-foreground">{ev.date}</span>
+                  <span className="text-[10px] text-muted-foreground">{ev.date}</span>
                 </div>
                 <div className="text-right shrink-0 ml-2">
                   <span className="text-[10px] tabular-nums text-muted-foreground">
@@ -206,7 +206,7 @@ export default function MarketAnalysisPanel() {
                 className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
-                    <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
+                    <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
                       style={{ backgroundColor: THREAT_COLORS[cls.level], color: '#fff' }}>
                       {CATEGORY_LABELS[cls.category]}
                     </span>
@@ -227,7 +227,7 @@ export default function MarketAnalysisPanel() {
               <div key={src.name} className="space-y-0.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-muted-foreground">{src.name}</span>
-                  <span className={`text-[9px] font-bold uppercase ${SIGNAL_TEXT[src.signal]}`}>{src.signal}</span>
+                  <span className={`text-[10px] font-bold uppercase ${SIGNAL_TEXT[src.signal]}`}>{src.signal}</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-border/30">
                   <div className={`h-2 rounded-full ${SIGNAL_COLORS[src.signal]} transition-all`}
@@ -260,7 +260,7 @@ export default function MarketAnalysisPanel() {
                   {rotationResult.spread > 0 ? 'RISK-ON ROTATION' : 'RISK-OFF ROTATION'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                 <span>Cyclical {rotationResult.cyclicalAvg >= 0 ? '+' : ''}{rotationResult.cyclicalAvg.toFixed(2)}%</span>
                 <span className="tabular-nums">Spread {rotationResult.spread >= 0 ? '+' : ''}{rotationResult.spread.toFixed(2)}%</span>
                 <span>Defensive {rotationResult.defensiveAvg >= 0 ? '+' : ''}{rotationResult.defensiveAvg.toFixed(2)}%</span>
@@ -283,14 +283,14 @@ export default function MarketAnalysisPanel() {
           <div className="space-y-3">
             {/* Moving Averages */}
             <div className="space-y-1.5">
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Moving Averages</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Moving Averages</span>
               {[{ label: '50 DMA', level: DMA_50 }, { label: '200 DMA', level: DMA_200 }].map(({ label, level }) => {
                 const above = SPY_PRICE > level
                 return (
                   <div key={label} className="flex items-center justify-between">
                     <span className="text-[10px] text-muted-foreground w-16">{label}</span>
                     <span className="text-[10px] tabular-nums font-medium">${level}</span>
-                    <span className={`text-[9px] font-bold px-1.5 py-px rounded-sm ${above ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
+                    <span className={`text-[10px] font-bold px-1.5 py-px rounded-sm ${above ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
                       SPY {above ? `+$${(SPY_PRICE - level).toFixed(0)}` : `-$${(level - SPY_PRICE).toFixed(0)}`}
                     </span>
                   </div>
@@ -301,10 +301,10 @@ export default function MarketAnalysisPanel() {
             {/* RSI Gauge */}
             <div className="space-y-1 pt-2 border-t border-border/30">
               <div className="flex items-center justify-between">
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">RSI (14)</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">RSI (14)</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] tabular-nums font-medium">{RSI}</span>
-                  <span className={`text-[9px] text-muted-foreground`}>{rsiLabel}</span>
+                  <span className={`text-[10px] text-muted-foreground`}>{rsiLabel}</span>
                 </div>
               </div>
               <div className="relative h-2 w-full rounded-full bg-border/30">
@@ -313,7 +313,7 @@ export default function MarketAnalysisPanel() {
                 <div className="absolute inset-y-0 left-[70%] w-px bg-border/60" />
                 <div className={`h-2 rounded-full ${rsiColor} transition-all`} style={{ width: `${rsiPct}%` }} />
               </div>
-              <div className="flex justify-between text-[8px] text-muted-foreground">
+              <div className="flex justify-between text-[9px] text-muted-foreground">
                 <span>Oversold 30</span>
                 <span>Neutral</span>
                 <span>70 Overbought</span>
@@ -322,8 +322,8 @@ export default function MarketAnalysisPanel() {
 
             {/* MACD */}
             <div className="flex items-center justify-between pt-2 border-t border-border/30">
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">MACD</span>
-              <span className={`text-[9px] font-bold px-1.5 py-px rounded-sm ${MACD_POSITIVE ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">MACD</span>
+              <span className={`text-[10px] font-bold px-1.5 py-px rounded-sm ${MACD_POSITIVE ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
                 {MACD_POSITIVE ? 'POSITIVE CROSSOVER' : 'NEGATIVE CROSSOVER'}
               </span>
             </div>
@@ -331,7 +331,7 @@ export default function MarketAnalysisPanel() {
             {/* Levels */}
             <div className="pt-2 border-t border-border/30 grid grid-cols-2 gap-x-3 gap-y-1">
               <div>
-                <span className="text-[9px] uppercase tracking-wider text-emerald-600 block mb-1">Support</span>
+                <span className="text-[10px] uppercase tracking-wider text-emerald-600 block mb-1">Support</span>
                 {SUPPORT_LEVELS.map((lvl) => (
                   <div key={lvl} className="flex items-center justify-between">
                     <div className="h-1 flex-1 mr-2 rounded-full bg-emerald-500/20">
@@ -342,7 +342,7 @@ export default function MarketAnalysisPanel() {
                 ))}
               </div>
               <div>
-                <span className="text-[9px] uppercase tracking-wider text-red-500 block mb-1">Resistance</span>
+                <span className="text-[10px] uppercase tracking-wider text-red-500 block mb-1">Resistance</span>
                 {RESISTANCE_LEVELS.map((lvl) => (
                   <div key={lvl} className="flex items-center justify-between">
                     <div className="h-1 flex-1 mr-2 rounded-full bg-red-500/20">
@@ -386,7 +386,7 @@ export default function MarketAnalysisPanel() {
                       </div>
                       <div className="flex items-center gap-1 w-16 justify-end">
                         <span className={`text-[10px] tabular-nums font-medium ${pos ? 'text-emerald-600' : 'text-red-500'}`}>{fmt(item.flow)}</span>
-                        <span className={`text-[9px] ${pos ? 'text-emerald-600' : 'text-red-500'}`}>{pos ? '▲' : '▼'}</span>
+                        <span className={`text-[10px] ${pos ? 'text-emerald-600' : 'text-red-500'}`}>{pos ? '▲' : '▼'}</span>
                       </div>
                     </div>
                   </div>
@@ -400,7 +400,7 @@ export default function MarketAnalysisPanel() {
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Risk Appetite</span>
                 <span className={`text-[13px] font-bold ${SIGNAL_TEXT[riskAppetite]}`}>{riskAppetite.toUpperCase()}</span>
               </div>
-              <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                 <span>Equity flows {totalEquity >= 0 ? '+' : ''}${totalEquity.toFixed(1)}B</span>
                 <span>Money Mkt +${moneyMkt.toFixed(1)}B</span>
               </div>

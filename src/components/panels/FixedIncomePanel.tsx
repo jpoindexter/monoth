@@ -107,7 +107,7 @@ export default function FixedIncomePanel() {
   const curveColor = isInverted ? '#ef4444' : '#059669'
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Fixed Income" loading={loading && etfLoading} error={error} onRetry={refresh}>
@@ -150,7 +150,7 @@ export default function FixedIncomePanel() {
           </table>
           {chartData && chartData.length > 0 && (
             <div className="mt-2 border-t border-border/20 pt-2">
-              <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Yield Curve</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Yield Curve</div>
               <ResponsiveContainer width="100%" height={expanded ? 300 : 80}>
                 <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                   <XAxis dataKey="maturity" tick={{ fontSize: expanded ? 11 : 9 }} tickLine={false} axisLine={false} />
@@ -218,7 +218,7 @@ export default function FixedIncomePanel() {
               <div key={s.label} className="flex items-center justify-between py-1 border-b border-border/20 last:border-0">
                 <div>
                   <span className="text-[11px] font-medium">{s.label}</span>
-                  <span className={`ml-2 text-[9px] font-medium uppercase tracking-wider ${
+                  <span className={`ml-2 text-[10px] font-medium uppercase tracking-wider ${
                     s.signal === 'Inverted' ? 'text-red-500' : s.signal === 'Flat' ? 'text-yellow-500' : 'text-emerald-600'
                   }`}>{s.signal}</span>
                 </div>
@@ -232,7 +232,7 @@ export default function FixedIncomePanel() {
             <p className="text-[10px] text-muted-foreground">Loading yield data...</p>
           )}
           <div className="mt-2 pt-2 border-t border-border/20">
-            <p className="text-[9px] text-muted-foreground leading-relaxed">
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
               Inverted curves (negative spread) historically signal recession risk.
               The 10Y-2Y spread is the most widely watched recession indicator.
             </p>
@@ -282,7 +282,7 @@ export default function FixedIncomePanel() {
               <span className={`text-[11px] tabular-nums font-medium ${isInverted ? 'text-red-500' : 'text-emerald-600'}`}>
                 {spread210 > 0 ? '+' : ''}{spread210.toFixed(2)}%
               </span>
-              <span className={`ml-auto text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${
+              <span className={`ml-auto text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${
                 isInverted ? 'bg-red-500/15 text-red-500' : 'bg-emerald-600/15 text-emerald-600'
               }`}>
                 {isInverted ? 'Inverted' : 'Normal'}
@@ -296,7 +296,7 @@ export default function FixedIncomePanel() {
         return (
           <div>
             <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-border/20">
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Total Upcoming Issuance</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Total Upcoming Issuance</span>
               <span className="text-[11px] font-semibold tabular-nums">${totalIssuance}B</span>
             </div>
             <table className="w-full text-[11px]">
@@ -337,8 +337,8 @@ export default function FixedIncomePanel() {
         return (
           <div>
             <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-border/20">
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Real Rate Regime</span>
-              <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${regimeColor}`}>{regime}</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Real Rate Regime</span>
+              <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${regimeColor}`}>{regime}</span>
             </div>
             <div className="space-y-2">
               {REAL_RATES.map((r) => {
@@ -363,7 +363,7 @@ export default function FixedIncomePanel() {
                         style={{ width: `${realPct}%` }}
                       />
                     </div>
-                    <div className="flex gap-3 text-[8px] text-muted-foreground">
+                    <div className="flex gap-3 text-[9px] text-muted-foreground">
                       <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-1 rounded-sm bg-foreground/20" />Nominal</span>
                       <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-1 rounded-sm bg-amber-500" />Real</span>
                     </div>
@@ -372,7 +372,7 @@ export default function FixedIncomePanel() {
               })}
             </div>
             <div className="mt-2 pt-2 border-t border-border/20">
-              <p className="text-[9px] text-muted-foreground leading-relaxed">
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
                 Real rates derived from nominal yield minus TIPS breakeven. RESTRICTIVE above 2%, NEUTRAL 0-2%, ACCOMMODATIVE below 0%.
               </p>
             </div>

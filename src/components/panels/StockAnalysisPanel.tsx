@@ -87,7 +87,7 @@ export default function StockAnalysisPanel() {
   })
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -142,7 +142,7 @@ export default function StockAnalysisPanel() {
         />
         <button
           type="submit"
-          className="h-5 px-2 text-[9px] uppercase tracking-wider font-medium rounded-sm bg-foreground text-background hover:opacity-80"
+          className="h-5 px-2 text-[10px] uppercase tracking-wider font-medium rounded-sm bg-foreground text-background hover:opacity-80"
         >
           Analyze
         </button>
@@ -181,7 +181,7 @@ export default function StockAnalysisPanel() {
           </div>
 
           <div>
-            <div className="flex justify-between text-[9px] text-muted-foreground mb-0.5">
+            <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
               <span>RSI(14)</span>
               <span className={`font-medium ${rsiColor(rsi)}`}>{rsi.toFixed(1)}</span>
             </div>
@@ -193,7 +193,7 @@ export default function StockAnalysisPanel() {
               <div className="absolute top-0 h-full w-px bg-yellow-400/60" style={{ left: '30%' }} />
               <div className="absolute top-0 h-full w-px bg-red-400/60" style={{ left: '70%' }} />
             </div>
-            <div className="flex justify-between text-[8px] text-muted-foreground mt-0.5">
+            <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
               <span>Oversold</span>
               <span>Neutral</span>
               <span>Overbought</span>
@@ -202,7 +202,7 @@ export default function StockAnalysisPanel() {
 
           {(bullish.length > 0 || expanded) && (
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Bullish factors</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Bullish factors</div>
               {bullish.length === 0
                 ? <div className="text-[10px] text-muted-foreground">None</div>
                 : bullish.map(f => (
@@ -215,7 +215,7 @@ export default function StockAnalysisPanel() {
 
           {(risks.length > 0 || expanded) && (
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Risk factors</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Risk factors</div>
               {risks.length === 0
                 ? <div className="text-[10px] text-muted-foreground">None</div>
                 : risks.map(f => (

@@ -120,7 +120,7 @@ export default function WatchlistPanel() {
   }, 0)
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Watchlist" loading={loading && watchlist.length > 0} error={error} onRetry={refresh}>
@@ -221,19 +221,19 @@ export default function WatchlistPanel() {
                           />
                           <button
                             onClick={() => createAlert(sym, 'above')}
-                            className="text-[9px] px-1 py-0.5 bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-sm hover:bg-emerald-500/30"
+                            className="text-[10px] px-1 py-0.5 bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-sm hover:bg-emerald-500/30"
                           >
                             Above
                           </button>
                           <button
                             onClick={() => createAlert(sym, 'below')}
-                            className="text-[9px] px-1 py-0.5 bg-red-500/20 text-red-700 dark:text-red-400 rounded-sm hover:bg-red-500/30"
+                            className="text-[10px] px-1 py-0.5 bg-red-500/20 text-red-700 dark:text-red-400 rounded-sm hover:bg-red-500/30"
                           >
                             Below
                           </button>
                           <button
                             onClick={() => setAlertOpen(null)}
-                            className="text-[9px] text-muted-foreground hover:text-foreground"
+                            className="text-[10px] text-muted-foreground hover:text-foreground"
                           >
                             ✕
                           </button>
@@ -243,7 +243,7 @@ export default function WatchlistPanel() {
                   )}
                   {alerts.filter((a) => a.symbol === sym).map((a) => (
                     <tr key={`alert-${a.id}`}>
-                      <td colSpan={4} className={`text-[9px] px-1 pb-0.5 ${a.triggered ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
+                      <td colSpan={4} className={`text-[10px] px-1 pb-0.5 ${a.triggered ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
                         <div className="flex items-center justify-between">
                           <span>{a.triggered ? '✓' : '○'} {a.direction} ${a.targetPrice.toFixed(2)}</span>
                           <button

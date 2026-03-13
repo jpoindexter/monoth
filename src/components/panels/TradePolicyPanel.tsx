@@ -135,7 +135,7 @@ export default function TradePolicyPanel() {
   const { data: newsData, loading, error, refresh } = useNewsData('regulation')
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const tariffRows = expanded ? TARIFFS : TARIFFS.slice(0, 5)
   const newsItems = expanded ? newsData : newsData?.slice(0, 8)
@@ -153,11 +153,11 @@ export default function TradePolicyPanel() {
         <div className="space-y-0">
           {expanded && (
             <div className="grid grid-cols-[auto_2rem_auto_3rem_auto] gap-x-2 pb-1 border-b border-border/30 mb-0.5">
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Pair</span>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground text-right tabular-nums">Rate</span>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Sector</span>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Status</span>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Impact</span>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Pair</span>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground text-right tabular-nums">Rate</span>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Sector</span>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Status</span>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Impact</span>
             </div>
           )}
           {tariffRows.map((t) => {
@@ -169,22 +169,22 @@ export default function TradePolicyPanel() {
                   <span className={`font-bold tabular-nums shrink-0 ${t.rate >= 100 ? 'text-red-500 text-[11px]' : t.rate >= 25 ? 'text-amber-500 text-[10px]' : 'text-yellow-400 text-[10px]'}`}>
                     {t.rate}%
                   </span>
-                  <span className="text-[9px] text-muted-foreground shrink-0">{t.sector}</span>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{t.sector}</span>
                   <span className="ml-auto shrink-0">
-                    <span className="text-[8px] font-bold uppercase px-1 py-px rounded-sm leading-none"
+                    <span className="text-[9px] font-bold uppercase px-1 py-px rounded-sm leading-none"
                       style={{ backgroundColor: badge.bg, color: badge.text }}>
                       {t.status}
                     </span>
                   </span>
                 </div>
                 {expanded && (
-                  <div className="text-[9px] text-muted-foreground mt-0.5 pl-0">{t.impact}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 pl-0">{t.impact}</div>
                 )}
               </div>
             )
           })}
           {!expanded && (
-            <div className="text-[9px] text-muted-foreground pt-1">{TARIFFS.length - tariffRows.length} more rows — expand panel</div>
+            <div className="text-[10px] text-muted-foreground pt-1">{TARIFFS.length - tariffRows.length} more rows — expand panel</div>
           )}
         </div>
       )}
@@ -199,18 +199,18 @@ export default function TradePolicyPanel() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-[10px] font-semibold text-foreground">{r.measure}</span>
-                      <span className="text-[8px] font-bold uppercase px-1 py-px rounded-sm leading-none shrink-0"
+                      <span className="text-[9px] font-bold uppercase px-1 py-px rounded-sm leading-none shrink-0"
                         style={{ backgroundColor: badge.bg, color: badge.text }}>
                         {r.status}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[9px] text-muted-foreground">{r.countries}</span>
-                      <span className="text-[8px] text-muted-foreground/60">·</span>
-                      <span className="text-[9px] text-muted-foreground">{r.sector}</span>
+                      <span className="text-[10px] text-muted-foreground">{r.countries}</span>
+                      <span className="text-[9px] text-muted-foreground/60">·</span>
+                      <span className="text-[10px] text-muted-foreground">{r.sector}</span>
                     </div>
                     {expanded && (
-                      <div className="text-[9px] text-muted-foreground/80 mt-0.5 italic">{r.detail}</div>
+                      <div className="text-[10px] text-muted-foreground/80 mt-0.5 italic">{r.detail}</div>
                     )}
                   </div>
                 </div>
@@ -232,12 +232,12 @@ export default function TradePolicyPanel() {
                   <span className="text-[10px] text-foreground font-medium">{f.label}</span>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-[10px] font-bold tabular-nums text-foreground">{val}</span>
-                    <span className="text-[9px] text-muted-foreground">{f.sub}</span>
+                    <span className="text-[10px] text-muted-foreground">{f.sub}</span>
                     <span className="text-[10px] font-bold" style={{ color }}>{arrow}</span>
                   </div>
                 </div>
                 {expanded && (
-                  <div className="text-[9px] text-muted-foreground mt-0.5">{f.detail}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{f.detail}</div>
                 )}
               </div>
             )
@@ -253,7 +253,7 @@ export default function TradePolicyPanel() {
               <div className="flex-1 min-w-0">
                 <span className={`font-medium leading-snug text-foreground ${expanded ? 'text-[13px]' : 'text-[11px] line-clamp-2'}`}>{item.title}</span>
                 {item.source && (
-                  <div className="text-[9px] text-muted-foreground mt-0.5">{item.source}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{item.source}</div>
                 )}
               </div>
               <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>

@@ -127,10 +127,10 @@ function UpgradesTab({ entries, expanded }: { entries: RatingEntry[]; expanded: 
   return (
     <div className="space-y-0.5">
       <div className="flex items-center gap-1.5 pb-1">
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground w-[44px]">Ticker</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground flex-1">Firm</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground text-right w-[80px]">Change</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground tabular-nums text-right w-[34px]">PT</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[44px]">Ticker</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground flex-1">Firm</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground text-right w-[80px]">Change</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground tabular-nums text-right w-[34px]">PT</span>
       </div>
       {rows.map((e, i) => {
         const tag = e.action === 'Initiate' ? 'INIT' : 'UP'
@@ -140,7 +140,7 @@ function UpgradesTab({ entries, expanded }: { entries: RatingEntry[]; expanded: 
             <span className={`text-[10px] flex-1 truncate ${expanded ? '' : 'max-w-[90px]'}`}>
               {expanded ? e.firm : e.firmShort}
             </span>
-            <span className="text-[9px] text-right w-[80px] shrink-0 tabular-nums">
+            <span className="text-[10px] text-right w-[80px] shrink-0 tabular-nums">
               <span className={ratingColor(e.fromRating)}>{e.fromRating.replace('Outperform','Outperf')}</span>
               <span className="text-muted-foreground/50"> → </span>
               <span className="text-emerald-500 font-medium">{e.toRating.replace('Outperform','Outperf')}</span>
@@ -160,10 +160,10 @@ function DowngradesTab({ entries, expanded }: { entries: RatingEntry[]; expanded
   return (
     <div className="space-y-0.5">
       <div className="flex items-center gap-1.5 pb-1">
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground w-[44px]">Ticker</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground flex-1">Firm</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground text-right w-[80px]">Change</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground tabular-nums text-right w-[34px]">PT</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[44px]">Ticker</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground flex-1">Firm</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground text-right w-[80px]">Change</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground tabular-nums text-right w-[34px]">PT</span>
       </div>
       {rows.length === 0 && (
         <div className="py-4 text-center text-[10px] text-muted-foreground">No downgrades today.</div>
@@ -174,7 +174,7 @@ function DowngradesTab({ entries, expanded }: { entries: RatingEntry[]; expanded
           <span className={`text-[10px] flex-1 truncate ${expanded ? '' : 'max-w-[90px]'}`}>
             {expanded ? e.firm : e.firmShort}
           </span>
-          <span className="text-[9px] text-right w-[80px] shrink-0 tabular-nums">
+          <span className="text-[10px] text-right w-[80px] shrink-0 tabular-nums">
             <span className={ratingColor(e.fromRating)}>{e.fromRating.replace('Outperform','Outperf')}</span>
             <span className="text-muted-foreground/50"> → </span>
             <span className="text-red-500 font-medium">{e.toRating.replace('Outperform','Outperf')}</span>
@@ -194,10 +194,10 @@ function TargetsTab({ entries, expanded }: { entries: RatingEntry[]; expanded: b
   return (
     <div className="space-y-0.5">
       <div className="flex items-center gap-1.5 pb-1">
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground w-[44px]">Ticker</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground flex-1">Firm</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground text-right w-[80px]">Old → New</span>
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground text-right w-[36px]">Chg</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[44px]">Ticker</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground flex-1">Firm</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground text-right w-[80px]">Old → New</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground text-right w-[36px]">Chg</span>
       </div>
       {rows.map((e, i) => {
         const chg = ptChangePct(e.priceTarget, e.prevTarget)
@@ -229,12 +229,12 @@ export default function AnalystRatingsPanel() {
   const [tab, setTab] = useState<Tab>('upgrades')
 
   const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Analyst Ratings">
       <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
-        <span className="text-[8px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real ratings</span>
+        <span className="text-[9px] text-yellow-500/80 uppercase tracking-wider">Simulated data · not real ratings</span>
       </div>
       <div className="flex gap-1 mb-2 flex-wrap">
         <button className={tabCls(tab === 'upgrades')} onClick={() => setTab('upgrades')}>Upgrades</button>
