@@ -1,13 +1,35 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
+import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
 const ENERGY_SYMBOLS = ['USO', 'UNG', 'XLE', 'ICLN', 'TAN', 'URA']
 const ENERGY_NAMES: Record<string, string> = {
   USO: 'Crude Oil', UNG: 'Nat Gas', XLE: 'Energy ETF', ICLN: 'Clean Energy', TAN: 'Solar', URA: 'Uranium',
+}
+
+const CHART_SYMBOLS = ['USO', 'UNG', 'XLE']
+
+const ENERGY_MIX = [
+  { name: 'Oil', pct: 31, color: '#1f2937' },
+  { name: 'Natural Gas', pct: 24, color: '#3b82f6' },
+  { name: 'Coal', pct: 15, color: '#6b7280' },
+  { name: 'Nuclear', pct: 10, color: '#8b5cf6' },
+  { name: 'Hydro', pct: 7, color: '#06b6d4' },
+  { name: 'Wind', pct: 5, color: '#10b981' },
+  { name: 'Solar', pct: 4, color: '#f59e0b' },
+  { name: 'Other', pct: 4, color: '#94a3b8' },
+]
+
+function seededPrice(name: string, base: number, range: number): number {
+  const day = new Date().toISOString().slice(0, 10)
+  let hash = 0
+  for (const ch of name + day) hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0
+  return base + ((Math.abs(hash) % 1000) / 1000 - 0.5) * range * 2
 }
 
 function relTime(ts: number): string {
@@ -18,8 +40,14 @@ function relTime(ts: number): string {
   return `${Math.floor(diff / 86400)}d`
 }
 
+const tabCls = (active: boolean) =>
+  `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+
 export default function EnergyPanel() {
-  const [tab, setTab] = useState<'prices' | 'news'>('news')
+  const [tab, setTab] = useState<'prices' | 'mix' | 'chart' | 'news'>('news')
+  const [chartSymbol, setChartSymbol] = useState('USO')
+  const [chartData, setChartData] = useState<CandleData[]>([])
+
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('energy')
   const { data: priceData, loading: priceLoading } = usePolling({
     fetcher: useCallback(() => fetchQuotes(ENERGY_SYMBOLS), []),
@@ -27,13 +55,23 @@ export default function EnergyPanel() {
     enabled: tab === 'prices',
   })
 
-  const tabCls = (active: boolean) =>
-    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+  useEffect(() => {
+    if (tab === 'chart') {
+      fetchCandles(chartSymbol).then(setChartData).catch(() => {})
+    }
+  }, [tab, chartSymbol])
+
+  const wti = seededPrice('WTI', 77, 7)
+  const brent = wti + seededPrice('BrentSpread', 4, 1)
+  const henryHub = seededPrice('HenryHub', 3, 1)
+  const ttf = seededPrice('EUTTF', 32.5, 7.5)
 
   return (
     <PanelWrapper title="Energy" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'prices')} onClick={() => setTab('prices')}>Prices</button>
+        <button className={tabCls(tab === 'mix')} onClick={() => setTab('mix')}>Mix</button>
+        <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
@@ -51,6 +89,7 @@ export default function EnergyPanel() {
               <tr><td colSpan={3} className="py-3 text-center text-muted-foreground text-[10px]">No data available. Try News tab.</td></tr>
             )}
             {priceData?.map((p) => {
+              if (p.price == null) return null
               const isPos = (p.changePercent ?? 0) >= 0
               return (
                 <tr key={p.symbol} className="border-t border-border/20">
@@ -67,6 +106,68 @@ export default function EnergyPanel() {
             })}
           </tbody>
         </table>
+      )}
+
+      {tab === 'mix' && (
+        <div className="flex flex-col gap-3">
+          <div className="h-5 rounded-full overflow-hidden flex w-full">
+            {ENERGY_MIX.map((src) => (
+              <div
+                key={src.name}
+                style={{ width: `${src.pct}%`, backgroundColor: src.color }}
+                title={`${src.name}: ${src.pct}%`}
+              />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+            {ENERGY_MIX.map((src) => (
+              <div key={src.name} className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: src.color }} />
+                <span className="text-[10px] text-muted-foreground">{src.name}</span>
+                <span className="text-[10px] tabular-nums font-medium text-foreground ml-auto">{src.pct}%</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-border/20 pt-2 grid grid-cols-2 gap-x-4 gap-y-2">
+            {[
+              { label: 'WTI Crude', value: wti, unit: '/bbl' },
+              { label: 'Brent Crude', value: brent, unit: '/bbl' },
+              { label: 'Henry Hub', value: henryHub, unit: '/MMBtu' },
+              { label: 'EU TTF Gas', value: ttf, unit: '/MWh' },
+            ].map(({ label, value, unit }) => (
+              <div key={label}>
+                <div className="text-[9px] text-muted-foreground">{label}</div>
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-[12px] tabular-nums font-bold text-foreground">${value.toFixed(2)}</span>
+                  <span className="text-[9px] text-muted-foreground">{unit}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tab === 'chart' && (
+        <div>
+          <div className="flex gap-1 mb-1">
+            {CHART_SYMBOLS.map((sym) => (
+              <button
+                key={sym}
+                className={`text-[8px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+                onClick={() => setChartSymbol(sym)}
+              >
+                {sym}
+              </button>
+            ))}
+          </div>
+          <LightweightChart
+            type="candlestick"
+            data={chartData}
+            height={140}
+          />
+        </div>
       )}
 
       {tab === 'news' && (
