@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { cors } from '../_cors'
-import { cached } from '../_cache'
+import { cors } from '../_cors.js'
+import { cached } from '../_cache.js'
 
 const DEFAULT_SERIES = ['CPIAUCSL', 'GDP', 'UNRATE', 'FEDFUNDS', 'DGS10', 'DGS2', 'DGS30', 'DTWEXBGS']
 

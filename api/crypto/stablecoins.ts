@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { cors } from '../_cors'
-import { cached } from '../_cache'
+import { cors } from '../_cors.js'
+import { cached } from '../_cache.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return

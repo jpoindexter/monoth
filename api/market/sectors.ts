@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { cors } from '../_cors'
-import { cached } from '../_cache'
+import { cors } from '../_cors.js'
+import { cached } from '../_cache.js'
 
 const SECTOR_ETFS = [
   { symbol: 'XLK', name: 'Technology' },

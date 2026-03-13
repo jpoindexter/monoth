@@ -1,13 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { cors } from '../_cors'
-import { cached } from '../_cache'
+import { cors } from '../_cors.js'
+import { cached } from '../_cache.js'
 
 function getYesterday(): string {
   const d = new Date()
   d.setDate(d.getDate() - 1)
   if (d.getDay() === 0) d.setDate(d.getDate() - 2)
   if (d.getDay() === 6) d.setDate(d.getDate() - 1)
-  return d.toISOString().split('T')[0]
+  return d.toISOString().split('T')[0]!
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -18,12 +18,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         fetch('https://api.frankfurter.app/latest?from=USD').then((r) => r.json()),
         fetch(`https://api.frankfurter.app/${getYesterday()}?from=USD`).then((r) => r.json()),
       ])
-      return Object.entries(latest.rates).map(([currency, rate]) => {
+      return Object.entries(latest.rates as Record<string, number>).map(([currency, rate]) => {
         const prevRate = (yesterday.rates as Record<string, number>)[currency] ?? rate
-        const change = (rate as number) - prevRate
+        const change = rate - prevRate
         return {
           pair: `USD/${currency}`,
-          rate: rate as number,
+          rate,
           change,
           changePercent: prevRate ? (change / prevRate) * 100 : 0,
           timestamp: Date.now(),

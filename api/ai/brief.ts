@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { cached } from '../_cache'
+import { cached } from '../_cache.js'
 
 const ALLOWED_ORIGINS = [
   /^https?:\/\/.*\.monoth\.app$/,

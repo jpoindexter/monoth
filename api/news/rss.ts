@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { XMLParser } from 'fast-xml-parser'
-import { cors } from '../_cors'
-import { cached } from '../_cache'
-import { FEED_URLS } from './_feed-urls'
+import { cors } from '../_cors.js'
+import { cached } from '../_cache.js'
+import { FEED_URLS } from './_feed-urls.js'
 
 const parser = new XMLParser({ ignoreAttributes: false })
 
