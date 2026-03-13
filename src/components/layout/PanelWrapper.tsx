@@ -6,7 +6,7 @@ interface PanelWrapperProps {
   title: string
   children?: React.ReactNode
   loading?: boolean
-  error?: string
+  error?: string | null
   onRetry?: () => void
 }
 

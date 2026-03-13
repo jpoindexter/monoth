@@ -10,7 +10,7 @@ export function usePolling<T>({ fetcher, interval, enabled = true }: UsePollingO
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const timerRef = useRef<ReturnType<typeof setInterval>>()
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined)
 
   const refresh = useCallback(async () => {
     try {
