@@ -1,31 +1,24 @@
-import { useMemo } from 'react'
 import { usePanelStore } from '@/stores'
-import { useLayoutStore } from '@/stores'
 import { PanelRenderer } from '@/components/panels'
 
 export function PanelGrid() {
   const { enabledPanels } = usePanelStore()
-  const { layoutLocked } = useLayoutStore()
-
   const panels = enabledPanels()
 
-  const gridStyle: React.CSSProperties = useMemo(() => ({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '8px',
-    padding: '8px',
-  }), [])
-
   return (
-    <div style={gridStyle}>
+    <div
+      className="flex-1 overflow-auto"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gridAutoRows: 'minmax(200px, 280px)',
+        gridAutoFlow: 'row dense',
+        gap: '4px',
+        padding: '4px',
+      }}
+    >
       {panels.map((p) => (
-        <div
-          key={p.id}
-          style={{
-            minHeight: '80px',
-            pointerEvents: layoutLocked ? 'none' : 'auto',
-          }}
-        >
+        <div key={p.id} className="min-h-0 overflow-hidden">
           <PanelRenderer panelId={p.id} panelName={p.name} />
         </div>
       ))}

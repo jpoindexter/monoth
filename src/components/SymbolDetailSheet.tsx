@@ -38,7 +38,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                   {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 {change !== null && (
-                  <span className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                  <span className={`text-sm font-medium ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
                     {isPositive ? '+' : ''}{change.toFixed(2)}%
                   </span>
                 )}

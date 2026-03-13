@@ -5,6 +5,8 @@ export type PanelId =
   | 'ipos-earnings' | 'derivatives-news' | 'fintech-news'
   | 'regulation' | 'hedge-funds-news' | 'market-analysis-news'
   | 'btc-etf' | 'stablecoins'
+  | 'geopolitics' | 'real-estate' | 'energy'
+  | 'volatility' | 'bond-news'
   | 'watchlist' | 'ai-insights' | 'export'
 
 export type PanelTier = 1 | 2 | 3

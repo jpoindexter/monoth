@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { Button } from '@/components/ui/button'

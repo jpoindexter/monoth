@@ -1,37 +1,49 @@
-
+import { useState } from 'react'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useForexData } from '@/hooks/use-forex-data'
 
+const MAJOR_CURRENCIES = ['EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD']
+
 export default function ForexPanel() {
+  const [tab, setTab] = useState<'major' | 'all'>('major')
   const { data, loading, error, refresh } = useForexData()
 
+  const filtered = tab === 'major'
+    ? data?.filter((rate) => MAJOR_CURRENCIES.some((c) => rate.pair.includes(c)))
+    : data
+
+  const tabCls = (active: boolean) =>
+    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+
   return (
-    <PanelWrapper title="Forex & Currencies" loading={loading} error={error} onRetry={refresh}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-xs">Pair</TableHead>
-            <TableHead className="text-xs text-right">Rate</TableHead>
-            <TableHead className="text-xs text-right">Change</TableHead>
-            <TableHead className="text-xs text-right">Change %</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data?.map((rate) => (
-            <TableRow key={rate.pair}>
-              <TableCell className="text-xs font-medium">{rate.pair}</TableCell>
-              <TableCell className="text-xs text-right font-mono">{rate.rate.toFixed(4)}</TableCell>
-              <TableCell className={`text-xs text-right font-mono ${rate.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {rate.change >= 0 ? '+' : ''}{rate.change.toFixed(4)}
-              </TableCell>
-              <TableCell className={`text-xs text-right font-mono ${rate.changePercent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {rate.changePercent >= 0 ? '+' : ''}{rate.changePercent.toFixed(2)}%
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <PanelWrapper title="Forex" loading={loading} error={error} onRetry={refresh}>
+      <div className="flex gap-1 mb-2">
+        <button className={tabCls(tab === 'major')} onClick={() => setTab('major')}>Major</button>
+        <button className={tabCls(tab === 'all')} onClick={() => setTab('all')}>All</button>
+      </div>
+      <table className="w-full text-[11px]">
+        <thead>
+          <tr className="text-muted-foreground">
+            <th className="text-left font-medium pb-1.5">Pair</th>
+            <th className="text-right font-medium pb-1.5">Rate</th>
+            <th className="text-right font-medium pb-1.5">Chg%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered?.map((rate) => {
+            const isPositive = rate.changePercent >= 0
+            return (
+              <tr key={rate.pair} className="border-t border-border/20">
+                <td className="py-1 font-medium">{rate.pair}</td>
+                <td className="text-right tabular-nums">{rate.rate.toFixed(4)}</td>
+                <td className={`text-right tabular-nums font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {isPositive ? '+' : ''}{rate.changePercent.toFixed(2)}%
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
     </PanelWrapper>
   )
 }

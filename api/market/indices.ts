@@ -2,14 +2,15 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
 
+// Finnhub free tier doesn't support index symbols -- use ETF proxies
 const INDICES = [
-  { symbol: '^GSPC', name: 'S&P 500' },
-  { symbol: '^IXIC', name: 'NASDAQ' },
-  { symbol: '^DJI', name: 'Dow Jones' },
-  { symbol: '^FTSE', name: 'FTSE 100' },
-  { symbol: '^N225', name: 'Nikkei 225' },
-  { symbol: '^GDAXI', name: 'DAX' },
-  { symbol: '^HSI', name: 'Hang Seng' },
+  { symbol: 'SPY', name: 'S&P 500' },
+  { symbol: 'QQQ', name: 'NASDAQ' },
+  { symbol: 'DIA', name: 'Dow Jones' },
+  { symbol: 'EFA', name: 'Intl Developed' },
+  { symbol: 'EEM', name: 'Emerging Markets' },
+  { symbol: 'IWM', name: 'Russell 2000' },
+  { symbol: 'VTI', name: 'Total Market' },
 ]
 
 async function fetchQuote(symbol: string) {
@@ -28,9 +29,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         INDICES.map(async ({ symbol, name }) => {
           const q = await fetchQuote(symbol)
           return {
-            symbol, name, price: q.c, change: q.d, changePercent: q.dp,
+            symbol, name, price: q.c ?? null, change: q.d ?? 0, changePercent: q.dp ?? 0,
             high: q.h, low: q.l, open: q.o, previousClose: q.pc,
-            timestamp: q.t * 1000, source: 'finnhub',
+            timestamp: q.t ? q.t * 1000 : Date.now(), source: 'finnhub',
           }
         })
       )

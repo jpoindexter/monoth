@@ -20,15 +20,15 @@ export default function SectorHeatmapPanel() {
 
   return (
     <PanelWrapper title="Sector Heatmap" loading={loading} error={error} onRetry={refresh}>
-      <div className="grid grid-cols-3 gap-1.5 p-1 h-full auto-rows-fr">
+      <div className="grid grid-cols-3 gap-1 h-full auto-rows-fr">
         {data?.map((sector) => (
           <div
             key={sector.symbol}
-            className="flex flex-col items-center justify-center rounded p-2 text-white min-h-[60px]"
+            className="flex flex-col items-center justify-center rounded px-1 py-0.5 text-white"
             style={getBlockStyle(sector.changePercent)}
           >
-            <span className="text-xs font-semibold text-center leading-tight">{sector.name}</span>
-            <span className="text-sm font-bold mt-1">
+            <span className="text-[9px] font-medium text-center leading-tight text-white/80">{sector.name}</span>
+            <span className="text-[11px] font-bold tabular-nums">
               {sector.changePercent >= 0 ? '+' : ''}{sector.changePercent?.toFixed(2)}%
             </span>
           </div>

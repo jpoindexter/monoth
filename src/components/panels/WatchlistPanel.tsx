@@ -73,7 +73,7 @@ export default function WatchlistPanel() {
               {watchlist.map((sym) => {
                 const point = data?.find((d) => d.symbol === sym)
                 const isPositive = (point?.change ?? 0) >= 0
-                const changeColor = isPositive ? 'text-green-500' : 'text-red-500'
+                const changeColor = isPositive ? 'text-emerald-600' : 'text-red-600'
                 return (
                   <TableRow key={sym}>
                     <TableCell className="font-medium text-sm">{sym}</TableCell>

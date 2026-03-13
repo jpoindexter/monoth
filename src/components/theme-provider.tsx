@@ -20,13 +20,19 @@ const ThemeProviderContext = createContext<ThemeProviderState>({
 
 export function ThemeProvider({
   children,
-  defaultTheme = "dark",
-  storageKey = "monoth-theme",
+  defaultTheme = "light",
+  storageKey = "monoth-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Clear stale key from old builds
+    localStorage.removeItem("monoth-theme")
+    const stored = localStorage.getItem(storageKey) as Theme | null
+    if (stored === "light") return stored
+    // Force light — ignore "dark", "system", or missing value
+    localStorage.setItem(storageKey, "light")
+    return "light"
+  })
 
   useEffect(() => {
     const root = window.document.documentElement

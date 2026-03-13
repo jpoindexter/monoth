@@ -21,34 +21,34 @@ export function Sidebar() {
 
   return (
     <aside
-      className="h-full border-r bg-background flex flex-col transition-all duration-200 shrink-0"
-      style={{ width: sidebarOpen ? 240 : 0 }}
+      className="h-full border-r border-border bg-white dark:bg-background flex flex-col transition-all duration-200 shrink-0"
+      style={{ width: sidebarOpen ? 240 : 48 }}
     >
       {sidebarOpen && (
         <>
-          <div className="flex items-center justify-between px-3 py-2 shrink-0">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Panels</span>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={toggleSidebar}>
+          <div className="flex items-center justify-between px-4 py-3 shrink-0">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Panels</span>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={toggleSidebar}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>
           <Separator />
           <ScrollArea className="flex-1">
-            <div className="p-2">
+            <div className="px-3 py-3">
               {tiers.map((tier) => {
                 const tierPanels = panels.filter((p) => p.tier === tier)
                 return (
-                  <div key={tier} className="mb-4">
-                    <p className="text-xs text-muted-foreground px-1 mb-1 font-medium">
-                      Tier {tier}: {TIER_LABELS[tier]}
+                  <div key={tier} className="mb-5">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-2 mb-2">
+                      {TIER_LABELS[tier]}
                     </p>
                     {tierPanels.map((panel) => (
-                      <div key={panel.id} className="flex items-center justify-between py-1 px-1 rounded hover:bg-accent">
-                        <span className="text-sm truncate flex-1 mr-2">{panel.name}</span>
+                      <div key={panel.id} className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-accent/60 transition-colors">
+                        <span className="text-sm truncate flex-1 mr-2 text-foreground/80">{panel.name}</span>
                         <Switch
                           checked={panel.enabled}
                           onCheckedChange={() => togglePanel(panel.id)}
-                          className="shrink-0"
+                          className="shrink-0 scale-90"
                         />
                       </div>
                     ))}
@@ -60,9 +60,11 @@ export function Sidebar() {
         </>
       )}
       {!sidebarOpen && (
-        <Button size="icon" variant="ghost" className="h-8 w-8 mx-auto mt-2" onClick={toggleSidebar}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        <div className="flex flex-col items-center pt-3">
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={toggleSidebar}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       )}
     </aside>
   )

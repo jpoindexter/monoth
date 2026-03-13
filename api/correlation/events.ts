@@ -35,9 +35,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const r = await fetch(
         `https://finnhub.io/api/v1/calendar/economic?from=${fmt(from)}&to=${fmt(now)}&token=${process.env.FINNHUB_API_KEY}`
       )
-      if (!r.ok) throw new Error(`Finnhub error: ${r.status}`)
+      if (!r.ok) return []
       const json = await r.json()
-      const events: Record<string, unknown>[] = json.economicCalendar ?? []
+      if (json.error) return []
+      const cal = json.economicCalendar
+      const events: Record<string, unknown>[] = Array.isArray(cal) ? cal : cal?.result ?? []
 
       const filtered: CorrelationEvent[] = events
         .filter((e) => e.actual != null && e.estimate != null && e.actual !== '' && e.estimate !== '')

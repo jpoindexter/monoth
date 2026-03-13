@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { ModeToggle } from '@/components/mode-toggle'
-import { Badge } from '@/components/ui/badge'
+import { motion } from 'motion/react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -39,39 +38,52 @@ export function TopBar() {
   }
 
   return (
-    <header className="h-12 border-b bg-background flex items-center px-4 gap-4 shrink-0">
-      <span className="font-bold text-lg">Monoth</span>
-      <div className="flex-1 flex justify-center">
-        <Badge variant={open ? 'default' : 'secondary'}>
-          {open ? 'Markets Open' : 'Markets Closed'}
-        </Badge>
+    <motion.header
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="h-8 border-b border-border/60 bg-white dark:bg-[#0a0a0a] flex items-center px-3 shrink-0">
+      <span className="font-bold text-[11px] tracking-[2px] uppercase text-foreground">Monoth</span>
+      <div className="ml-3 flex items-center gap-1">
+        {open ? (
+          <motion.span
+            animate={{ opacity: [1, 0.4, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"
+          />
+        ) : (
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+        )}
+        <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
+          {open ? 'Live' : 'Closed'}
+        </span>
       </div>
-      <div className="flex items-center gap-2">
-        <ModeToggle />
+      <div className="flex-1" />
+      <div className="flex items-center gap-1.5">
         {authenticated ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="h-8 w-8 cursor-pointer">
-                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+              <Avatar className="h-5 w-5 cursor-pointer">
+                <AvatarFallback className="text-[9px]">{initials}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal truncate max-w-48">
+              <DropdownMenuLabel className="text-[10px] text-muted-foreground font-normal truncate max-w-48">
                 {email}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuItem onClick={handleSignOut} className="text-[11px]">
                 Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button size="sm" variant="outline" onClick={() => setAuthOpen(true)}>
+          <Button size="sm" variant="ghost" className="h-5 text-[10px] px-2" onClick={() => setAuthOpen(true)}>
             Sign In
           </Button>
         )}
       </div>
       <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
-    </header>
+    </motion.header>
   )
 }

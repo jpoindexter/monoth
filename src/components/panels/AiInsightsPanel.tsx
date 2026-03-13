@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { Button } from '@/components/ui/button'
@@ -139,7 +137,7 @@ export default function AiInsightsPanel() {
         </Button>
 
         {error && (
-          <p className="text-xs text-red-500">{error}</p>
+          <p className="text-xs text-red-600">{error}</p>
         )}
 
         {brief && !loading && (

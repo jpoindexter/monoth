@@ -21,10 +21,11 @@ function fearGreed(indices: { symbol: string; price: number }[]): number {
 
 function sectorRotation(sectors: { changePercent: number }[] | null): number {
   if (!sectors || sectors.length === 0) return 50
-  const changes = sectors.map((s) => s.changePercent)
+  const changes = sectors.map((s) => s.changePercent).filter((c) => c != null && isFinite(c))
+  if (changes.length === 0) return 50
   const spread = Math.max(...changes) - Math.min(...changes)
-  // 0% spread = 50, >=3% spread = 100
-  return clamp(50 + (spread / 3) * 50, 50, 100)
+  // 0% spread = 20 (calm), 5% spread = 80 (high rotation)
+  return clamp(20 + (spread / 5) * 60, 0, 100)
 }
 
 function rateSensitivity(fredData: { seriesId: string; value: number }[] | null): number {
@@ -48,7 +49,7 @@ function commodityPressure(
   const all = [...indices, ...commodities]
   const relevant = all.filter((d) => {
     const sym = d.symbol.toUpperCase()
-    return sym.includes('GC') || sym.includes('GOLD') || sym.includes('CL') || sym.includes('OIL') || sym.includes('WTI')
+    return sym === 'GLD' || sym === 'SLV' || sym === 'USO' || sym === 'UNG' || sym === 'COPX'
   })
   if (relevant.length === 0) return 50
   const avg = relevant.reduce((sum, d) => sum + d.changePercent, 0) / relevant.length

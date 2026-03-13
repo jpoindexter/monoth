@@ -1,24 +1,17 @@
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 function formatLargeNumber(num: number): string {
-  if (num >= 1_000_000_000_000) {
-    return '$' + (num / 1_000_000_000_000).toFixed(1) + 'T'
-  }
-  if (num >= 1_000_000_000) {
-    return '$' + (num / 1_000_000_000).toFixed(1) + 'B'
-  }
-  if (num >= 1_000_000) {
-    return '$' + (num / 1_000_000).toFixed(1) + 'M'
-  }
+  if (num >= 1_000_000_000_000) return '$' + (num / 1_000_000_000_000).toFixed(1) + 'T'
+  if (num >= 1_000_000_000) return '$' + (num / 1_000_000_000).toFixed(1) + 'B'
+  if (num >= 1_000_000) return '$' + (num / 1_000_000).toFixed(1) + 'M'
   return '$' + num.toLocaleString('en-US', { maximumFractionDigits: 0 })
 }
 
-function getPegDeviationColor(deviation: number): string {
-  if (deviation < 0.001) return 'text-green-500'
+function pegColor(deviation: number): string {
+  if (deviation < 0.001) return 'text-emerald-600'
   if (deviation < 0.005) return 'text-yellow-500'
-  return 'text-red-500'
+  return 'text-red-600'
 }
 
 interface Stablecoin {
@@ -43,35 +36,34 @@ export default function StablecoinsPanel() {
 
   return (
     <PanelWrapper title="Stablecoins" loading={loading} error={error} onRetry={refresh}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-1/4">Name</TableHead>
-            <TableHead className="w-1/5 text-right">Price</TableHead>
-            <TableHead className="w-1/5 text-right">Peg Deviation</TableHead>
-            <TableHead className="w-1/3 text-right">Market Cap</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+      <table className="w-full text-[11px]">
+        <thead>
+          <tr className="text-muted-foreground">
+            <th className="text-left font-medium pb-1.5">Name</th>
+            <th className="text-right font-medium pb-1.5">Price</th>
+            <th className="text-right font-medium pb-1.5">Peg</th>
+            <th className="text-right font-medium pb-1.5">MCap</th>
+          </tr>
+        </thead>
+        <tbody>
           {data?.map((coin) => (
-            <TableRow key={coin.id}>
-              <TableCell className="text-sm font-medium">
-                <div>{coin.name}</div>
-                <div className="text-xs text-muted-foreground">{coin.symbol.toUpperCase()}</div>
-              </TableCell>
-              <TableCell className="text-right font-mono text-sm">
+            <tr key={coin.id} className="border-t border-border/20">
+              <td className="py-0.5">
+                <span className="font-medium text-foreground">{coin.symbol.toUpperCase()}</span>
+              </td>
+              <td className="text-right tabular-nums">
                 ${coin.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
-              </TableCell>
-              <TableCell className={`text-right text-sm ${getPegDeviationColor(coin.pegDeviation)}`}>
+              </td>
+              <td className={`text-right tabular-nums font-medium ${pegColor(coin.pegDeviation)}`}>
                 {(coin.pegDeviation * 100).toFixed(2)}%
-              </TableCell>
-              <TableCell className="text-right font-mono text-sm text-muted-foreground">
+              </td>
+              <td className="text-right tabular-nums text-muted-foreground">
                 {formatLargeNumber(coin.marketCap)}
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
     </PanelWrapper>
   )
 }
