@@ -4,6 +4,19 @@ import { supabase } from '@/lib/supabase'
 
 type Tier = 'free' | 'pro' | 'api' | 'enterprise'
 
+const WL_KEY = 'monoth-watchlist'
+
+function loadWatchlist(): string[] {
+  try {
+    const raw = localStorage.getItem(WL_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+function saveWatchlist(list: string[]) {
+  localStorage.setItem(WL_KEY, JSON.stringify(list))
+}
+
 interface UserStore {
   authenticated: boolean
   email: string | null
@@ -24,15 +37,23 @@ export const useUserStore = create<UserStore>((set) => ({
   authenticated: false,
   email: null,
   tier: 'free',
-  watchlist: [],
+  watchlist: loadWatchlist(),
   theme: 'dark',
   session: null,
   setAuthenticated: (authenticated) => set({ authenticated }),
   setTier: (tier) => set({ tier }),
   addToWatchlist: (symbol) =>
-    set((s) => ({ watchlist: [...s.watchlist, symbol] })),
+    set((s) => {
+      const watchlist = [...s.watchlist, symbol]
+      saveWatchlist(watchlist)
+      return { watchlist }
+    }),
   removeFromWatchlist: (symbol) =>
-    set((s) => ({ watchlist: s.watchlist.filter((w) => w !== symbol) })),
+    set((s) => {
+      const watchlist = s.watchlist.filter((w) => w !== symbol)
+      saveWatchlist(watchlist)
+      return { watchlist }
+    }),
   toggleTheme: () =>
     set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
   setSession: (session) =>

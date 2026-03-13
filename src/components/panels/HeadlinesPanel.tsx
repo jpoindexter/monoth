@@ -45,6 +45,11 @@ export default function HeadlinesPanel() {
               className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors"
             >
               <div className="flex-1 min-w-0">
+                {Date.now() - item.published < 1800_000 && (
+                  <span className="inline-block text-[7px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle bg-red-600 text-white animate-pulse">
+                    New
+                  </span>
+                )}
                 {cls && (
                   <span
                     className="inline-block text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
@@ -57,9 +62,16 @@ export default function HeadlinesPanel() {
                   {item.title}
                 </span>
               </div>
-              <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">
-                {relTime(item.published)}
-              </span>
+              <div className="text-right shrink-0 ml-1">
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap block">
+                  {relTime(item.published)}
+                </span>
+                {item.source && (
+                  <span className="text-[8px] text-muted-foreground/60 whitespace-nowrap block">
+                    {item.source}
+                  </span>
+                )}
+              </div>
             </a>
           )
         })}
