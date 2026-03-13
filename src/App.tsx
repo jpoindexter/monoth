@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import { ThemeProvider } from '@/components/theme-provider'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Landing } from '@/pages/Landing'
 import { Dashboard } from '@/pages/Dashboard'
 import { CommandPalette } from '@/components/CommandPalette'
@@ -51,11 +52,13 @@ function AppInner() {
 
 export default function App() {
   return (
-    <ThemeProvider defaultTheme="light">
-      <BrowserRouter>
-        <AppInner />
-      </BrowserRouter>
-      <Analytics />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="light">
+        <BrowserRouter>
+          <AppInner />
+        </BrowserRouter>
+        <Analytics />
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }

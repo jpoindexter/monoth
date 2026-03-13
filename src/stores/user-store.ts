@@ -48,14 +48,16 @@ export const useUserStore = create<UserStore>((set) => ({
         authenticated: !!session,
         email: session?.user?.email ?? null,
       })
-    })
+    }).catch(() => {})
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({
-        session,
-        authenticated: !!session,
-        email: session?.user?.email ?? null,
+    try {
+      supabase.auth.onAuthStateChange((_event, session) => {
+        set({
+          session,
+          authenticated: !!session,
+          email: session?.user?.email ?? null,
+        })
       })
-    })
+    } catch {}
   },
 }))

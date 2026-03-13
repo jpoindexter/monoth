@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import type { PanelId } from '@/types'
 
 const panels: Record<string, React.LazyExoticComponent<() => React.JSX.Element>> = {
@@ -56,8 +57,14 @@ export function PanelRenderer({ panelId, panelName }: PanelRendererProps) {
   }
 
   return (
-    <Suspense fallback={<PanelWrapper title={panelName} loading />}>
-      <Panel />
-    </Suspense>
+    <ErrorBoundary fallback={
+      <PanelWrapper title={panelName}>
+        <div className="flex items-center justify-center h-full text-[10px] text-destructive">Panel error</div>
+      </PanelWrapper>
+    }>
+      <Suspense fallback={<PanelWrapper title={panelName} loading />}>
+        <Panel />
+      </Suspense>
+    </ErrorBoundary>
   )
 }
