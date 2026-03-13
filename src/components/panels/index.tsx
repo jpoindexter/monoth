@@ -14,6 +14,15 @@ const panels: Record<string, React.LazyExoticComponent<() => React.JSX.Element>>
   'sector-heatmap': lazy(() => import('./SectorHeatmapPanel')),
   'market-radar': lazy(() => import('./MarketRadarPanel')),
   'correlation': lazy(() => import('./CorrelationPanel')),
+  'ipo-earnings': lazy(() => import('./IpoEarningsPanel')),
+  'derivatives': lazy(() => import('./DerivativesPanel')),
+  'fintech': lazy(() => import('./FintechPanel')),
+  'regulation': lazy(() => import('./RegulationPanel')),
+  'hedge-funds': lazy(() => import('./HedgeFundsPanel')),
+  'market-analysis': lazy(() => import('./MarketAnalysisPanel')),
+  'btc-etf': lazy(() => import('./BtcEtfPanel')),
+  'stablecoins': lazy(() => import('./StablecoinsPanel')),
+  'watchlist': lazy(() => import('./WatchlistPanel')),
 }
 
 interface PanelRendererProps {
