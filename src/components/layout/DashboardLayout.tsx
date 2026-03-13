@@ -1,6 +1,7 @@
 import { TopBar } from './TopBar'
 import { PanelGrid } from './PanelGrid'
 import { StatsBar } from './StatsBar'
+import { StatusBar } from './StatusBar'
 
 export function DashboardLayout() {
   return (
@@ -8,6 +9,7 @@ export function DashboardLayout() {
       <TopBar />
       <StatsBar />
       <PanelGrid />
+      <StatusBar />
     </div>
   )
 }

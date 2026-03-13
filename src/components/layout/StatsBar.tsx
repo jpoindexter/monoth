@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMarketData } from '@/hooks/use-market-data'
 import { useCryptoData } from '@/hooks/use-crypto-data'
@@ -36,6 +37,7 @@ function MiniSparkline({ changePercent }: { changePercent: number }) {
 }
 
 export function StatsBar() {
+  const navigate = useNavigate()
   useMarketData()
   useCryptoData()
 
@@ -84,7 +86,8 @@ export function StatsBar() {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.25, delay: i * 0.04 }}
-                className="flex items-center gap-1.5 whitespace-nowrap"
+                className="flex items-center gap-1.5 whitespace-nowrap cursor-pointer hover:opacity-80"
+                onClick={() => navigate(`/symbol/${s.label}`)}
               >
                 <span className="text-muted-foreground font-medium">{s.label}</span>
                 <span className="tabular-nums font-medium text-foreground">{s.value}</span>
