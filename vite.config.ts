@@ -15,4 +15,9 @@ export default defineConfig({
       '/api': 'http://localhost:3000',
     },
   },
+  build: {
+    rollupOptions: {
+      external: ['react-grid-layout/css/styles.css'],
+    },
+  },
 })

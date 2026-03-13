@@ -9,6 +9,11 @@ const panels: Record<string, React.LazyExoticComponent<() => React.JSX.Element>>
   'fixed-income': lazy(() => import('./FixedIncomePanel')),
   'commodities': lazy(() => import('./CommoditiesPanel')),
   'crypto': lazy(() => import('./CryptoPanel')),
+  'central-banks': lazy(() => import('./CentralBanksPanel')),
+  'economic-data': lazy(() => import('./EconomicDataPanel')),
+  'sector-heatmap': lazy(() => import('./SectorHeatmapPanel')),
+  'market-radar': lazy(() => import('./MarketRadarPanel')),
+  'correlation': lazy(() => import('./CorrelationPanel')),
 }
 
 interface PanelRendererProps {
