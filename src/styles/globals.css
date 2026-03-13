@@ -201,3 +201,18 @@
 .panel-highlight {
   animation: panel-highlight 2s ease-out forwards;
 }
+
+@keyframes flash-up {
+  0% { background-color: rgba(16, 185, 129, 0.25); }
+  100% { background-color: transparent; }
+}
+@keyframes flash-down {
+  0% { background-color: rgba(239, 68, 68, 0.25); }
+  100% { background-color: transparent; }
+}
+.flash-up {
+  animation: flash-up 0.8s ease-out forwards;
+}
+.flash-down {
+  animation: flash-down 0.8s ease-out forwards;
+}

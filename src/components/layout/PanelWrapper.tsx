@@ -4,6 +4,28 @@ import { Maximize2, Minimize2, RefreshCw } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSpanStore } from '@/stores/span-store'
 
+// FlashValue: wraps a number cell and pulses green/red when value changes
+export function FlashValue({ value, className = '' }: { value: number | string | null | undefined; className?: string }) {
+  const prev = useRef(value)
+  const ref = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    if (prev.current === value || value == null || prev.current == null) {
+      prev.current = value
+      return
+    }
+    const dir = Number(value) > Number(prev.current) ? 'flash-up' : 'flash-down'
+    prev.current = value
+    const el = ref.current
+    if (!el) return
+    el.classList.remove('flash-up', 'flash-down')
+    void el.offsetWidth
+    el.classList.add(dir)
+  }, [value])
+
+  return <span ref={ref} className={`rounded-[2px] px-0.5 -mx-0.5 ${className}`}>{value}</span>
+}
+
 const ExpandedContext = createContext(false)
 export const useIsExpanded = () => useContext(ExpandedContext)
 
@@ -87,6 +109,7 @@ interface PanelWrapperProps {
 
 export function PanelWrapper({ title, panelId, children, loading, error, onRetry }: PanelWrapperProps) {
   const [expanded, setExpanded] = useState(false)
+  const [hovered, setHovered] = useState(false)
   const contextPanelId = usePanelId()
   const effectivePanelId = panelId ?? contextPanelId
 
@@ -94,16 +117,21 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
     <motion.div
       layout
       initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className={`flex flex-col bg-white dark:bg-[#141414] rounded-sm border border-border/40 overflow-hidden ${
+      animate={{ opacity: expanded ? 1 : hovered ? 1 : 0.72 }}
+      whileHover={expanded ? undefined : { scale: 1.003 }}
+      transition={{ opacity: { duration: 0.15 }, scale: { duration: 0.15 }, y: { duration: 0.3, ease: 'easeOut' } }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      className={`flex flex-col bg-white dark:bg-[#141414] rounded-sm border overflow-hidden transition-colors duration-150 ${
         expanded
-          ? 'fixed inset-2 z-50'
-          : 'h-full'
+          ? 'fixed inset-2 z-50 border-border/60'
+          : hovered
+          ? 'h-full border-border/70 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]'
+          : 'h-full border-border/30'
       }`}
     >
-      <div className="px-2 py-1 shrink-0 border-b border-border/30 bg-black/[0.02] dark:bg-white/[0.03] flex items-center">
-        <h3 className="text-[10px] font-semibold uppercase tracking-[1px] text-muted-foreground flex-1">{title}</h3>
+      <div className={`px-2 py-1 shrink-0 border-b flex items-center transition-colors duration-150 ${hovered ? 'border-border/40 bg-black/[0.04] dark:bg-white/[0.05]' : 'border-border/20 bg-black/[0.02] dark:bg-white/[0.02]'}`}>
+        <h3 className={`text-[10px] font-semibold uppercase tracking-[1px] flex-1 transition-colors duration-150 ${hovered ? 'text-foreground/80' : 'text-muted-foreground'}`}>{title}</h3>
         <div className="flex items-center gap-0.5">
           {onRetry && (
             <button
