@@ -13,6 +13,7 @@ export type PanelId =
   | 'market-video'
   | 'options-flow' | 'insider-trading' | 'earnings-calendar'
   | 'analyst-ratings' | 'fund-flows' | 'short-interest' | 'economic-calendar'
+  | 'stock-analysis' | 'trade-policy'
 
 export type PanelTier = 1 | 2 | 3
 

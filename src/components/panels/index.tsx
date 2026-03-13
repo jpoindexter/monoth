@@ -44,6 +44,8 @@ const panels: Record<string, React.LazyExoticComponent<() => React.JSX.Element>>
   'fund-flows': lazy(() => import('./FundFlowsPanel')),
   'short-interest': lazy(() => import('./ShortInterestPanel')),
   'economic-calendar': lazy(() => import('./EconomicCalendarPanel')),
+  'stock-analysis': lazy(() => import('./StockAnalysisPanel')),
+  'trade-policy': lazy(() => import('./TradePolicyPanel')),
 }
 
 interface PanelRendererProps {

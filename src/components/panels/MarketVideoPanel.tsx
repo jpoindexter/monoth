@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { usePolling } from '@/hooks/use-polling'
 
-type Tab = 'live' | 'shows' | 'trending' | 'learn'
+type Tab = 'latest' | 'shows' | 'trending' | 'learn'
 
 const CHANNELS = [
-  { id: 'bloomberg-tv', name: 'Bloomberg TV', desc: '24/7 business & markets', color: 'border-blue-500', live: true, embedQuery: 'Bloomberg+TV+live' },
-  { id: 'cnbc', name: 'CNBC', desc: 'Market coverage & analysis', color: 'border-yellow-500', live: true, embedQuery: 'CNBC+live+stream' },
-  { id: 'bloomberg-surveillance', name: 'Bloomberg Surveillance', desc: 'Morning market analysis', color: 'border-blue-400', live: false, embedQuery: null },
-  { id: 'yahoo-finance', name: 'Yahoo Finance Live', desc: 'Real-time market coverage', color: 'border-purple-500', live: true, embedQuery: 'Yahoo+Finance+live' },
-  { id: 'fox-business', name: 'Fox Business', desc: 'Business news & market data', color: 'border-red-500', live: true, embedQuery: 'Fox+Business+live+stream' },
-  { id: 'cheddar', name: 'Cheddar News', desc: 'Tech & business updates', color: 'border-orange-500', live: false, embedQuery: null },
+  { id: 'bloomberg', name: 'Bloomberg TV', channelId: 'UCIALMKvObZNtJ6AmdCLP7Lg', color: 'border-blue-500', desc: '24/7 markets & business' },
+  { id: 'cnbc', name: 'CNBC', channelId: 'UCvJJ_dzjViJCoLf5uKUTwoA', color: 'border-yellow-500', desc: 'Markets & investing' },
+  { id: 'yahoo-finance', name: 'Yahoo Finance', channelId: 'UCEAZeUIeJs0IjQiqTCdVSIg', color: 'border-purple-500', desc: 'Real-time coverage' },
+  { id: 'fox-business', name: 'Fox Business', channelId: 'UCF9IOB2TExg3QIBupFtBDxg', color: 'border-red-500', desc: 'Business news' },
+  { id: 'real-vision', name: 'Real Vision', channelId: 'UCXgqMEMGRMcQNStdYCBgPaA', color: 'border-emerald-500', desc: 'Macro & deep dives' },
+  { id: 'tasty-trades', name: 'tastylive', channelId: 'UCv1HRYS9_A9NI1xAiUnJGcA', color: 'border-orange-500', desc: 'Options & trading' },
 ]
 
 const SHOWS = [
@@ -24,16 +25,16 @@ const SHOWS = [
 ]
 
 const TRENDING = [
-  { id: 1, title: 'Fed signals rate cuts ahead — what it means for markets', channel: 'Bloomberg TV', views: '245K views', time: '2h ago', topic: 'Macro' },
-  { id: 2, title: 'NVDA earnings breakdown: record revenue, but guidance disappoints', channel: 'CNBC', views: '189K views', time: '3h ago', topic: 'Earnings' },
-  { id: 3, title: '2024 macro outlook: recession or soft landing?', channel: 'Real Vision', views: '132K views', time: '5h ago', topic: 'Macro' },
-  { id: 4, title: 'Bitcoin ETF flows hit all-time high — crypto rally incoming?', channel: 'Cheddar News', views: '98K views', time: '6h ago', topic: 'Crypto' },
-  { id: 5, title: 'How to trade the VIX spike: strategies for volatile markets', channel: 'Chat With Traders', views: '76K views', time: '8h ago', topic: 'Trading' },
-  { id: 6, title: 'S&P 500 technical analysis: key levels to watch this week', channel: 'The Compound', views: '61K views', time: '1d ago', topic: 'Analysis' },
-  { id: 7, title: 'Apple earnings preview: iPhone demand slowdown concerns', channel: 'Yahoo Finance Live', views: '55K views', time: '1d ago', topic: 'Earnings' },
-  { id: 8, title: 'DeFi summer 2.0? Onchain activity surging across protocols', channel: 'Bankless', views: '47K views', time: '1d ago', topic: 'Crypto' },
-  { id: 9, title: 'Oil market breakdown: OPEC cuts and geopolitical risk', channel: 'Fox Business', views: '39K views', time: '2d ago', topic: 'Commodities' },
-  { id: 10, title: 'Buffett indicator hits 180%: is the market overvalued?', channel: 'Invest Like the Best', views: '31K views', time: '2d ago', topic: 'Analysis' },
+  { id: 1, title: 'AI stocks surge as Nvidia beats on data center revenue', channel: 'Bloomberg TV', views: '312K views', time: '1h ago', topic: 'Earnings' },
+  { id: 2, title: 'Trump tariffs on China: how markets are pricing the risk', channel: 'CNBC', views: '278K views', time: '2h ago', topic: 'Macro' },
+  { id: 3, title: 'Fed holds rates — Powell signals no cuts until inflation cools', channel: 'Yahoo Finance', views: '201K views', time: '3h ago', topic: 'Macro' },
+  { id: 4, title: 'Bitcoin breaks $100K again: what drives this rally', channel: 'Real Vision', views: '165K views', time: '4h ago', topic: 'Crypto' },
+  { id: 5, title: 'DeepSeek vs OpenAI: what the AI war means for US tech stocks', channel: 'Bloomberg TV', views: '143K views', time: '5h ago', topic: 'Analysis' },
+  { id: 6, title: 'Options expiry this Friday: key levels for S&P 500', channel: 'tastylive', views: '98K views', time: '6h ago', topic: 'Trading' },
+  { id: 7, title: 'Solana ETF filing: next crypto domino to fall?', channel: 'Bankless', views: '87K views', time: '8h ago', topic: 'Crypto' },
+  { id: 8, title: 'Recession watch: yield curve, PMI, and what the data says', channel: 'Odd Lots', views: '74K views', time: '10h ago', topic: 'Macro' },
+  { id: 9, title: 'Energy stocks lagging despite oil spike — buy the dip?', channel: 'Fox Business', views: '52K views', time: '1d ago', topic: 'Commodities' },
+  { id: 10, title: 'Buffett sells more Apple — what Berkshire is positioning for', channel: 'Invest Like the Best', views: '41K views', time: '1d ago', topic: 'Analysis' },
 ]
 
 const TRACKS = [
@@ -67,9 +68,89 @@ const diffColors: Record<string, string> = {
   'Advanced': 'bg-red-500/20 text-red-400',
 }
 
+interface Video {
+  id: string
+  title: string
+  published: string
+  url: string
+}
+
+function timeAgo(published: string): string {
+  const ms = Date.now() - new Date(published).getTime()
+  const mins = Math.floor(ms / 60_000)
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return `${Math.floor(hrs / 24)}d ago`
+}
+
+function ChannelVideos({ channelId, channelName, expanded }: { channelId: string; channelName: string; expanded: boolean }) {
+  const fetcher = useCallback(
+    () => fetch(`/api/market/youtube-feed?channelId=${channelId}`).then((r) => r.json() as Promise<{ videos: Video[] }>),
+    [channelId]
+  )
+  const { data, loading, error } = usePolling({ fetcher, interval: 900_000 })
+
+  const limit = expanded ? 3 : 2
+
+  if (loading) {
+    return (
+      <div className="space-y-1 mt-1">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="h-3 bg-muted/50 rounded animate-pulse w-full" />
+        ))}
+      </div>
+    )
+  }
+
+  if (error || !data?.videos?.length) {
+    return (
+      <a
+        href={`https://www.youtube.com/channel/${channelId}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[9px] text-blue-400 hover:text-blue-300 mt-1 block"
+      >
+        Latest on YouTube →
+      </a>
+    )
+  }
+
+  const videos = data.videos.slice(0, limit)
+
+  return (
+    <div className="mt-1 space-y-1">
+      {videos.map((v) => (
+        <div key={v.id}>
+          <a
+            href={v.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[9px] text-foreground hover:text-blue-400 line-clamp-1 block leading-snug"
+          >
+            {v.title}
+          </a>
+          <span className="text-[8px] text-muted-foreground">{timeAgo(v.published)}</span>
+          {expanded && (
+            <div className="mt-1 mb-1">
+              <iframe
+                src={`https://www.youtube.com/embed/${v.id}`}
+                className="w-full rounded-sm"
+                height={160}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function MarketVideoPanel() {
   const expanded = useIsExpanded()
-  const [tab, setTab] = useState<Tab>('live')
+  const [tab, setTab] = useState<Tab>('latest')
 
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
@@ -79,49 +160,31 @@ export default function MarketVideoPanel() {
   return (
     <PanelWrapper title="Market Video">
       <div className="flex gap-1 mb-2 flex-wrap">
-        <button className={tabCls(tab === 'live')} onClick={() => setTab('live')}>Live</button>
+        <button className={tabCls(tab === 'latest')} onClick={() => setTab('latest')}>Latest</button>
         <button className={tabCls(tab === 'shows')} onClick={() => setTab('shows')}>Shows</button>
         <button className={tabCls(tab === 'trending')} onClick={() => setTab('trending')}>Trending</button>
         <button className={tabCls(tab === 'learn')} onClick={() => setTab('learn')}>Learn</button>
       </div>
 
-      {tab === 'live' && (
-        <div className="space-y-1.5">
+      {tab === 'latest' && (
+        <div className="space-y-2">
           {CHANNELS.map((ch) => (
-            <div key={ch.id}>
-              <div className={`border-l-2 ${ch.color} pl-2 py-1 flex items-center justify-between`}>
+            <div key={ch.id} className={`border-l-2 ${ch.color} pl-2 py-1`}>
+              <div className="flex items-start justify-between gap-1">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-medium text-foreground leading-tight">{ch.name}</span>
-                    {ch.live && (
-                      <span className="flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-wider text-red-500">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                        Live
-                      </span>
-                    )}
-                  </div>
+                  <div className="text-[10px] font-medium text-foreground leading-tight">{ch.name}</div>
                   <div className="text-[9px] text-muted-foreground">{ch.desc}</div>
                 </div>
                 <a
-                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ch.name + ' live')}`}
+                  href={`https://www.youtube.com/channel/${ch.channelId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[9px] text-blue-400 hover:text-blue-300 ml-2 shrink-0"
+                  className="text-[9px] text-blue-400 hover:text-blue-300 shrink-0"
                 >
-                  Watch
+                  Channel
                 </a>
               </div>
-              {expanded && ch.live && ch.embedQuery && (
-                <div className="mt-1 mb-1">
-                  <iframe
-                    src={`https://www.youtube.com/embed?listType=search&list=${ch.embedQuery}`}
-                    className="w-full rounded-sm"
-                    height={200}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              )}
+              <ChannelVideos channelId={ch.channelId} channelName={ch.name} expanded={expanded} />
             </div>
           ))}
         </div>

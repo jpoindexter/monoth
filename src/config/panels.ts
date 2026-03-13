@@ -40,4 +40,6 @@ export const PANELS: PanelConfig[] = [
   { id: 'fund-flows', name: 'Fund Flows', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'short-interest', name: 'Short Interest', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'economic-calendar', name: 'Economic Calendar', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'stock-analysis', name: 'Stock Analysis', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'trade-policy', name: 'Trade Policy', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
 ]
