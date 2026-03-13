@@ -1,0 +1,26 @@
+import type { PanelConfig } from '@/types'
+
+export const PANELS: PanelConfig[] = [
+  { id: 'live-markets', name: 'Live Markets', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'headlines', name: 'Market Headlines', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'forex', name: 'Forex & Currencies', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'fixed-income', name: 'Fixed Income', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'commodities', name: 'Commodities & Futures', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'crypto', name: 'Crypto & Digital Assets', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'central-banks', name: 'Central Bank Watch', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'economic-data', name: 'Economic Data', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'sector-heatmap', name: 'Sector Heatmap', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'market-radar', name: 'Market Radar', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'correlation-engine', name: 'Correlation Engine', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'ipos-earnings', name: 'IPOs, Earnings & M&A', tier: 2, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'derivatives-news', name: 'Derivatives & Options News', tier: 2, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'fintech-news', name: 'Fintech & Trading Tech', tier: 2, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'regulation', name: 'Financial Regulation', tier: 2, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'hedge-funds-news', name: 'Hedge Funds & PE News', tier: 2, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'market-analysis-news', name: 'Market Analysis News', tier: 2, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'btc-etf', name: 'BTC ETF Tracker', tier: 2, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'stablecoins', name: 'Stablecoins', tier: 2, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'watchlist', name: 'Watchlist', tier: 3, enabled: false, defaultWidth: 4, defaultHeight: 4 },
+  { id: 'ai-insights', name: 'AI Market Insights', tier: 3, enabled: false, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'export', name: 'Export', tier: 3, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+]
