@@ -15,6 +15,7 @@ export type PanelId =
   | 'analyst-ratings' | 'fund-flows' | 'short-interest' | 'economic-calendar'
   | 'stock-analysis' | 'trade-policy'
   | 'fundamentals' | 'stock-screener'
+  | 'options-chain'
 
 export type PanelTier = 1 | 2 | 3
 

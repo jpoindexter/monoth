@@ -44,4 +44,5 @@ export const PANELS: PanelConfig[] = [
   { id: 'trade-policy', name: 'Trade Policy', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'fundamentals', name: 'Fundamentals', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'stock-screener', name: 'Stock Screener', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'options-chain', name: 'Options Chain', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
 ]
