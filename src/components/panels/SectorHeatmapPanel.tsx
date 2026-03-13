@@ -90,38 +90,24 @@ export default function SectorHeatmapPanel() {
 
       {tab === 'heatmap' && byMagnitude && (
         <div className="flex flex-col gap-1">
-          <div className="flex gap-1" style={{ minHeight: expanded ? '100px' : '60px' }}>
-            {byMagnitude.slice(0, expanded ? byMagnitude.length : 3).map((sector) => (
+          <div
+            className="grid gap-1"
+            style={{ gridTemplateColumns: expanded ? 'repeat(auto-fill, minmax(120px, 1fr))' : 'repeat(auto-fill, minmax(80px, 1fr))' }}
+          >
+            {byMagnitude.map((sector) => (
               <div
                 key={sector.symbol}
-                className="flex flex-col items-center justify-center rounded px-1 py-1 text-white"
-                style={{ ...getBlockStyle(sector.changePercent), flexGrow: Math.max(Math.abs(sector.changePercent), 1), minHeight: expanded ? '90px' : '50px' }}
+                className="flex flex-col items-center justify-center rounded px-1 py-2 text-white overflow-hidden"
+                style={{ ...getBlockStyle(sector.changePercent), minHeight: expanded ? '90px' : '55px' }}
               >
-                <span className={`font-medium text-center leading-tight ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{sector.name}</span>
-                <span className={`font-bold tabular-nums ${expanded ? 'text-[16px]' : 'text-[13px]'}`}>
+                <span className={`font-medium text-center leading-tight break-words hyphens-auto ${expanded ? 'text-[11px]' : 'text-[8px]'}`}>{sector.name}</span>
+                <span className={`font-bold tabular-nums whitespace-nowrap ${expanded ? 'text-[16px]' : 'text-[13px]'}`}>
                   {sector.changePercent >= 0 ? '+' : ''}{sector.changePercent.toFixed(2)}%
                 </span>
-                <span className={`opacity-70 ${expanded ? 'text-[10px]' : 'text-[8px]'}`}>{sector.symbol}</span>
+                <span className={`opacity-70 whitespace-nowrap ${expanded ? 'text-[10px]' : 'text-[8px]'}`}>{sector.symbol}</span>
               </div>
             ))}
           </div>
-          {!expanded && (
-          <div className="flex gap-1" style={{ minHeight: '50px' }}>
-            {byMagnitude.slice(3).map((sector) => (
-              <div
-                key={sector.symbol}
-                className="flex flex-col items-center justify-center rounded px-1 py-1 text-white"
-                style={{ ...getBlockStyle(sector.changePercent), flexGrow: Math.max(Math.abs(sector.changePercent), 1), minHeight: '50px' }}
-              >
-                <span className="text-[9px] font-medium text-center leading-tight">{sector.name}</span>
-                <span className="text-[13px] font-bold tabular-nums">
-                  {sector.changePercent >= 0 ? '+' : ''}{sector.changePercent.toFixed(2)}%
-                </span>
-                <span className="text-[8px] opacity-70">{sector.symbol}</span>
-              </div>
-            ))}
-          </div>
-          )}
           {best && worst && (
             <div className="text-[10px] mt-0.5">
               <span className="text-emerald-500 font-medium">Best: {best.name} {best.changePercent >= 0 ? '+' : ''}{best.changePercent.toFixed(2)}%</span>
