@@ -26,8 +26,39 @@ const ETF_NAMES: Record<string, string> = {
   BND: 'Total Bond', TIPS: 'TIPS',
 }
 
+const AUCTIONS = [
+  { label: '13-Week Bill', size: 75, date: 'Mar 17' },
+  { label: '4-Week Bill',  size: 80, date: 'Mar 18' },
+  { label: '2-Year Note',  size: 69, date: 'Mar 25' },
+  { label: '5-Year Note',  size: 70, date: 'Mar 26' },
+  { label: '10-Year Note', size: 42, date: 'Apr 9'  },
+  { label: '30-Year Bond', size: 22, date: 'Apr 10' },
+]
+
+const AUCTION_DATES: Record<string, string> = {
+  'Mar 17': '2025-03-17',
+  'Mar 18': '2025-03-18',
+  'Mar 25': '2025-03-25',
+  'Mar 26': '2025-03-26',
+  'Apr 9':  '2025-04-09',
+  'Apr 10': '2025-04-10',
+}
+
+function daysUntil(dateStr: string): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const target = new Date(dateStr)
+  return Math.round((target.getTime() - today.getTime()) / 86_400_000)
+}
+
+const REAL_RATES = [
+  { maturity: '5Y',  nominal: 4.37, real: 2.0, breakeven: 2.3 },
+  { maturity: '10Y', nominal: 4.31, real: 2.1, breakeven: 2.2 },
+  { maturity: '30Y', nominal: 4.61, real: 2.2, breakeven: null },
+]
+
 export default function FixedIncomePanel() {
-  const [tab, setTab] = useState<'yields' | 'etfs' | 'spreads' | 'curve'>('yields')
+  const [tab, setTab] = useState<'yields' | 'etfs' | 'spreads' | 'curve' | 'auctions' | 'real'>('yields')
   const { data, loading, error, refresh } = useMacroData()
 
   const { data: etfData, loading: etfLoading } = usePolling({
@@ -84,6 +115,8 @@ export default function FixedIncomePanel() {
         <button className={tabCls(tab === 'etfs')} onClick={() => setTab('etfs')}>ETFs</button>
         <button className={tabCls(tab === 'spreads')} onClick={() => setTab('spreads')}>Spreads</button>
         <button className={tabCls(tab === 'curve')} onClick={() => setTab('curve')}>Curve</button>
+        <button className={tabCls(tab === 'auctions')} onClick={() => setTab('auctions')}>Auctions</button>
+        <button className={tabCls(tab === 'real')} onClick={() => setTab('real')}>Real Rates</button>
       </div>
 
       {tab === 'yields' && (
@@ -239,6 +272,94 @@ export default function FixedIncomePanel() {
           )}
         </div>
       )}
+      {tab === 'auctions' && (() => {
+        const totalIssuance = AUCTIONS.reduce((sum, a) => sum + a.size, 0)
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-border/20">
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Total Upcoming Issuance</span>
+              <span className="text-[11px] font-semibold tabular-nums">${totalIssuance}B</span>
+            </div>
+            <table className="w-full text-[11px]">
+              <thead>
+                <tr className="text-muted-foreground">
+                  <th className="text-left font-medium pb-1.5">Security</th>
+                  <th className="text-right font-medium pb-1.5">Size</th>
+                  <th className="text-right font-medium pb-1.5">Date</th>
+                  <th className="text-right font-medium pb-1.5">Days</th>
+                </tr>
+              </thead>
+              <tbody>
+                {AUCTIONS.map((a) => {
+                  const days = daysUntil(AUCTION_DATES[a.date])
+                  const color = days <= 3 ? 'text-red-500' : days <= 7 ? 'text-amber-500' : 'text-emerald-600'
+                  return (
+                    <tr key={a.label} className="border-t border-border/20">
+                      <td className="py-0.5 font-medium">{a.label}</td>
+                      <td className="text-right tabular-nums">${a.size}B</td>
+                      <td className="text-right tabular-nums text-muted-foreground">{a.date}</td>
+                      <td className={`text-right tabular-nums font-medium ${color}`}>
+                        {days > 0 ? `+${days}d` : days === 0 ? 'Today' : `${days}d`}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
+      })()}
+
+      {tab === 'real' && (() => {
+        const avgReal = REAL_RATES.reduce((s, r) => s + r.real, 0) / REAL_RATES.length
+        const regime = avgReal > 2 ? 'RESTRICTIVE' : avgReal >= 0 ? 'NEUTRAL' : 'ACCOMMODATIVE'
+        const regimeColor = regime === 'RESTRICTIVE' ? 'bg-red-500/15 text-red-500' : regime === 'ACCOMMODATIVE' ? 'bg-emerald-600/15 text-emerald-600' : 'bg-amber-500/15 text-amber-500'
+        const maxNominal = Math.max(...REAL_RATES.map((r) => r.nominal))
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-border/20">
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Real Rate Regime</span>
+              <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${regimeColor}`}>{regime}</span>
+            </div>
+            <div className="space-y-2">
+              {REAL_RATES.map((r) => {
+                const nomPct = (r.nominal / maxNominal) * 100
+                const realPct = (r.real / maxNominal) * 100
+                return (
+                  <div key={r.maturity} className="space-y-0.5">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="font-medium">{r.maturity}</span>
+                      <span className="text-muted-foreground tabular-nums">
+                        Nom {r.nominal.toFixed(2)}% / Real {r.real.toFixed(2)}%
+                        {r.breakeven != null ? ` / BE ${r.breakeven.toFixed(2)}%` : ''}
+                      </span>
+                    </div>
+                    <div className="relative h-3 bg-border/20 rounded-sm overflow-hidden">
+                      <div
+                        className="absolute left-0 top-0 h-full rounded-sm bg-foreground/20"
+                        style={{ width: `${nomPct}%` }}
+                      />
+                      <div
+                        className="absolute left-0 top-0 h-full rounded-sm bg-amber-500"
+                        style={{ width: `${realPct}%` }}
+                      />
+                    </div>
+                    <div className="flex gap-3 text-[8px] text-muted-foreground">
+                      <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-1 rounded-sm bg-foreground/20" />Nominal</span>
+                      <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-1 rounded-sm bg-amber-500" />Real</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="mt-2 pt-2 border-t border-border/20">
+              <p className="text-[9px] text-muted-foreground leading-relaxed">
+                Real rates derived from nominal yield minus TIPS breakeven. RESTRICTIVE above 2%, NEUTRAL 0-2%, ACCOMMODATIVE below 0%.
+              </p>
+            </div>
+          </div>
+        )
+      })()}
     </PanelWrapper>
   )
 }
