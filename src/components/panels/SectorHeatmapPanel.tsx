@@ -32,8 +32,8 @@ export default function SectorHeatmapPanel() {
   const { data, loading, error, refresh } = usePolling({ fetcher, interval: 60_000 })
   const { data: newsData } = useNewsData('analysis')
 
-  const sorted = data ? [...data].sort((a, b) => b.changePercent - a.changePercent) : null
-  const byMagnitude = data ? [...data].sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)) : null
+  const sorted = data ? [...data].filter(s => s.changePercent != null).sort((a, b) => b.changePercent - a.changePercent) : null
+  const byMagnitude = data ? [...data].filter(s => s.changePercent != null).sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)) : null
   const best = sorted?.[0]
   const worst = sorted?.[sorted.length - 1]
 

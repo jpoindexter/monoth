@@ -32,10 +32,12 @@ function getCategory(title: string): Exclude<Category, 'All'> | null {
   return null
 }
 
-function fmtVol(n: number): string {
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M'
-  if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K'
-  return '$' + n.toFixed(0)
+function fmtVol(n: number | string): string {
+  const v = typeof n === 'string' ? Number(n) : n
+  if (!isFinite(v)) return '$0'
+  if (v >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M'
+  if (v >= 1e3) return '$' + (v / 1e3).toFixed(0) + 'K'
+  return '$' + v.toFixed(0)
 }
 
 function TrendingBadge({ volume }: { volume: number }) {
@@ -69,7 +71,7 @@ export default function PredictionsPanel() {
 
   const { data, loading, error, refresh } = usePolling({ fetcher, interval: 300_000 })
 
-  const categorized = (data ?? []).map((p) => ({ ...p, category: getCategory(p.title) }))
+  const categorized = (data ?? []).map((p) => ({ ...p, volume: Number(p.volume) || 0, category: getCategory(p.title) }))
 
   const counts: Record<Category, number> = {
     All: categorized.length,
