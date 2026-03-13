@@ -1,14 +1,18 @@
-import { useRef, useEffect } from 'react'
+'use client'
+
+import { useId } from 'react'
 import {
-  createChart,
-  type IChartApi,
-  type ISeriesApi,
-  ColorType,
-  AreaSeries,
-  CandlestickSeries,
-  LineSeries,
-  HistogramSeries,
-} from 'lightweight-charts'
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from 'recharts'
 
 interface ChartDataPoint {
   time: string // 'YYYY-MM-DD' format
@@ -29,6 +33,28 @@ interface LightweightChartProps {
   className?: string
 }
 
+function getDataKey(d: ChartDataPoint) {
+  return d.value !== undefined ? 'value' : 'close'
+}
+
+function formatValue(v: number) {
+  if (Math.abs(v) >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`
+  if (Math.abs(v) >= 1_000) return `${(v / 1_000).toFixed(1)}K`
+  return v.toLocaleString(undefined, { maximumFractionDigits: 2 })
+}
+
+const tickStyle = { fontSize: 9, fill: '#9ca3af' }
+
+function CustomTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null
+  const val = payload[0]?.value
+  return (
+    <div style={{ background: 'rgba(0,0,0,0.7)', padding: '4px 8px', borderRadius: 4, fontSize: 11, color: '#f3f4f6' }}>
+      {val !== undefined ? formatValue(val) : null}
+    </div>
+  )
+}
+
 export function LightweightChart({
   type = 'area',
   data,
@@ -38,103 +64,88 @@ export function LightweightChart({
   areaBottomColor = 'rgba(37, 99, 235, 0.02)',
   className = '',
 }: LightweightChartProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const chartRef = useRef<IChartApi | null>(null)
-  const seriesRef = useRef<ISeriesApi<any> | null>(null)
+  const gradId = useId()
 
-  useEffect(() => {
-    if (!containerRef.current) return
+  if (!data || data.length === 0) return <div style={{ height }} className={className} />
 
-    const chart = createChart(containerRef.current, {
-      height,
-      layout: {
-        background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: '#9ca3af',
-        fontSize: 9,
-      },
-      grid: {
-        vertLines: { color: 'rgba(0,0,0,0.04)' },
-        horzLines: { color: 'rgba(0,0,0,0.04)' },
-      },
-      rightPriceScale: {
-        borderVisible: false,
-        scaleMargins: { top: 0.1, bottom: 0.05 },
-      },
-      timeScale: {
-        borderVisible: false,
-        fixLeftEdge: true,
-        fixRightEdge: true,
-      },
-      crosshair: {
-        vertLine: { labelVisible: false },
-      },
-      handleScroll: false,
-      handleScale: false,
-    })
+  const dataKey = getDataKey(data[0])
+  const tickCount = Math.min(4, data.length)
 
-    chartRef.current = chart
+  const shared = {
+    data,
+    margin: { top: 4, right: 4, left: 0, bottom: 0 },
+  }
 
-    if (type === 'area') {
-      const series = chart.addSeries(AreaSeries, {
-        lineColor,
-        topColor: areaTopColor,
-        bottomColor: areaBottomColor,
-        lineWidth: 1.5,
-        crosshairMarkerRadius: 3,
-      })
-      series.setData(data as any)
-      seriesRef.current = series
-    } else if (type === 'candlestick') {
-      const series = chart.addSeries(CandlestickSeries, {
-        upColor: '#059669',
-        downColor: '#ef4444',
-        borderUpColor: '#059669',
-        borderDownColor: '#ef4444',
-        wickUpColor: '#059669',
-        wickDownColor: '#ef4444',
-      })
-      series.setData(data as any)
-      seriesRef.current = series
-    } else if (type === 'line') {
-      const series = chart.addSeries(LineSeries, {
-        color: lineColor,
-        lineWidth: 1.5,
-        crosshairMarkerRadius: 3,
-      })
-      series.setData(data as any)
-      seriesRef.current = series
-    } else if (type === 'histogram') {
-      const series = chart.addSeries(HistogramSeries, {
-        color: lineColor,
-      })
-      series.setData(data as any)
-      seriesRef.current = series
-    }
+  const xAxis = (
+    <XAxis
+      dataKey="time"
+      tick={tickStyle}
+      axisLine={false}
+      tickLine={false}
+      interval="preserveStartEnd"
+      tickCount={tickCount}
+      minTickGap={40}
+    />
+  )
 
-    chart.timeScale().fitContent()
+  const yAxis = <YAxis hide domain={['auto', 'auto']} />
 
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width } = entry.contentRect
-        if (width > 0) chart.applyOptions({ width })
-      }
-    })
-    observer.observe(containerRef.current)
+  const tooltip = <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(156,163,175,0.3)', strokeWidth: 1 }} />
 
-    return () => {
-      observer.disconnect()
-      chart.remove()
-      chartRef.current = null
-      seriesRef.current = null
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  if (type === 'line') {
+    return (
+      <div style={{ height }} className={className}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart {...shared}>
+            {xAxis}
+            {yAxis}
+            {tooltip}
+            <Line type="monotone" dataKey={dataKey} stroke={lineColor} strokeWidth={1.5} dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    )
+  }
 
-  useEffect(() => {
-    if (seriesRef.current && data.length > 0) {
-      seriesRef.current.setData(data as any)
-      chartRef.current?.timeScale().fitContent()
-    }
-  }, [data])
+  if (type === 'histogram') {
+    return (
+      <div style={{ height }} className={className}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart {...shared}>
+            {xAxis}
+            {yAxis}
+            {tooltip}
+            <Bar dataKey={dataKey} fill={lineColor} radius={[1, 1, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    )
+  }
 
-  return <div ref={containerRef} className={className} />
+  // area + candlestick both render as area chart
+  return (
+    <div style={{ height }} className={className}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart {...shared}>
+          <defs>
+            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={areaTopColor} stopOpacity={1} />
+              <stop offset="100%" stopColor={areaBottomColor} stopOpacity={1} />
+            </linearGradient>
+          </defs>
+          {xAxis}
+          {yAxis}
+          {tooltip}
+          <Area
+            type="monotone"
+            dataKey={dataKey}
+            stroke={lineColor}
+            strokeWidth={1.5}
+            fill={`url(#${gradId})`}
+            dot={false}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  )
 }

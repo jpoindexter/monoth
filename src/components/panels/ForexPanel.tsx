@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useForexData } from '@/hooks/use-forex-data'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
@@ -38,6 +38,7 @@ function getCarryRisk(vix: number): { label: string; color: string } {
 }
 
 export default function ForexPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'major' | 'em' | 'all' | 'chart' | 'strength' | 'carry'>('major')
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
   const [chartPair, setChartPair] = useState('EUR')
@@ -46,9 +47,9 @@ export default function ForexPanel() {
   const { data, loading, error, refresh } = useForexData()
 
   const filtered = tab === 'major'
-    ? data?.filter((rate) => MAJOR_CURRENCIES.some((c) => rate.pair.includes(c)))
+    ? (expanded ? data : data?.filter((rate) => MAJOR_CURRENCIES.some((c) => rate.pair.includes(c))))
     : tab === 'em'
-    ? data?.filter((rate) => EM_CURRENCIES.some((c) => rate.pair.includes(c)))
+    ? (expanded ? data : data?.filter((rate) => EM_CURRENCIES.some((c) => rate.pair.includes(c))))
     : tab === 'all'
     ? data
     : null
@@ -109,8 +110,9 @@ export default function ForexPanel() {
 
   const maxAbs = Math.max(...strengthData.map(d => Math.abs(d.strength)), 0.01)
 
-  const top3 = strengthData.slice(0, 3).map(d => d.currency)
-  const bottom3 = strengthData.slice(-3).map(d => d.currency)
+  const crossCount = expanded ? 5 : 3
+  const top3 = strengthData.slice(0, crossCount).map(d => d.currency)
+  const bottom3 = strengthData.slice(-crossCount).map(d => d.currency)
 
   const getRateForPair = (base: string, quote: string): number | null => {
     if (base === quote) return 1
@@ -162,7 +164,7 @@ export default function ForexPanel() {
               <LightweightChart
                 type="area"
                 data={dxyData.map(d => ({ time: d.time, value: d.close }))}
-                height={140}
+                height={expanded ? 300 : 140}
                 lineColor="#f59e0b"
                 areaTopColor="rgba(245, 158, 11, 0.2)"
                 areaBottomColor="rgba(245, 158, 11, 0.02)"
@@ -172,7 +174,7 @@ export default function ForexPanel() {
             <LightweightChart
               type="area"
               data={chartData}
-              height={140}
+              height={expanded ? 300 : 140}
               lineColor="#6366f1"
               areaTopColor="rgba(99, 102, 241, 0.2)"
               areaBottomColor="rgba(99, 102, 241, 0.02)"

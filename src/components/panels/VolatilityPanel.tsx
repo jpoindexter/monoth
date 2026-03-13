@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { useNewsData } from '@/hooks/use-news-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { useMarketStore } from '@/stores/market-store'
@@ -18,14 +18,17 @@ const VOL_NAMES: Record<string, string> = {
 const VIX_RANGE = { low52: 11.5, high52: 35.2, avg: 18.5 }
 
 const STRIKES = ['-10%', '-5%', 'ATM', '+5%', '+10%']
+const STRIKES_EXPANDED = ['-20%', '-15%', '-10%', '-5%', 'ATM', '+5%', '+10%', '+15%', '+20%']
 const MONTHS = ['1M', '2M', '3M', '6M']
+const MONTHS_EXPANDED = ['1W', '1M', '2M', '3M', '6M', '9M', '12M']
 
-function generateVolSurface(vixSpot: number) {
-  return MONTHS.map((m, mi) => ({
+function generateVolSurface(vixSpot: number, months: string[], strikes: string[]) {
+  const midIdx = Math.floor(strikes.length / 2)
+  return months.map((m, mi) => ({
     month: m,
-    values: STRIKES.map((_, si) => {
+    values: strikes.map((_, si) => {
       const base = vixSpot + mi * 0.8
-      const skew = (2 - si) * 1.5
+      const skew = (midIdx - si) * 1.5
       return Math.max(base + skew, 5)
     }),
   }))
@@ -48,6 +51,7 @@ function relTime(ts: number): string {
 }
 
 export default function VolatilityPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'etfs' | 'news' | 'chart' | 'surface'>('news')
   const [chartData, setChartData] = useState<CandleData[]>([])
   const fetcher = useCallback(() => fetchQuotes(VOL_SYMBOLS), [])
@@ -67,7 +71,9 @@ export default function VolatilityPanel() {
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
-  const surface = generateVolSurface(vixSpot)
+  const activeStrikes = expanded ? STRIKES_EXPANDED : STRIKES
+  const activeMonths = expanded ? MONTHS_EXPANDED : MONTHS
+  const surface = generateVolSurface(vixSpot, activeMonths, activeStrikes)
   const allIvs = surface.flatMap((r) => r.values)
   const minIv = Math.min(...allIvs)
   const maxIv = Math.max(...allIvs)
@@ -92,7 +98,7 @@ export default function VolatilityPanel() {
         <LightweightChart
           type="area"
           data={chartData}
-          height={140}
+          height={expanded ? 300 : 140}
           lineColor="#ef4444"
           areaTopColor="rgba(239, 68, 68, 0.2)"
           areaBottomColor="rgba(239, 68, 68, 0.02)"
@@ -155,7 +161,7 @@ export default function VolatilityPanel() {
                 <thead>
                   <tr>
                     <td className="w-7 pr-1" />
-                    {STRIKES.map((s) => (
+                    {activeStrikes.map((s) => (
                       <th key={s} className="text-center text-muted-foreground font-medium pb-1 w-11">{s}</th>
                     ))}
                   </tr>

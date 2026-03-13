@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useCryptoData } from '@/hooks/use-crypto-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { Sparkline } from '@/components/charts/Sparkline'
@@ -50,6 +50,7 @@ const CHAIN_BREAKDOWN = [
 ]
 
 export default function CryptoPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'top15' | 'stables' | 'chart' | 'defi' | 'dominance'>('top15')
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
   const { data, loading, error, refresh } = useCryptoData()
@@ -97,7 +98,7 @@ export default function CryptoPanel() {
         <LightweightChart
           type="area"
           data={chartData}
-          height={160}
+          height={expanded ? 300 : 160}
           lineColor="#f59e0b"
           areaTopColor="rgba(245, 158, 11, 0.2)"
           areaBottomColor="rgba(245, 158, 11, 0.02)"
@@ -117,7 +118,7 @@ export default function CryptoPanel() {
             </tr>
           </thead>
           <tbody>
-            {data?.slice(0, 15).map((c) => {
+            {data?.slice(0, expanded ? undefined : 15).map((c) => {
               const isPositive = c.changePercent24h >= 0
               return (
                 <tr key={c.id} className="border-t border-border/20">

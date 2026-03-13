@@ -23,7 +23,6 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "fast-xml-parser": "^5.5.4",
-    "lightweight-charts": "^5.1.0",
     "lucide-react": "^0.577.0",
     "micro": "^10.0.1",
     "motion": "^12.36.0",

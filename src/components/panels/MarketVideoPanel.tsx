@@ -1,15 +1,15 @@
 import { useState } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 
 type Tab = 'live' | 'shows' | 'trending' | 'learn'
 
 const CHANNELS = [
-  { id: 'bloomberg-tv', name: 'Bloomberg TV', desc: '24/7 business & markets', color: 'border-blue-500', live: true },
-  { id: 'cnbc', name: 'CNBC', desc: 'Market coverage & analysis', color: 'border-yellow-500', live: true },
-  { id: 'bloomberg-surveillance', name: 'Bloomberg Surveillance', desc: 'Morning market analysis', color: 'border-blue-400', live: false },
-  { id: 'yahoo-finance', name: 'Yahoo Finance Live', desc: 'Real-time market coverage', color: 'border-purple-500', live: true },
-  { id: 'fox-business', name: 'Fox Business', desc: 'Business news & market data', color: 'border-red-500', live: true },
-  { id: 'cheddar', name: 'Cheddar News', desc: 'Tech & business updates', color: 'border-orange-500', live: false },
+  { id: 'bloomberg-tv', name: 'Bloomberg TV', desc: '24/7 business & markets', color: 'border-blue-500', live: true, embedQuery: 'Bloomberg+TV+live' },
+  { id: 'cnbc', name: 'CNBC', desc: 'Market coverage & analysis', color: 'border-yellow-500', live: true, embedQuery: 'CNBC+live+stream' },
+  { id: 'bloomberg-surveillance', name: 'Bloomberg Surveillance', desc: 'Morning market analysis', color: 'border-blue-400', live: false, embedQuery: null },
+  { id: 'yahoo-finance', name: 'Yahoo Finance Live', desc: 'Real-time market coverage', color: 'border-purple-500', live: true, embedQuery: 'Yahoo+Finance+live' },
+  { id: 'fox-business', name: 'Fox Business', desc: 'Business news & market data', color: 'border-red-500', live: true, embedQuery: 'Fox+Business+live+stream' },
+  { id: 'cheddar', name: 'Cheddar News', desc: 'Tech & business updates', color: 'border-orange-500', live: false, embedQuery: null },
 ]
 
 const SHOWS = [
@@ -68,6 +68,7 @@ const diffColors: Record<string, string> = {
 }
 
 export default function MarketVideoPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<Tab>('live')
 
   const tabCls = (active: boolean) =>
@@ -87,27 +88,40 @@ export default function MarketVideoPanel() {
       {tab === 'live' && (
         <div className="space-y-1.5">
           {CHANNELS.map((ch) => (
-            <div key={ch.id} className={`border-l-2 ${ch.color} pl-2 py-1 flex items-center justify-between`}>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-medium text-foreground leading-tight">{ch.name}</span>
-                  {ch.live && (
-                    <span className="flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-wider text-red-500">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                      Live
-                    </span>
-                  )}
+            <div key={ch.id}>
+              <div className={`border-l-2 ${ch.color} pl-2 py-1 flex items-center justify-between`}>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-medium text-foreground leading-tight">{ch.name}</span>
+                    {ch.live && (
+                      <span className="flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-wider text-red-500">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        Live
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[9px] text-muted-foreground">{ch.desc}</div>
                 </div>
-                <div className="text-[9px] text-muted-foreground">{ch.desc}</div>
+                <a
+                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ch.name + ' live')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[9px] text-blue-400 hover:text-blue-300 ml-2 shrink-0"
+                >
+                  Watch
+                </a>
               </div>
-              <a
-                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ch.name + ' live')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[9px] text-blue-400 hover:text-blue-300 ml-2 shrink-0"
-              >
-                Watch
-              </a>
+              {expanded && ch.live && ch.embedQuery && (
+                <div className="mt-1 mb-1">
+                  <iframe
+                    src={`https://www.youtube.com/embed?listType=search&list=${ch.embedQuery}`}
+                    className="w-full rounded-sm"
+                    height={200}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -134,9 +148,9 @@ export default function MarketVideoPanel() {
         <div className="space-y-1.5">
           {TRENDING.map((v) => (
             <div key={v.id} className="border-t border-border/20 pt-1.5 first:border-t-0 first:pt-0">
-              <div className="text-[10px] font-medium text-foreground leading-snug line-clamp-2">{v.title}</div>
+              <div className={`text-[10px] font-medium text-foreground leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{v.title}</div>
               <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                <span className="text-[9px] text-muted-foreground">{v.channel}</span>
+                <span className={`text-muted-foreground ${expanded ? 'text-[10px] font-medium' : 'text-[9px]'}`}>{v.channel}</span>
                 <span className="text-[9px] text-muted-foreground">{v.views}</span>
                 <span className="text-[9px] text-muted-foreground">{v.time}</span>
                 <span className={`text-[8px] px-1 py-0 rounded-sm ${topicColors[v.topic] ?? 'bg-muted text-muted-foreground'}`}>

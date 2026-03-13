@@ -30,7 +30,7 @@ export function PanelGrid() {
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gridAutoRows: 'minmax(200px, 280px)',
+        gridAutoRows: 'auto',
         gridAutoFlow: 'row dense',
         gap: '4px',
         padding: '4px',
@@ -67,6 +67,7 @@ export function PanelGrid() {
             style={{
               gridColumn: span.col > 1 ? `span ${span.col}` : undefined,
               gridRow: span.row > 1 ? `span ${span.row}` : undefined,
+              minHeight: 200 * (span.row ?? 1),
             }}
           >
             <PanelIdProvider id={p.id}>

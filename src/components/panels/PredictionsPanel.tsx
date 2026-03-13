@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { usePolling } from '@/hooks/use-polling'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 
 interface Prediction {
   id: string
@@ -60,6 +60,7 @@ const CATEGORY_TABS: Category[] = ['All', 'Politics', 'Finance', 'Crypto', 'Spor
 const TOP_TABS: TopTab[] = ['Markets', 'Trending', 'Stats']
 
 export default function PredictionsPanel() {
+  const expanded = useIsExpanded()
   const [topTab, setTopTab] = useState<TopTab>('Markets')
   const [activeCategory, setActiveCategory] = useState<Category>('All')
 
@@ -86,7 +87,7 @@ export default function PredictionsPanel() {
   const maxVolume = filtered.reduce((m, p) => Math.max(m, p.volume), 1)
   const totalVolume = (data ?? []).reduce((s, p) => s + p.volume, 0)
 
-  const topFive = [...(data ?? [])].sort((a, b) => b.volume - a.volume).slice(0, 5)
+  const topFive = [...(data ?? [])].sort((a, b) => b.volume - a.volume).slice(0, expanded ? undefined : 5)
   const topFiveMaxVol = topFive.reduce((m, p) => Math.max(m, p.volume), 1)
 
   const avgYesPct =
@@ -161,7 +162,7 @@ export default function PredictionsPanel() {
               {filtered.map((p) => (
                 <div key={p.id} className="py-1.5 border-b border-border/20 last:border-0">
                   <div className="flex items-start gap-1 mb-1">
-                    <div className="text-[11px] font-medium text-foreground leading-snug line-clamp-2 flex-1">
+                    <div className={`text-[11px] font-medium text-foreground leading-snug flex-1 ${expanded ? '' : 'line-clamp-2'}`}>
                       {p.title}
                     </div>
                     <TrendingBadge volume={p.volume} />
@@ -255,7 +256,7 @@ export default function PredictionsPanel() {
 
         {topTab === 'Stats' && (
           <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-2">
+            <div className={`grid gap-2 ${expanded ? 'grid-cols-4' : 'grid-cols-3'}`}>
               <div className="rounded-md border border-border/30 p-2 text-center">
                 <div className="text-[18px] font-bold text-foreground">{data?.length ?? 0}</div>
                 <div className="text-[8px] text-muted-foreground uppercase tracking-wide">Markets</div>
@@ -268,6 +269,12 @@ export default function PredictionsPanel() {
                 <div className="text-[18px] font-bold text-emerald-500">{avgYesPct.toFixed(0)}%</div>
                 <div className="text-[8px] text-muted-foreground uppercase tracking-wide">Avg Yes</div>
               </div>
+              {expanded && (
+                <div className="rounded-md border border-border/30 p-2 text-center">
+                  <div className="text-[18px] font-bold text-indigo-400">{avgSpread.toFixed(1)}%</div>
+                  <div className="text-[8px] text-muted-foreground uppercase tracking-wide">Avg Spread</div>
+                </div>
+              )}
             </div>
 
             <div className="rounded-md border border-border/30 p-2">
