@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { usePanelStore } from '@/stores'
 import { useSpanStore } from '@/stores/span-store'
 import { PanelRenderer } from '@/components/panels'
@@ -10,6 +10,19 @@ export function PanelGrid() {
   const getSpan = useSpanStore((s) => s.getSpan)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const dragId = useRef<string | null>(null)
+
+  useEffect(() => {
+    function onFocusPanel(e: Event) {
+      const { panelId } = (e as CustomEvent<{ panelId: string }>).detail
+      const el = document.getElementById(`panel-${panelId}`)
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('panel-highlight')
+      setTimeout(() => el.classList.remove('panel-highlight'), 2000)
+    }
+    window.addEventListener('monoth:focus-panel', onFocusPanel)
+    return () => window.removeEventListener('monoth:focus-panel', onFocusPanel)
+  }, [])
 
   return (
     <div
@@ -28,6 +41,7 @@ export function PanelGrid() {
         return (
           <div
             key={p.id}
+            id={`panel-${p.id}`}
             draggable
             onDragStart={() => { dragId.current = p.id }}
             onDragOver={(e) => {

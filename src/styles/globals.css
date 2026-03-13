@@ -193,3 +193,11 @@
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+@keyframes panel-highlight {
+  0% { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.8); }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+.panel-highlight {
+  animation: panel-highlight 2s ease-out forwards;
+}
