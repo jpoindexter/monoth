@@ -11,8 +11,8 @@ export function DashboardLayout() {
       <TopBar />
       <TickerTape />
       <StatsBar />
-      <NewsTicker />
       <PanelGrid />
+      <NewsTicker />
       <StatusBar />
     </div>
   )
