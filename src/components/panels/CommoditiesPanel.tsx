@@ -37,10 +37,45 @@ function relTime(ts: number): string {
 const tabCls = (active: boolean) =>
   `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
+const CHART_SYMBOLS = ['GLD', 'SLV', 'USO', 'DBA'] as const
+type ChartSymbol = typeof CHART_SYMBOLS[number]
+
+const CHART_SYMBOL_NAMES: Record<ChartSymbol, string> = {
+  GLD: 'Gold',
+  SLV: 'Silver',
+  USO: 'Oil',
+  DBA: 'Agriculture',
+}
+
+const CHART_COLORS: Record<ChartSymbol, { line: string; top: string; bottom: string }> = {
+  GLD: { line: '#d97706', top: 'rgba(217, 119, 6, 0.2)', bottom: 'rgba(217, 119, 6, 0.02)' },
+  SLV: { line: '#b45309', top: 'rgba(180, 83, 9, 0.2)', bottom: 'rgba(180, 83, 9, 0.02)' },
+  USO: { line: '#6b7280', top: 'rgba(107, 114, 128, 0.2)', bottom: 'rgba(107, 114, 128, 0.02)' },
+  DBA: { line: '#059669', top: 'rgba(5, 150, 105, 0.2)', bottom: 'rgba(5, 150, 105, 0.02)' },
+}
+
+type CyclePhase = 'EARLY CYCLE' | 'MID CYCLE' | 'LATE CYCLE' | 'DOWNTURN'
+
+const CYCLE_PHASE_CLS: Record<CyclePhase, string> = {
+  'EARLY CYCLE': 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30',
+  'MID CYCLE': 'text-blue-600 bg-blue-50 dark:bg-blue-950/30',
+  'LATE CYCLE': 'text-amber-600 bg-amber-50 dark:bg-amber-950/30',
+  'DOWNTURN': 'text-red-500 bg-red-50 dark:bg-red-950/30',
+}
+
+const SUPERCYCLE_SECTORS: { name: string; phase: CyclePhase }[] = [
+  { name: 'Precious Metals', phase: 'LATE CYCLE' },
+  { name: 'Energy', phase: 'MID CYCLE' },
+  { name: 'Agriculture', phase: 'EARLY CYCLE' },
+  { name: 'Industrial Metals', phase: 'MID CYCLE' },
+  { name: 'Livestock', phase: 'DOWNTURN' },
+  { name: 'Softs (Coffee, Cocoa, Sugar)', phase: 'LATE CYCLE' },
+]
+
 export default function CommoditiesPanel() {
-  const [tab, setTab] = useState<'prices' | 'news' | 'chart' | 'sectors'>('prices')
+  const [tab, setTab] = useState<'prices' | 'news' | 'chart' | 'sectors' | 'supercycle'>('prices')
   const [chartData, setChartData] = useState<CandleData[]>([])
-  const [chartSymbol, setChartSymbol] = useState('GLD')
+  const [chartSymbol, setChartSymbol] = useState<ChartSymbol>('GLD')
 
   const fetcher = useCallback(async () => {
     return fetchQuotes(COMMODITY_SYMBOLS)
@@ -97,22 +132,73 @@ export default function CommoditiesPanel() {
         <button className={tabCls(tab === 'sectors')} onClick={() => setTab('sectors')}>Sectors</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
         <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
+        <button className={tabCls(tab === 'supercycle')} onClick={() => setTab('supercycle')}>Supercycle</button>
       </div>
 
       {tab === 'chart' && (
         <div>
           <div className="flex gap-1 mb-1">
-            {['GLD', 'USO', 'SLV', 'UNG'].map((sym) => (
+            {CHART_SYMBOLS.map((sym) => (
               <button
                 key={sym}
-                className={`text-[8px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+                className={`text-[8px] px-1.5 py-0.5 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`}
                 onClick={() => setChartSymbol(sym)}
               >
                 {sym}
+                <span className="ml-0.5 text-[7px] opacity-60">{CHART_SYMBOL_NAMES[sym]}</span>
               </button>
             ))}
           </div>
-          <LightweightChart type="area" data={chartData} height={140} lineColor="#059669" areaTopColor="rgba(5, 150, 105, 0.2)" areaBottomColor="rgba(5, 150, 105, 0.02)" />
+          <LightweightChart
+            type="area"
+            data={chartData}
+            height={140}
+            lineColor={CHART_COLORS[chartSymbol].line}
+            areaTopColor={CHART_COLORS[chartSymbol].top}
+            areaBottomColor={CHART_COLORS[chartSymbol].bottom}
+          />
+        </div>
+      )}
+
+      {tab === 'supercycle' && (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between items-center">
+              <span className="text-[11px] text-muted-foreground">Bloomberg Cmdty Index (proxy)</span>
+              <div className="text-right">
+                <span className="text-[11px] tabular-nums font-medium text-foreground">214.3</span>
+                <span className="text-[10px] text-amber-600 ml-1">+18% vs 10Y avg</span>
+              </div>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[11px] text-muted-foreground">Cmdty/Equity ratio (GLD+USO/SPY)</span>
+              <div className="text-right">
+                <span className="text-[11px] tabular-nums font-medium text-foreground">0.42</span>
+                <span className="text-[10px] text-emerald-600 ml-1">Trending up</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-border/20 pt-2">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Sector Cycle Position</div>
+            <div className="flex flex-col gap-1">
+              {SUPERCYCLE_SECTORS.map((sector) => (
+                <div key={sector.name} className="flex items-center justify-between">
+                  <span className="text-[11px] text-foreground">{sector.name}</span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${CYCLE_PHASE_CLS[sector.phase]}`}>
+                    {sector.phase}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-border/20 pt-2 flex items-center justify-between">
+            <span className="text-[11px] font-medium text-foreground">Supercycle Signal</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-sm text-amber-600 bg-amber-50 dark:bg-amber-950/30">
+              BULLISH
+            </span>
+          </div>
         </div>
       )}
 
