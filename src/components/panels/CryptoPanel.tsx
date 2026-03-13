@@ -3,6 +3,7 @@ import { useCryptoData } from '@/hooks/use-crypto-data'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 import { LightweightChart } from '@/components/charts/LightweightChart'
+import { Sparkline } from '@/components/charts/Sparkline'
 
 function fmtCap(num: number): string {
   if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T'
@@ -87,6 +88,7 @@ export default function CryptoPanel() {
               <th className="text-left font-medium pb-1.5">#</th>
               <th className="text-left font-medium pb-1.5">Name</th>
               <th className="text-right font-medium pb-1.5">Price</th>
+              <th className="text-right font-medium pb-1.5">7d</th>
               <th className="text-right font-medium pb-1.5">24h</th>
               <th className="text-right font-medium pb-1.5">MCap</th>
             </tr>
@@ -102,6 +104,11 @@ export default function CryptoPanel() {
                   </td>
                   <td className="text-right tabular-nums">
                     ${c.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td className="text-right">
+                    <div className="flex justify-end">
+                      <Sparkline data={c.sparkline ?? []} />
+                    </div>
                   </td>
                   <td className={`text-right tabular-nums font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
                     {isPositive ? '+' : ''}{c.changePercent24h.toFixed(2)}%

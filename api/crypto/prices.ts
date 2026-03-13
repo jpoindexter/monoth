@@ -7,7 +7,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { data, stale } = await cached('crypto-top50', 60_000, async () => {
       const r = await fetch(
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h'
+        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h'
       )
       if (!r.ok) throw new Error(`CoinGecko error: ${r.status}`)
       const coins = await r.json()
@@ -21,6 +21,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         marketCap: c.market_cap,
         volume24h: c.total_volume,
         rank: c.market_cap_rank,
+        sparkline: c.sparkline_in_7d?.price
+          ? c.sparkline_in_7d.price.filter((_: number, i: number) => i % 24 === 0)
+          : undefined,
       }))
     })
     if (stale) res.setHeader('X-Cache', 'STALE')

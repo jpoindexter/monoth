@@ -27,6 +27,7 @@ export interface CryptoAsset {
   marketCap: number
   volume24h: number
   rank: number
+  sparkline?: number[]
 }
 
 export interface MacroSignal {
