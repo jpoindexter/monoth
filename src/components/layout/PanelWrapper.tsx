@@ -2,20 +2,34 @@ import { useState, createContext, useContext } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Maximize2, Minimize2, RefreshCw } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useSpanStore } from '@/stores/span-store'
 
 const ExpandedContext = createContext(false)
 export const useIsExpanded = () => useContext(ExpandedContext)
 
+const PanelIdContext = createContext<string | undefined>(undefined)
+export const usePanelId = () => useContext(PanelIdContext)
+export function PanelIdProvider({ id, children }: { id: string; children: React.ReactNode }) {
+  return <PanelIdContext.Provider value={id}>{children}</PanelIdContext.Provider>
+}
+
 interface PanelWrapperProps {
   title: string
+  panelId?: string
   children?: React.ReactNode
   loading?: boolean
   error?: string | null
   onRetry?: () => void
 }
 
-export function PanelWrapper({ title, children, loading, error, onRetry }: PanelWrapperProps) {
+export function PanelWrapper({ title, panelId, children, loading, error, onRetry }: PanelWrapperProps) {
   const [expanded, setExpanded] = useState(false)
+  const cycleSpan = useSpanStore((s) => s.cycleSpan)
+  const getSpan = useSpanStore((s) => s.getSpan)
+  const contextPanelId = usePanelId()
+  const effectivePanelId = panelId ?? contextPanelId
+  const span = effectivePanelId ? getSpan(effectivePanelId) : { col: 1, row: 1 }
+  const spanLabel = span.col === 1 && span.row === 1 ? '1×1' : `${span.col}×${span.row}`
 
   const panel = (
     <motion.div
@@ -39,6 +53,15 @@ export function PanelWrapper({ title, children, loading, error, onRetry }: Panel
               title="Refresh"
             >
               <RefreshCw className="w-2.5 h-2.5" />
+            </button>
+          )}
+          {effectivePanelId && (
+            <button
+              onClick={() => cycleSpan(effectivePanelId)}
+              className="px-1 py-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors text-[8px] font-medium tabular-nums"
+              title={`Resize (${spanLabel})`}
+            >
+              {spanLabel}
             </button>
           )}
           <button

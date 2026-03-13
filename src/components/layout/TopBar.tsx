@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { Settings } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,7 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { AuthModal } from '@/components/auth/AuthModal'
+import { SettingsModal } from '@/components/settings/SettingsModal'
 import { useUserStore } from '@/stores/user-store'
+import { useRegionStore, REGION_LABELS, type Region } from '@/stores/region-store'
 import { supabase } from '@/lib/supabase'
 
 function isMarketOpen(): boolean {
@@ -28,8 +31,11 @@ function isMarketOpen(): boolean {
 export function TopBar() {
   const open = isMarketOpen()
   const [authOpen, setAuthOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const authenticated = useUserStore((s) => s.authenticated)
   const email = useUserStore((s) => s.email)
+  const region = useRegionStore((s) => s.region)
+  const setRegion = useRegionStore((s) => s.setRegion)
 
   const initials = email ? email[0]?.toUpperCase() ?? 'M' : 'M'
 
@@ -58,8 +64,35 @@ export function TopBar() {
           {open ? 'Live' : 'Closed'}
         </span>
       </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="ml-2 flex items-center gap-0.5 text-[9px] uppercase tracking-wider text-muted-foreground hover:text-foreground font-medium">
+            {REGION_LABELS[region]}
+            <svg width="6" height="6" viewBox="0 0 6 6" className="ml-0.5 opacity-50"><path d="M0.5 1.5L3 4L5.5 1.5" stroke="currentColor" strokeWidth="1" fill="none"/></svg>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          {(Object.keys(REGION_LABELS) as Region[]).map((r) => (
+            <DropdownMenuItem
+              key={r}
+              onClick={() => setRegion(r)}
+              className={`text-[11px] ${region === r ? 'font-medium' : ''}`}
+            >
+              {region === r && <span className="mr-1">✓</span>}
+              {REGION_LABELS[r]}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div className="flex-1" />
       <div className="flex items-center gap-1.5">
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="p-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
+          title="Settings"
+        >
+          <Settings className="w-3 h-3" />
+        </button>
         {authenticated ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -84,6 +117,7 @@ export function TopBar() {
         )}
       </div>
       <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </motion.header>
   )
 }
