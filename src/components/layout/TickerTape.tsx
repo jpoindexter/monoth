@@ -1,22 +1,18 @@
 import { useMarketStore } from '@/stores'
 
-const TICKER_SYMBOLS = ['SPY', 'QQQ', 'DIA', 'IWM', 'VTI', 'EFA', 'EEM']
+const INDEX_SYMBOLS = ['SPY', 'QQQ', 'DIA', 'IWM', 'VTI', 'EFA', 'EEM', 'GLD']
 const CRYPTO_SYMBOLS = ['BTC', 'ETH']
-const COMMODITY_SYMBOLS = ['GLD']
 
 export function TickerTape() {
   const indices = useMarketStore((s) => s.indices)
   const crypto = useMarketStore((s) => s.crypto)
-  const commodities = useMarketStore((s) => s.commodities)
 
-  const indexItems = indices.filter((d) => TICKER_SYMBOLS.includes(d.symbol))
-  const cryptoItems = crypto.filter((d) => CRYPTO_SYMBOLS.includes(d.symbol))
-  const commodityItems = commodities.filter((d) => COMMODITY_SYMBOLS.includes(d.symbol))
+  const indexItems = indices.filter((d) => INDEX_SYMBOLS.includes(d.symbol))
+  const cryptoItems = crypto.filter((d) => CRYPTO_SYMBOLS.includes(d.symbol.toUpperCase()))
 
   const items = [
     ...indexItems.map((d) => ({ symbol: d.symbol, price: d.price, change: d.changePercent })),
-    ...cryptoItems.map((d) => ({ symbol: d.symbol, price: d.price, change: d.changePercent24h })),
-    ...commodityItems.map((d) => ({ symbol: d.symbol, price: d.price, change: d.changePercent })),
+    ...cryptoItems.map((d) => ({ symbol: d.symbol.toUpperCase(), price: d.price, change: d.changePercent24h })),
   ]
 
   if (items.length === 0) return null
@@ -27,9 +23,7 @@ export function TickerTape() {
       <span key={item.symbol} className="inline-flex items-center gap-1 px-3">
         <span className="text-foreground font-medium">{item.symbol}</span>
         <span className="text-muted-foreground tabular-nums">
-          {item.price < 100
-            ? item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            : item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </span>
         <span className={`tabular-nums ${pos ? 'text-emerald-600' : 'text-red-500'}`}>
           {pos ? '+' : ''}{item.change.toFixed(2)}%
