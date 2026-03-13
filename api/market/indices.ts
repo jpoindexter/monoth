@@ -2,7 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
 
-// Finnhub free tier doesn't support index symbols -- use ETF proxies
 const INDICES = [
   { symbol: 'SPY', name: 'S&P 500' },
   { symbol: 'QQQ', name: 'NASDAQ' },
@@ -13,29 +12,31 @@ const INDICES = [
   { symbol: 'VTI', name: 'Total Market' },
 ]
 
-async function fetchQuote(symbol: string) {
-  const res = await fetch(
-    `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${process.env.FINNHUB_API_KEY}`
-  )
-  if (!res.ok) throw new Error(`Finnhub error: ${res.status}`)
-  return res.json()
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
     const { data, stale } = await cached('indices', 30_000, async () => {
-      const quotes = await Promise.all(
-        INDICES.map(async ({ symbol, name }) => {
-          const q = await fetchQuote(symbol)
-          return {
-            symbol, name, price: q.c ?? null, change: q.d ?? 0, changePercent: q.dp ?? 0,
-            high: q.h, low: q.l, open: q.o, previousClose: q.pc,
-            timestamp: q.t ? q.t * 1000 : Date.now(), source: 'finnhub',
-          }
-        })
-      )
-      return quotes
+      const symbols = INDICES.map((i) => i.symbol).join(',')
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketDayHigh,regularMarketDayLow,regularMarketOpen,regularMarketPreviousClose`
+      const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } })
+      if (!r.ok) throw new Error(`Yahoo Finance error: ${r.status}`)
+      const json = await r.json()
+      const resultMap = new Map((json.quoteResponse?.result ?? []).map((q: Record<string, unknown>) => [q.symbol, q]))
+      return INDICES.map(({ symbol, name }) => {
+        const q = resultMap.get(symbol) as Record<string, number> | undefined
+        return {
+          symbol, name,
+          price: q?.regularMarketPrice ?? null,
+          change: q?.regularMarketChange ?? 0,
+          changePercent: q?.regularMarketChangePercent ?? 0,
+          high: q?.regularMarketDayHigh,
+          low: q?.regularMarketDayLow,
+          open: q?.regularMarketOpen,
+          previousClose: q?.regularMarketPreviousClose,
+          timestamp: Date.now(),
+          source: 'yahoo',
+        }
+      })
     })
     if (stale) res.setHeader('X-Cache', 'STALE')
     res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')

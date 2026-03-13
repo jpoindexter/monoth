@@ -221,25 +221,22 @@ export default function EarningsCalendarPanel() {
 
   const thisBounds = getWeekBounds(0)
   const nextBounds = getWeekBounds(1)
-  const FINNHUB_TOKEN = 'REDACTED'
 
   const fetchWeek = useCallback(async (from: string, to: string): Promise<EarningsEntry[]> => {
-    const url = `https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_TOKEN}`
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('Finnhub error')
-    const json = await res.json()
-    const raw: Record<string, unknown>[] = json?.earningsCalendar ?? []
-    if (!raw.length) throw new Error('empty')
+    const res = await fetch(`/api/market/earnings?from=${from}&to=${to}`)
+    if (!res.ok) throw new Error('earnings API error')
+    const raw: Record<string, unknown>[] = await res.json()
+    if (!Array.isArray(raw) || !raw.length) throw new Error('empty')
     return raw.map((r) => ({
       symbol: String(r.symbol ?? ''),
-      date: String(r.date ?? ''),
+      date: String(r.reportDate ?? r.date ?? ''),
       hour: (['bmo', 'amc', 'dmh'].includes(String(r.hour)) ? r.hour : 'amc') as Hour,
       epsEstimate: r.epsEstimate != null ? Number(r.epsEstimate) : null,
       epsActual: r.epsActual != null ? Number(r.epsActual) : null,
-      revenueEstimate: r.revenueEstimate != null ? Number(r.revenueEstimate) / 1e9 : null,
-      revenueActual: r.revenueActual != null ? Number(r.revenueActual) / 1e9 : null,
+      revenueEstimate: r.revenueEstimate != null ? Number(r.revenueEstimate) : null,
+      revenueActual: r.revenueActual != null ? Number(r.revenueActual) : null,
     }))
-  }, [FINNHUB_TOKEN])
+  }, [])
 
   const { data: thisWeekData, loading: loadingThis } = usePolling<EarningsEntry[]>({
     fetcher: useCallback(() => fetchWeek(thisBounds.from, thisBounds.to), [fetchWeek, thisBounds.from, thisBounds.to]),

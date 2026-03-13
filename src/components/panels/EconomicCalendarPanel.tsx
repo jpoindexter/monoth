@@ -223,41 +223,6 @@ function buildMockEvents(): EconEvent[] {
   ]
 }
 
-// ---- Finnhub API shape ----
-interface FinnhubEvent {
-  event?: string
-  country?: string
-  time?: string
-  actual?: number | null
-  estimate?: number | null
-  prev?: number | null
-  impact?: string
-  unit?: string
-}
-
-function parseFinnhub(raw: FinnhubEvent[]): EconEvent[] {
-  return raw.slice(0, 50).map((e, i) => {
-    const rawTime = e.time ?? ''
-    const date = rawTime.slice(0, 10) || new Date().toISOString().slice(0, 10)
-    const time = rawTime.slice(11, 16) || '00:00'
-    const fmt = (v: number | null | undefined, unit?: string) =>
-      v != null ? `${v}${unit ?? ''}` : null
-    const impact: Impact =
-      e.impact === 'high' ? 'high' : e.impact === 'medium' ? 'medium' : 'low'
-    return {
-      id: `fh-${i}`,
-      event: e.event ?? 'Unknown Event',
-      country: (e.country ?? 'US').toUpperCase(),
-      date,
-      time,
-      actual: fmt(e.actual, e.unit),
-      estimate: fmt(e.estimate, e.unit),
-      previous: fmt(e.prev, e.unit),
-      impact,
-    }
-  })
-}
-
 // ---- Helpers ----
 
 const IMPACT_COLOR: Record<Impact, string> = {
@@ -482,15 +447,11 @@ export default function EconomicCalendarPanel() {
   const [tab, setTab] = useState<'upcoming' | 'today' | 'high'>('upcoming')
 
   const fetcher = useCallback(async (): Promise<EconEvent[]> => {
-    const res = await fetch(
-      'https://finnhub.io/api/v1/calendar/economic?token=REDACTED',
-      { cache: 'no-store' }
-    )
-    if (!res.ok) throw new Error(`Finnhub ${res.status}`)
-    const json = await res.json()
-    const raw: FinnhubEvent[] = json?.economicCalendar ?? []
-    if (!raw.length) throw new Error('Empty response')
-    return parseFinnhub(raw)
+    const res = await fetch('/api/macro/calendar', { cache: 'no-store' })
+    if (!res.ok) throw new Error(`calendar API ${res.status}`)
+    const raw: EconEvent[] = await res.json()
+    if (!Array.isArray(raw) || !raw.length) throw new Error('Empty response')
+    return raw
   }, [])
 
   const { data, loading, error, refresh } = usePolling({

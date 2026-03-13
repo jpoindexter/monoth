@@ -105,24 +105,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } catch {}
       }
 
-      // 5. VIX proxy (from Finnhub VIXY quote)
-      const finnhubKey = process.env.FINNHUB_API_KEY
-      if (finnhubKey) {
-        try {
-          const vixRes = await fetch(`https://finnhub.io/api/v1/quote?symbol=VIXY&token=${finnhubKey}`)
-          const vixData = await vixRes.json()
-          if (vixData.dp != null) {
-            const change = vixData.dp
-            signals.push({
-              name: 'Volatility',
-              value: Math.round(change * 10) / 10,
-              label: change > 5 ? 'Spiking' : change < -5 ? 'Falling' : 'Stable',
-              status: change > 5 ? 'bearish' : change < -5 ? 'bullish' : 'neutral',
-              detail: `VIXY: ${change > 0 ? '+' : ''}${change.toFixed(1)}%`,
-            })
-          }
-        } catch {}
-      }
+      // 5. VIX (Yahoo Finance ^VIX)
+      try {
+        const vixRes = await fetch('https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX', {
+          headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
+        })
+        const vixData = await vixRes.json()
+        const q = vixData.quoteResponse?.result?.[0]
+        if (q?.regularMarketPrice != null) {
+          const level = q.regularMarketPrice
+          signals.push({
+            name: 'Volatility',
+            value: Math.round(level * 10) / 10,
+            label: level > 30 ? 'Elevated Fear' : level < 15 ? 'Low Volatility' : 'Moderate',
+            status: level > 30 ? 'bearish' : level < 15 ? 'bullish' : 'neutral',
+            detail: `VIX: ${level.toFixed(1)}`,
+          })
+        }
+      } catch {}
 
       return signals
     })
