@@ -6,6 +6,7 @@ import { fetchQuotes } from '@/services/api'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
+import { DonutChart, PALETTE } from '@/components/charts/DonutChart'
 import { X } from 'lucide-react'
 
 const SHARES_KEY = 'monoth-portfolio-shares'
@@ -180,6 +181,21 @@ export default function WatchlistPanel() {
         </table>
       ) : (
         <>
+          {(() => {
+            const segments = watchlist
+              .map((sym, i) => {
+                const point = data?.find((d) => d.symbol === sym)
+                const qty = shares[sym] ?? 0
+                const val = point ? point.price * qty : 0
+                return { label: sym, value: val, color: PALETTE[i % PALETTE.length] }
+              })
+              .filter((s) => s.value > 0)
+            return segments.length > 0 ? (
+              <div className="mb-3">
+                <DonutChart segments={segments} size={120} />
+              </div>
+            ) : null
+          })()}
           <table className="w-full text-[11px]">
             <thead>
               <tr className="text-muted-foreground">
