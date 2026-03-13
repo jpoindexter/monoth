@@ -33,4 +33,11 @@ export const PANELS: PanelConfig[] = [
   { id: 'watchlist', name: 'Watchlist', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'ai-insights', name: 'AI Insights', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'export', name: 'Settings', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'options-flow', name: 'Options Flow', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'insider-trading', name: 'Insider Trading', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'earnings-calendar', name: 'Earnings Calendar', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'analyst-ratings', name: 'Analyst Ratings', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'fund-flows', name: 'Fund Flows', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'short-interest', name: 'Short Interest', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'economic-calendar', name: 'Economic Calendar', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
 ]

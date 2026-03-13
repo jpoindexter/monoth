@@ -11,6 +11,8 @@ export type PanelId =
   | 'daily-brief' | 'supply-chain'
   | 'watchlist' | 'ai-insights' | 'export'
   | 'market-video'
+  | 'options-flow' | 'insider-trading' | 'earnings-calendar'
+  | 'analyst-ratings' | 'fund-flows' | 'short-interest' | 'economic-calendar'
 
 export type PanelTier = 1 | 2 | 3
 
