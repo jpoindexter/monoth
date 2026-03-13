@@ -41,6 +41,7 @@ export function StatsBar() {
 
   const indices = useMarketStore((s) => s.indices)
   const crypto = useMarketStore((s) => s.crypto)
+  const commodities = useMarketStore((s) => s.commodities)
 
   const sp500 = indices.find((i) => i.symbol === 'SPY')
   const nasdaq = indices.find((i) => i.symbol === 'QQQ')
@@ -49,6 +50,8 @@ export function StatsBar() {
   const vti = indices.find((i) => i.symbol === 'VTI')
   const bitcoin = crypto.find((c) => c.id === 'bitcoin')
   const ethereum = crypto.find((c) => c.id === 'ethereum')
+  const gold = commodities.find((c) => c.symbol === 'GLD')
+  const oil = commodities.find((c) => c.symbol === 'USO')
 
   const stats = [
     sp500 && sp500.price != null && { label: 'SPY', value: fmt(sp500.price), change: sp500.changePercent },
@@ -56,6 +59,8 @@ export function StatsBar() {
     nasdaq && nasdaq.price != null && { label: 'QQQ', value: fmt(nasdaq.price), change: nasdaq.changePercent },
     russell && russell.price != null && { label: 'IWM', value: fmt(russell.price), change: russell.changePercent },
     vti && vti.price != null && { label: 'VTI', value: fmt(vti.price), change: vti.changePercent },
+    gold && gold.price != null && { label: 'GLD', value: fmt(gold.price), change: gold.changePercent },
+    oil && oil.price != null && { label: 'USO', value: fmt(oil.price), change: oil.changePercent },
     bitcoin && bitcoin.price != null && { label: 'BTC', value: `$${bitcoin.price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`, change: bitcoin.changePercent24h },
     ethereum && ethereum.price != null && { label: 'ETH', value: `$${fmt(ethereum.price)}`, change: ethereum.changePercent24h },
   ].filter(Boolean) as StatItem[]
@@ -69,7 +74,7 @@ export function StatsBar() {
       transition={{ duration: 0.4 }}
       className="border-b border-border/40 bg-white dark:bg-[#0a0a0a] px-3 h-6 flex items-center shrink-0"
     >
-      <div className="flex items-center gap-4 overflow-x-auto text-[10px]">
+      <div className="flex items-center gap-4 overflow-x-auto text-[10px] no-scrollbar">
         <AnimatePresence mode="popLayout">
           {stats.map((s, i) => {
             const isPositive = (s.change ?? 0) >= 0

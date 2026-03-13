@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Settings } from 'lucide-react'
+import { Settings, Sun, Moon, Keyboard } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -86,6 +86,17 @@ export function TopBar() {
       </DropdownMenu>
       <div className="flex-1" />
       <div className="flex items-center gap-1.5">
+        <kbd className="hidden sm:inline text-[8px] text-muted-foreground/60 bg-muted/50 px-1 py-0.5 rounded font-mono">
+          /
+        </kbd>
+        <button
+          onClick={() => document.documentElement.classList.toggle('dark')}
+          className="p-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
+          title="Toggle theme (D)"
+        >
+          <Sun className="w-3 h-3 dark:hidden" />
+          <Moon className="w-3 h-3 hidden dark:block" />
+        </button>
         <button
           onClick={() => setSettingsOpen(true)}
           className="p-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
