@@ -1,9 +1,11 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '@/stores'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api'
+import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { LightweightChart } from '@/components/charts/LightweightChart'
 import { X } from 'lucide-react'
 
 const SHARES_KEY = 'monoth-portfolio-shares'
@@ -19,6 +21,29 @@ function saveShares(shares: Record<string, number>) {
   localStorage.setItem(SHARES_KEY, JSON.stringify(shares))
 }
 
+function MiniChart({ symbol }: { symbol: string }) {
+  const [candles, setCandles] = useState<CandleData[]>([])
+
+  useEffect(() => {
+    fetchCandles(symbol).then(setCandles).catch(() => {})
+  }, [symbol])
+
+  if (candles.length === 0) {
+    return <div className="h-[100px] flex items-center justify-center text-muted-foreground text-[10px]">Loading...</div>
+  }
+
+  return (
+    <LightweightChart
+      type="area"
+      data={candles}
+      height={100}
+      lineColor="#6366f1"
+      areaTopColor="rgba(99, 102, 241, 0.2)"
+      areaBottomColor="rgba(99, 102, 241, 0.02)"
+    />
+  )
+}
+
 export default function WatchlistPanel() {
   const watchlist = useUserStore((s) => s.watchlist)
   const addToWatchlist = useUserStore((s) => s.addToWatchlist)
@@ -26,6 +51,7 @@ export default function WatchlistPanel() {
   const [input, setInput] = useState('')
   const [tab, setTab] = useState<'quotes' | 'portfolio'>('quotes')
   const [shares, setShares] = useState<Record<string, number>>(loadShares)
+  const [expanded, setExpanded] = useState<string | null>(null)
   const navigate = useNavigate()
 
   const fetcher = useCallback(() => fetchQuotes(watchlist), [watchlist])
@@ -53,6 +79,10 @@ export default function WatchlistPanel() {
     }
     setShares(next)
     saveShares(next)
+  }
+
+  function toggleExpanded(sym: string) {
+    setExpanded((prev) => (prev === sym ? null : sym))
   }
 
   const totalValue = watchlist.reduce((sum, sym) => {
@@ -102,24 +132,48 @@ export default function WatchlistPanel() {
             {watchlist.map((sym) => {
               const point = data?.find((d) => d.symbol === sym)
               const isPos = (point?.changePercent ?? 0) >= 0
+              const isExpanded = expanded === sym
               return (
-                <tr key={sym} className="border-t border-border/20 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50" onClick={() => navigate(`/symbol/${sym}`)}>
-                  <td className="py-0.5 font-medium">{sym}</td>
-                  <td className="text-right tabular-nums">
-                    {point ? `$${point.price.toFixed(2)}` : '-'}
-                  </td>
-                  <td className={`text-right tabular-nums font-medium ${point ? (isPos ? 'text-emerald-600' : 'text-red-500') : ''}`}>
-                    {point ? `${isPos ? '+' : ''}${point.changePercent.toFixed(2)}%` : '-'}
-                  </td>
-                  <td className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => removeFromWatchlist(sym)}
-                      className="p-0.5 text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="w-2.5 h-2.5" />
-                    </button>
-                  </td>
-                </tr>
+                <>
+                  <tr
+                    key={sym}
+                    className="border-t border-border/20 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                    onClick={() => toggleExpanded(sym)}
+                  >
+                    <td className="py-0.5 font-medium flex items-center gap-1">
+                      <span
+                        className="inline-block text-muted-foreground transition-transform duration-150"
+                        style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', fontSize: '8px' }}
+                      >
+                        &#9654;
+                      </span>
+                      {sym}
+                    </td>
+                    <td className="text-right tabular-nums">
+                      {point ? `$${point.price.toFixed(2)}` : '-'}
+                    </td>
+                    <td className={`text-right tabular-nums font-medium ${point ? (isPos ? 'text-emerald-600' : 'text-red-500') : ''}`}>
+                      {point ? `${isPos ? '+' : ''}${point.changePercent.toFixed(2)}%` : '-'}
+                    </td>
+                    <td className="text-right" onClick={(e) => { e.stopPropagation(); navigate(`/symbol/${sym}`) }}>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeFromWatchlist(sym) }}
+                        className="p-0.5 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </td>
+                  </tr>
+                  {isExpanded && (
+                    <tr key={`${sym}-chart`}>
+                      <td colSpan={4} className="pb-2">
+                        <div className="bg-muted/30 rounded px-2 pt-1">
+                          <MiniChart symbol={sym} />
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               )
             })}
           </tbody>
