@@ -14,7 +14,7 @@ type ThemeProviderState = {
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>({
-  theme: "system",
+  theme: "light",
   setTheme: () => null,
 })
 
@@ -25,13 +25,9 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Clear stale key from old builds
-    localStorage.removeItem("monoth-theme")
     const stored = localStorage.getItem(storageKey) as Theme | null
-    if (stored === "light") return stored
-    // Force light — ignore "dark", "system", or missing value
-    localStorage.setItem(storageKey, "light")
-    return "light"
+    if (stored === "light" || stored === "dark") return stored
+    return defaultTheme
   })
 
   useEffect(() => {
@@ -47,9 +43,9 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+    setTheme: (newTheme: Theme) => {
+      localStorage.setItem(storageKey, newTheme)
+      setTheme(newTheme)
     },
   }
 

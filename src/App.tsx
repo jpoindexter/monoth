@@ -7,9 +7,11 @@ import { Dashboard } from '@/pages/Dashboard'
 import { CommandPalette } from '@/components/CommandPalette'
 import { useLayoutStore } from '@/stores'
 import { useUserStore } from '@/stores/user-store'
+import { useTheme } from '@/components/theme-provider'
 
 function AppInner() {
   const toggleLock = useLayoutStore((s) => s.toggleLock)
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     useUserStore.getState().initAuth()
@@ -24,7 +26,7 @@ function AppInner() {
         e.preventDefault()
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))
       } else if (e.key === 'D' || e.key === 'd') {
-        document.documentElement.classList.toggle('dark')
+        setTheme(theme === 'dark' ? 'light' : 'dark')
       } else if (e.key === 'L' || e.key === 'l') {
         toggleLock()
       } else if (e.key === 'R' || e.key === 'r') {
@@ -33,7 +35,7 @@ function AppInner() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [toggleLock])
+  }, [toggleLock, theme, setTheme])
 
   return (
     <>
@@ -49,7 +51,7 @@ function AppInner() {
 
 export default function App() {
   return (
-    <ThemeProvider defaultTheme="dark">
+    <ThemeProvider defaultTheme="light">
       <BrowserRouter>
         <AppInner />
       </BrowserRouter>

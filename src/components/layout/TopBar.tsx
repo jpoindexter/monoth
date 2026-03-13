@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Settings, Sun, Moon, Keyboard } from 'lucide-react'
+import { Settings, Sun, Moon } from 'lucide-react'
+import { useTheme } from '@/components/theme-provider'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,6 +37,7 @@ export function TopBar() {
   const email = useUserStore((s) => s.email)
   const region = useRegionStore((s) => s.region)
   const setRegion = useRegionStore((s) => s.setRegion)
+  const { theme, setTheme } = useTheme()
 
   const initials = email ? email[0]?.toUpperCase() ?? 'M' : 'M'
 
@@ -90,7 +92,7 @@ export function TopBar() {
           /
         </kbd>
         <button
-          onClick={() => document.documentElement.classList.toggle('dark')}
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           className="p-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
           title="Toggle theme (D)"
         >
