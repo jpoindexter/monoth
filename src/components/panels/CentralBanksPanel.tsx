@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
@@ -39,6 +39,12 @@ export default function CentralBanksPanel() {
     enabled: tab === 'signals',
   })
 
+  useEffect(() => {
+    if (!sigLoading && signals != null && !signals.length && tab === 'signals') {
+      setTab('news')
+    }
+  }, [sigLoading, signals, tab])
+
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
@@ -63,7 +69,9 @@ export default function CentralBanksPanel() {
             </div>
           ))}
           {!signals?.length && !sigLoading && (
-            <p className="text-[10px] text-muted-foreground">No signal data available</p>
+            <div className="py-4 text-center text-[10px] text-muted-foreground">
+              No data available. Refreshes automatically.
+            </div>
           )}
         </div>
       )}

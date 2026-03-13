@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
@@ -47,6 +47,12 @@ export default function StablecoinsPanel() {
   })
   const { data: newsData } = useNewsData('stablecoins')
 
+  useEffect(() => {
+    if (!loading && data != null && !data.length && tab === 'data') {
+      setTab('news')
+    }
+  }, [loading, data, tab])
+
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
@@ -57,7 +63,13 @@ export default function StablecoinsPanel() {
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
-      {tab === 'data' && (
+      {tab === 'data' && !loading && data != null && !data.length && (
+        <div className="py-4 text-center text-[10px] text-muted-foreground">
+          No data available. Refreshes automatically.
+        </div>
+      )}
+
+      {tab === 'data' && data && !!data.length && (
         <table className="w-full text-[11px]">
           <thead>
             <tr className="text-muted-foreground">

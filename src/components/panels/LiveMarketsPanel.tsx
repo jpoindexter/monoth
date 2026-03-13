@@ -111,7 +111,13 @@ export default function LiveMarketsPanel() {
         <div className="py-4 text-center text-muted-foreground text-[10px]">Loading...</div>
       )}
 
-      {isMoversTab && moversList && (
+      {isMoversTab && !moversLoading && moversList != null && !moversList.length && (
+        <div className="py-4 text-center text-[10px] text-muted-foreground">
+          No data available. Refreshes automatically.
+        </div>
+      )}
+
+      {isMoversTab && moversList && !!moversList.length && (
         <table className="w-full text-[11px]">
           <thead>
             <tr className="text-muted-foreground">

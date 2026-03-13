@@ -40,7 +40,7 @@ export default function PredictionsPanel() {
               {p.title}
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="flex-1 h-3 rounded-sm overflow-hidden bg-zinc-200 flex">
+              <div className="flex-1 h-3 rounded-sm overflow-hidden bg-zinc-200 dark:bg-zinc-700 flex">
                 <div
                   className="h-full bg-emerald-500 flex items-center justify-center"
                   style={{ width: `${p.yesPct}%` }}

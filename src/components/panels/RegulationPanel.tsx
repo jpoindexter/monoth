@@ -43,7 +43,7 @@ function categorizeNews(headlines: { title: string; published: number; id: strin
 }
 
 function ActivityDot({ level }: { level: number }) {
-  const color = level >= 7 ? 'bg-red-500' : level >= 4 ? 'bg-amber-500' : level >= 2 ? 'bg-yellow-500' : 'bg-zinc-300'
+  const color = level >= 7 ? 'bg-red-500' : level >= 4 ? 'bg-amber-500' : level >= 2 ? 'bg-yellow-500' : 'bg-zinc-300 dark:bg-zinc-600'
   return <span className={`inline-block w-1.5 h-1.5 rounded-full ${color}`} />
 }
 

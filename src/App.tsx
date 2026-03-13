@@ -7,6 +7,7 @@ import { ToastContainer } from '@/components/Toast'
 import { Landing } from '@/pages/Landing'
 import { Dashboard } from '@/pages/Dashboard'
 import { CommandPalette } from '@/components/CommandPalette'
+import { KeyboardHelp } from '@/components/KeyboardHelp'
 import { useLayoutStore } from '@/stores'
 import { useUserStore } from '@/stores/user-store'
 import { useTheme } from '@/components/theme-provider'
@@ -48,6 +49,7 @@ function AppInner() {
         <Route path="/symbol/:ticker" element={<Dashboard />} />
       </Routes>
       <CommandPalette />
+      <KeyboardHelp />
       <ToastContainer />
     </>
   )

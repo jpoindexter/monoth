@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { useMacroData } from '@/hooks/use-macro-data'
 import { usePolling } from '@/hooks/use-polling'
@@ -27,6 +27,12 @@ export default function EconomicDataPanel() {
     enabled: tab === 'calendar',
   })
 
+  useEffect(() => {
+    if (!loading && data != null && !data.length && tab === 'indicators') {
+      setTab('calendar')
+    }
+  }, [loading, data, tab])
+
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
@@ -43,7 +49,13 @@ export default function EconomicDataPanel() {
         <button className={tabCls(tab === 'calendar')} onClick={() => setTab('calendar')}>Calendar</button>
       </div>
 
-      {tab === 'indicators' && (
+      {tab === 'indicators' && !loading && data != null && !data.length && (
+        <div className="py-4 text-center text-[10px] text-muted-foreground">
+          No data available. Refreshes automatically.
+        </div>
+      )}
+
+      {tab === 'indicators' && data && !!data.length && (
         <table className="w-full text-[11px]">
           <thead>
             <tr className="text-muted-foreground">
@@ -76,7 +88,13 @@ export default function EconomicDataPanel() {
         <div className="py-4 text-center text-muted-foreground text-[10px]">Loading...</div>
       )}
 
-      {tab === 'calendar' && calData && (
+      {tab === 'calendar' && !calLoading && calData != null && !calData.length && (
+        <div className="py-4 text-center text-[10px] text-muted-foreground">
+          No data available. Refreshes automatically.
+        </div>
+      )}
+
+      {tab === 'calendar' && calData && !!calData.length && (
         <table className="w-full text-[11px]">
           <thead>
             <tr className="text-muted-foreground">
