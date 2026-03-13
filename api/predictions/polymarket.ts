@@ -2,12 +2,12 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
 
-interface PolymarketEvent {
+interface PolymarketMarket {
   id: string
-  title: string
+  question: string
   slug: string
-  outcomes: string[]
-  outcomePrices: string // JSON string of prices array
+  outcomes: string
+  outcomePrices: string
   volume: number
   liquidity: number
   endDate: string
@@ -19,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { data, stale } = await cached('polymarket', 300_000, async () => {
-      const url = 'https://gamma-api.polymarket.com/events?limit=20&active=true&closed=false&order=volume&ascending=false'
+      const url = 'https://gamma-api.polymarket.com/markets?limit=20&active=true&closed=false&order=volume&ascending=false'
       const r = await fetch(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
@@ -27,27 +27,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       })
       if (!r.ok) throw new Error(`Polymarket error: ${r.status}`)
-      const events: PolymarketEvent[] = await r.json()
+      const markets: PolymarketMarket[] = await r.json()
 
-      return events
-        .filter((e) => e.active && e.outcomes?.length >= 2)
-        .map((e) => {
+      return markets
+        .filter((m) => m.active && m.outcomePrices)
+        .map((m) => {
           let prices: number[] = []
           try {
-            prices = JSON.parse(e.outcomePrices || '[]').map(Number)
+            prices = JSON.parse(m.outcomePrices || '[]').map(Number)
           } catch {}
           const yesPrice = prices[0] ?? 0.5
           const yesPct = Math.round(yesPrice * 100)
 
           return {
-            id: e.id,
-            title: e.title,
+            id: m.id,
+            title: m.question,
             yesPct,
             noPct: 100 - yesPct,
-            volume: e.volume,
-            endDate: e.endDate,
+            volume: m.volume,
+            endDate: m.endDate,
           }
         })
+        .filter((m) => m.volume > 100)
         .slice(0, 15)
     })
 
