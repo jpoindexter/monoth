@@ -51,8 +51,22 @@ function relTime(ts: number): string {
   return `${Math.floor(diff / 86400)}d`
 }
 
+const FLOW_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+const FLOW_RANGE = { min: -8, max: 15 }
+
+const CROWDING_STOCKS = [
+  { symbol: 'NVDA', name: 'NVIDIA', theme: 'AI/Semis' },
+  { symbol: 'MSFT', name: 'Microsoft', theme: 'Cloud' },
+  { symbol: 'AMZN', name: 'Amazon', theme: 'E-comm/Cloud' },
+  { symbol: 'META', name: 'Meta', theme: 'Social/AI' },
+  { symbol: 'GOOGL', name: 'Alphabet', theme: 'Search/AI' },
+  { symbol: 'TSLA', name: 'Tesla', theme: 'EV' },
+  { symbol: 'JPM', name: 'JPMorgan', theme: 'Banks' },
+  { symbol: 'LLY', name: 'Eli Lilly', theme: 'Pharma' },
+]
+
 export default function HedgeFundsPanel() {
-  const [tab, setTab] = useState<'prices' | 'strategies' | 'holdings' | 'news'>('prices')
+  const [tab, setTab] = useState<'prices' | 'strategies' | 'holdings' | 'news' | 'flows' | 'crowding'>('prices')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('hedgefunds')
   const { data: priceData, loading: priceLoading } = usePolling({
     fetcher: useCallback(() => fetchQuotes(HF_SYMBOLS), []),
@@ -76,6 +90,31 @@ export default function HedgeFundsPanel() {
     change: seededReturn(h.symbol + 'chg', -2, 3),
   }))
 
+  const flowData = FLOW_MONTHS.map((month, i) => ({
+    month,
+    flow: seededReturn('flow' + month, FLOW_RANGE.min, FLOW_RANGE.max),
+    index: i,
+  }))
+  const maxFlowAbs = Math.max(...flowData.map(f => Math.abs(f.flow)), 0.1)
+  const last3FlowSum = flowData.slice(-3).reduce((acc, f) => acc + f.flow, 0)
+  const currentMonthFlow = flowData[flowData.length - 1]
+  let cumulative = 0
+  const flowWithCumulative = flowData.map(f => {
+    cumulative += f.flow
+    return { ...f, cumulative }
+  })
+  const smartMoneyDir = last3FlowSum >= 0 ? 'ALLOCATING' : 'REDEEMING'
+
+  const crowdingData = CROWDING_STOCKS.map(s => ({
+    ...s,
+    hfPct: seededReturn(s.symbol + 'hfpct', 55, 85),
+    score: seededReturn(s.symbol + 'score', 4, 10),
+  }))
+  const avgCrowding = crowdingData.reduce((acc, c) => acc + c.score, 0) / crowdingData.length
+  const crowdingRisk = avgCrowding > 7 ? 'HIGH' : avgCrowding >= 5 ? 'MODERATE' : 'LOW'
+  const crowdingRiskColor = crowdingRisk === 'HIGH' ? 'text-red-500' : crowdingRisk === 'MODERATE' ? 'text-amber-500' : 'text-emerald-500'
+  const crowdingRiskBg = crowdingRisk === 'HIGH' ? 'bg-red-500/10' : crowdingRisk === 'MODERATE' ? 'bg-amber-500/10' : 'bg-emerald-500/10'
+
   return (
     <PanelWrapper title="Hedge Funds & PE" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2">
@@ -83,6 +122,8 @@ export default function HedgeFundsPanel() {
         <button className={tabCls(tab === 'strategies')} onClick={() => setTab('strategies')}>Strategies</button>
         <button className={tabCls(tab === 'holdings')} onClick={() => setTab('holdings')}>Holdings</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
+        <button className={tabCls(tab === 'flows')} onClick={() => setTab('flows')}>Flows</button>
+        <button className={tabCls(tab === 'crowding')} onClick={() => setTab('crowding')}>Crowding</button>
       </div>
 
       {tab === 'prices' && (
@@ -202,6 +243,134 @@ export default function HedgeFundsPanel() {
               </a>
             )
           })}
+        </div>
+      )}
+      {tab === 'flows' && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between mb-1">
+            <div>
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">HF Industry AUM</span>
+              <span className="text-[13px] font-semibold ml-1.5">~$4.5T</span>
+            </div>
+            <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${smartMoneyDir === 'ALLOCATING' ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
+              {smartMoneyDir}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
+            <span>Monthly Net Flows ($B)</span>
+            <span className={`font-medium ${currentMonthFlow.flow >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+              {currentMonthFlow.month}: {currentMonthFlow.flow >= 0 ? '+' : ''}{currentMonthFlow.flow.toFixed(1)}B
+            </span>
+          </div>
+
+          <div className="flex items-end gap-1 h-16">
+            {flowData.map((f) => {
+              const barH = Math.max((Math.abs(f.flow) / maxFlowAbs) * 100, 4)
+              const isPos = f.flow >= 0
+              return (
+                <div key={f.month} className="flex-1 flex flex-col items-center gap-0.5">
+                  {isPos ? (
+                    <>
+                      <div
+                        className="w-full rounded-sm bg-emerald-500"
+                        style={{ height: `${barH}%` }}
+                        title={`${f.month}: +${f.flow.toFixed(1)}B`}
+                      />
+                      <div className="w-full rounded-sm bg-transparent" style={{ height: `0%` }} />
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-full rounded-sm bg-transparent" style={{ height: `${100 - barH}%` }} />
+                      <div
+                        className="w-full rounded-sm bg-red-500"
+                        style={{ height: `${barH}%` }}
+                        title={`${f.month}: ${f.flow.toFixed(1)}B`}
+                      />
+                    </>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="flex justify-between mt-0.5">
+            {flowData.map((f) => (
+              <span key={f.month} className="flex-1 text-center text-[8px] text-muted-foreground">{f.month}</span>
+            ))}
+          </div>
+
+          <div className="mt-2 pt-1.5 border-t border-border/20">
+            <div className="flex items-center justify-between text-[9px] text-muted-foreground uppercase tracking-wider mb-1">
+              <span>Cumulative Flow (Jan base)</span>
+            </div>
+            <div className="flex items-end gap-1 h-6">
+              {flowWithCumulative.map((f, i) => {
+                const allCum = flowWithCumulative.map(x => x.cumulative)
+                const minCum = Math.min(...allCum)
+                const maxCum = Math.max(...allCum)
+                const range = maxCum - minCum || 1
+                const barH = Math.max(((f.cumulative - minCum) / range) * 100, 4)
+                const isPos = f.cumulative >= 0
+                return (
+                  <div key={f.month} className="flex-1 flex flex-col justify-end">
+                    <div
+                      className={`w-full rounded-sm ${isPos ? 'bg-emerald-400/60' : 'bg-red-400/60'}`}
+                      style={{ height: `${barH}%` }}
+                      title={`${f.month} cumulative: ${f.cumulative >= 0 ? '+' : ''}${f.cumulative.toFixed(1)}B`}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+            <div className="flex justify-between mt-0.5">
+              {flowWithCumulative.map((f) => (
+                <span key={f.month} className="flex-1 text-center text-[8px] tabular-nums text-muted-foreground">
+                  {f.cumulative >= 0 ? '+' : ''}{f.cumulative.toFixed(0)}
+                </span>
+              ))}
+            </div>
+          </div>
+          <p className="text-[9px] text-muted-foreground mt-1">Simulated flows in $B. Smart Money badge based on last 3mo.</p>
+        </div>
+      )}
+
+      {tab === 'crowding' && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Most Crowded HF Positions</span>
+            <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${crowdingRiskBg} ${crowdingRiskColor}`}>
+              Crowding Risk: {crowdingRisk}
+            </span>
+          </div>
+          <div className="flex justify-between text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
+            <span>Stock / Theme</span>
+            <span>HFs Hold / Score</span>
+          </div>
+          {crowdingData.map((c) => {
+            const barPct = (c.score / 10) * 100
+            const barColor = c.score >= 8 ? 'bg-red-500' : c.score >= 6 ? 'bg-orange-500' : c.score >= 4 ? 'bg-amber-400' : 'bg-emerald-500'
+            return (
+              <div key={c.symbol}>
+                <div className="flex items-center justify-between mb-0.5">
+                  <div>
+                    <span className="text-[11px] font-medium">{c.symbol}</span>
+                    <span className="text-muted-foreground ml-1 text-[9px]">{c.theme}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] tabular-nums text-muted-foreground">{c.hfPct.toFixed(0)}%</span>
+                    <span className={`text-[11px] tabular-nums font-medium ${c.score >= 7 ? 'text-red-500' : c.score >= 5 ? 'text-amber-500' : 'text-emerald-600'}`}>
+                      {c.score.toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+                <div className="w-full bg-muted/40 h-1.5 rounded-full overflow-hidden">
+                  <div className={`h-1.5 rounded-full ${barColor}`} style={{ width: `${barPct}%` }} />
+                </div>
+              </div>
+            )
+          })}
+          <p className="text-[9px] text-muted-foreground mt-2">Simulated. Score 0-10; higher = more crowded. Red &gt;= 8.</p>
         </div>
       )}
     </PanelWrapper>
