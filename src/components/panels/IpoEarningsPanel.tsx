@@ -32,7 +32,7 @@ function fmtRev(n: number | null): string {
 }
 
 export default function IpoEarningsPanel() {
-  const [tab, setTab] = useState<'earnings' | 'news'>('earnings')
+  const [tab, setTab] = useState<'earnings' | 'news'>('news')
   const { data: newsData, loading: newsLoading, error: newsError, refresh } = useNewsData('ipo')
 
   const { data: earningsData, loading: earningsLoading } = usePolling<Earning[]>({

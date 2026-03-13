@@ -29,6 +29,11 @@ export default function PredictionsPanel() {
   return (
     <PanelWrapper title="Prediction Markets" loading={loading} error={error} onRetry={refresh}>
       <div className="space-y-0">
+        {(!data || data.length === 0) && !loading && (
+          <div className="py-4 text-center text-[10px] text-muted-foreground">
+            No prediction markets available. Data refreshes every 5 minutes.
+          </div>
+        )}
         {data?.map((p) => (
           <div key={p.id} className="py-1.5 border-b border-border/20 last:border-0">
             <div className="text-[11px] font-medium text-foreground leading-snug line-clamp-2 mb-1">

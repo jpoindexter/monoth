@@ -21,7 +21,7 @@ function relTime(ts: number): string {
 }
 
 export default function MarketAnalysisPanel() {
-  const [tab, setTab] = useState<'events' | 'news'>('events')
+  const [tab, setTab] = useState<'events' | 'news'>('news')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('analysis')
   const { data: events, loading: evLoading } = usePolling<CorrelationEvent[]>({
     fetcher: useCallback(async () => {
