@@ -5,174 +5,311 @@ interface City {
   name: string
   timezone: string
   market: string
-  openHour: number
-  closeHour: number
+  open: number
+  close: number
   weekdays: boolean
+  color: string
 }
 
 const CITIES: City[] = [
-  { name: 'New York', timezone: 'America/New_York', market: 'NYSE', openHour: 9.5, closeHour: 16, weekdays: true },
-  { name: 'London', timezone: 'Europe/London', market: 'LSE', openHour: 8, closeHour: 16.5, weekdays: true },
-  { name: 'Tokyo', timezone: 'Asia/Tokyo', market: 'TSE', openHour: 9, closeHour: 15, weekdays: true },
-  { name: 'Hong Kong', timezone: 'Asia/Hong_Kong', market: 'HKEX', openHour: 9.5, closeHour: 16, weekdays: true },
-  { name: 'Sydney', timezone: 'Australia/Sydney', market: 'ASX', openHour: 10, closeHour: 16, weekdays: true },
-  { name: 'Frankfurt', timezone: 'Europe/Berlin', market: 'XETRA', openHour: 9, closeHour: 17.5, weekdays: true },
-  { name: 'Singapore', timezone: 'Asia/Singapore', market: 'SGX', openHour: 9, closeHour: 17, weekdays: true },
-  { name: 'Mumbai', timezone: 'Asia/Kolkata', market: 'NSE', openHour: 9.25, closeHour: 15.5, weekdays: true },
+  { name: 'New York',   timezone: 'America/New_York',   market: 'NYSE',  open: 9.5,  close: 16,   weekdays: true, color: 'bg-blue-500' },
+  { name: 'London',     timezone: 'Europe/London',       market: 'LSE',   open: 8,    close: 16.5, weekdays: true, color: 'bg-violet-500' },
+  { name: 'Frankfurt',  timezone: 'Europe/Berlin',       market: 'XETRA', open: 9,    close: 17.5, weekdays: true, color: 'bg-amber-500' },
+  { name: 'Tokyo',      timezone: 'Asia/Tokyo',          market: 'TSE',   open: 9,    close: 15,   weekdays: true, color: 'bg-rose-500' },
+  { name: 'Hong Kong',  timezone: 'Asia/Hong_Kong',      market: 'HKEX',  open: 9.5,  close: 16,   weekdays: true, color: 'bg-red-400' },
+  { name: 'Sydney',     timezone: 'Australia/Sydney',    market: 'ASX',   open: 10,   close: 16,   weekdays: true, color: 'bg-teal-500' },
+  { name: 'Singapore',  timezone: 'Asia/Singapore',      market: 'SGX',   open: 9,    close: 17,   weekdays: true, color: 'bg-emerald-500' },
+  { name: 'Mumbai',     timezone: 'Asia/Kolkata',        market: 'NSE',   open: 9.25, close: 15.5, weekdays: true, color: 'bg-orange-400' },
 ]
 
-function getTimeInZone(tz: string): Date {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: tz }))
+function getLocalHours(tz: string, base: Date = new Date()): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  }).formatToParts(base)
+  const h = parseInt(parts.find(p => p.type === 'hour')?.value ?? '0')
+  const m = parseInt(parts.find(p => p.type === 'minute')?.value ?? '0')
+  return h + m / 60
 }
 
-function formatTime(date: Date): string {
-  const h = date.getHours()
-  const m = date.getMinutes().toString().padStart(2, '0')
-  const ampm = h >= 12 ? 'PM' : 'AM'
-  const h12 = h % 12 || 12
-  return `${h12}:${m} ${ampm}`
-}
-
-function isMarketOpen(city: City): boolean {
-  const now = getTimeInZone(city.timezone)
-  const day = now.getDay()
-  if (city.weekdays && (day === 0 || day === 6)) return false
-  const hours = now.getHours() + now.getMinutes() / 60
-  return hours >= city.openHour && hours < city.closeHour
-}
-
-function hoursUntilEvent(city: City): string {
-  const now = getTimeInZone(city.timezone)
-  const day = now.getDay()
-  const hours = now.getHours() + now.getMinutes() / 60
-  const open = isMarketOpen(city)
-
-  if (city.weekdays && (day === 0 || day === 6)) {
-    const daysUntilMon = day === 0 ? 1 : 2
-    return `opens in ${daysUntilMon}d`
-  }
-
-  if (open) {
-    const remaining = city.closeHour - hours
-    if (remaining < 1) return `closes in ${Math.round(remaining * 60)}m`
-    return `closes in ${remaining.toFixed(1)}h`
-  }
-
-  if (hours < city.openHour) {
-    const until = city.openHour - hours
-    if (until < 1) return `opens in ${Math.round(until * 60)}m`
-    return `opens in ${until.toFixed(1)}h`
-  }
-
-  return 'closed'
-}
-
-function SessionTimeline() {
-  const etNow = getTimeInZone('America/New_York')
-  const etHour = etNow.getHours() + etNow.getMinutes() / 60
-
-  // Convert each market's open/close to ET offset
-  function toET(city: City) {
-    const localNow = getTimeInZone(city.timezone)
-    const localHour = localNow.getHours() + localNow.getMinutes() / 60
-    const offset = etHour - localHour
-    return {
-      name: city.market,
-      open: city.openHour + offset,
-      close: city.closeHour + offset,
-      isOpen: isMarketOpen(city),
-    }
-  }
-
-  const sessions = CITIES.map(toET)
-
-  return (
-    <div className="mt-1 pt-1.5 border-t border-border/20">
-      <div className="text-[8px] uppercase tracking-wider text-muted-foreground mb-1">Session Overlap (ET)</div>
-      <div className="relative h-[60px]">
-        {/* Hour markers */}
-        {[0, 4, 8, 12, 16, 20, 24].map((h) => (
-          <div key={h} className="absolute top-0 bottom-0" style={{ left: `${(h / 24) * 100}%` }}>
-            <div className="w-px h-full bg-border/20" />
-            <span className="absolute -bottom-0.5 -translate-x-1/2 text-[7px] text-muted-foreground/60">{h}</span>
-          </div>
-        ))}
-        {/* Now line */}
-        <div
-          className="absolute top-0 bottom-0 w-px bg-red-500 z-10"
-          style={{ left: `${(etHour / 24) * 100}%` }}
-        />
-        {/* Session bars */}
-        {sessions.slice(0, 6).map((s, i) => {
-          let open = s.open % 24
-          if (open < 0) open += 24
-          let close = s.close % 24
-          if (close < 0) close += 24
-
-          const left = (open / 24) * 100
-          const width = open < close
-            ? ((close - open) / 24) * 100
-            : ((24 - open) / 24) * 100
-
-          return (
-            <div
-              key={s.name}
-              className={`absolute h-[7px] rounded-sm ${s.isOpen ? 'bg-emerald-500/60' : 'bg-zinc-400/30'}`}
-              style={{
-                left: `${left}%`,
-                width: `${Math.min(width, 100 - left)}%`,
-                top: `${i * 9}px`,
-              }}
-              title={`${s.name}: ${open.toFixed(1)}-${close.toFixed(1)} ET`}
-            >
-              <span className="text-[6px] font-medium text-foreground/70 pl-0.5 leading-[7px]">{s.name}</span>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+function getLocalDay(tz: string, base: Date = new Date()): number {
+  return parseInt(
+    new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short' })
+      .format(base)
+      .replace('Sun', '0').replace('Mon', '1').replace('Tue', '2')
+      .replace('Wed', '3').replace('Thu', '4').replace('Fri', '5').replace('Sat', '6')
   )
 }
 
-export default function WorldClockPanel() {
-  const [, setNow] = useState(Date.now())
+function formatTimeInZone(tz: string, base: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(base)
+}
 
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 10_000)
-    return () => clearInterval(timer)
-  }, [])
+type MarketStatus = 'OPEN' | 'PRE-MARKET' | 'POST-MARKET' | 'CLOSED'
 
-  const openCount = CITIES.filter(isMarketOpen).length
+function getMarketStatus(city: City, base: Date = new Date()): MarketStatus {
+  const dayStr = new Intl.DateTimeFormat('en-US', { timeZone: city.timezone, weekday: 'short' }).format(base)
+  const isWeekend = dayStr === 'Sun' || dayStr === 'Sat'
+  if (city.weekdays && isWeekend) return 'CLOSED'
+  const h = getLocalHours(city.timezone, base)
+  if (h >= city.open && h < city.close) return 'OPEN'
+  if (h >= city.open - 1 && h < city.open) return 'PRE-MARKET'
+  if (h >= city.close && h < city.close + 1) return 'POST-MARKET'
+  return 'CLOSED'
+}
+
+function hoursUntilEvent(city: City): string {
+  const dayStr = new Intl.DateTimeFormat('en-US', { timeZone: city.timezone, weekday: 'short' }).format()
+  const isWeekend = dayStr === 'Sun' || dayStr === 'Sat'
+  const h = getLocalHours(city.timezone)
+  const status = getMarketStatus(city)
+
+  if (city.weekdays && isWeekend) {
+    const day = getLocalDay(city.timezone)
+    const daysUntilMon = day === 0 ? 1 : 2
+    return `opens in ${daysUntilMon}d`
+  }
+  if (status === 'OPEN') {
+    const rem = city.close - h
+    if (rem < 1) return `closes in ${Math.round(rem * 60)}m`
+    return `closes in ${rem.toFixed(1)}h`
+  }
+  if (h < city.open) {
+    const until = city.open - h
+    if (until < 1) return `opens in ${Math.round(until * 60)}m`
+    return `opens in ${until.toFixed(1)}h`
+  }
+  return 'closed'
+}
+
+const STATUS_DOT: Record<MarketStatus, string> = {
+  'OPEN': 'bg-emerald-500',
+  'PRE-MARKET': 'bg-amber-400',
+  'POST-MARKET': 'bg-amber-400',
+  'CLOSED': 'bg-zinc-400',
+}
+
+const STATUS_TEXT: Record<MarketStatus, string> = {
+  'OPEN': 'text-emerald-600',
+  'PRE-MARKET': 'text-amber-500',
+  'POST-MARKET': 'text-amber-500',
+  'CLOSED': 'text-muted-foreground',
+}
+
+// ---- Clocks tab ----
+
+function ClocksTab() {
+  const openCount = CITIES.filter(c => getMarketStatus(c) === 'OPEN').length
 
   return (
-    <PanelWrapper title="World Clock">
+    <>
       <div className="text-[9px] text-muted-foreground mb-1.5">
         <span className="text-emerald-600 font-medium">{openCount}</span> of {CITIES.length} markets open
       </div>
       <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
         {CITIES.map((city) => {
-          const time = getTimeInZone(city.timezone)
-          const open = isMarketOpen(city)
+          const status = getMarketStatus(city)
           return (
             <div key={city.name} className="flex items-center justify-between py-0.5">
               <div className="min-w-0">
-                <div className="text-[11px] font-medium text-foreground truncate">{city.name}</div>
+                <div className="text-[10px] font-medium text-foreground truncate">{city.name}</div>
                 <div className="text-[8px] text-muted-foreground">{city.market} · {hoursUntilEvent(city)}</div>
               </div>
               <div className="text-right shrink-0 ml-2">
-                <div className="text-[11px] tabular-nums font-medium">{formatTime(time)}</div>
+                <div className="text-[12px] tabular-nums font-medium">{formatTimeInZone(city.timezone)}</div>
                 <div className="flex items-center justify-end gap-0.5">
-                  <span className={`inline-block w-1 h-1 rounded-full ${open ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
-                  <span className={`text-[8px] uppercase tracking-wider ${open ? 'text-emerald-600' : 'text-muted-foreground'}`}>
-                    {open ? 'Open' : 'Closed'}
-                  </span>
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT[status]}`} />
+                  <span className={`text-[8px] uppercase tracking-wider ${STATUS_TEXT[status]}`}>{status}</span>
                 </div>
               </div>
             </div>
           )
         })}
       </div>
-      <SessionTimeline />
+    </>
+  )
+}
+
+// ---- Convert tab ----
+
+function ConvertTab() {
+  const [inputTime, setInputTime] = useState(() => {
+    const now = new Date()
+    const hh = now.getHours().toString().padStart(2, '0')
+    const mm = now.getMinutes().toString().padStart(2, '0')
+    return `${hh}:${mm}`
+  })
+
+  const baseDate = (() => {
+    const [hh, mm] = inputTime.split(':').map(Number)
+    const d = new Date()
+    d.setHours(isNaN(hh) ? 0 : hh, isNaN(mm) ? 0 : mm, 0, 0)
+    return d
+  })()
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-[9px] text-muted-foreground">Local time</span>
+        <input
+          type="time"
+          value={inputTime}
+          onChange={e => setInputTime(e.target.value)}
+          className="text-[11px] tabular-nums font-medium bg-muted/40 border border-border/30 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary/50"
+        />
+      </div>
+      <table className="w-full border-collapse">
+        <tbody>
+          {CITIES.map((city) => {
+            const status = getMarketStatus(city, baseDate)
+            return (
+              <tr key={city.name} className="border-b border-border/10 last:border-0">
+                <td className="py-0.5 pr-2">
+                  <span className="text-[10px] font-medium text-foreground">{city.name}</span>
+                </td>
+                <td className="py-0.5 pr-2">
+                  <span className="text-[12px] tabular-nums font-medium">{formatTimeInZone(city.timezone, baseDate)}</span>
+                </td>
+                <td className="py-0.5">
+                  <div className="flex items-center gap-1">
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT[status]}`} />
+                    <span className={`text-[8px] uppercase tracking-wider ${STATUS_TEXT[status]}`}>{status}</span>
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+// ---- Overlap tab ----
+
+function OverlapTab() {
+  const etHours = getLocalHours('America/New_York')
+
+  const sessions = CITIES.map(city => {
+    const localH = getLocalHours(city.timezone)
+    const offset = etHours - localH
+    let openET = city.open + offset
+    let closeET = city.close + offset
+    // normalize to 0-24
+    openET = ((openET % 24) + 24) % 24
+    closeET = ((closeET % 24) + 24) % 24
+    return { city, openET, closeET, status: getMarketStatus(city) }
+  })
+
+  const tickHours = [0, 3, 6, 9, 12, 15, 18, 21, 24]
+
+  return (
+    <div>
+      <div className="text-[8px] uppercase tracking-wider text-muted-foreground mb-1.5">Session Overlap (ET)</div>
+      <div className="relative" style={{ paddingBottom: '12px' }}>
+        {/* tick lines */}
+        {tickHours.map(h => (
+          <div
+            key={h}
+            className="absolute top-0 bottom-4 w-px bg-border/20"
+            style={{ left: `${(h / 24) * 100}%` }}
+          />
+        ))}
+        {/* now line */}
+        <div
+          className="absolute top-0 bottom-4 w-px bg-red-500 z-10"
+          style={{ left: `${(etHours / 24) * 100}%` }}
+        />
+        {/* bars */}
+        {sessions.map(({ city, openET, closeET, status }, i) => {
+          const isOpen = status === 'OPEN'
+          const wraps = closeET < openET
+          const bars = wraps
+            ? [{ l: (openET / 24) * 100, w: ((24 - openET) / 24) * 100 }, { l: 0, w: (closeET / 24) * 100 }]
+            : [{ l: (openET / 24) * 100, w: ((closeET - openET) / 24) * 100 }]
+
+          return (
+            <div key={city.name} className="relative h-2 mb-1" style={{ marginBottom: i === sessions.length - 1 ? 0 : '3px' }}>
+              {bars.map((bar, bi) => (
+                <div
+                  key={bi}
+                  className={`absolute h-2 rounded-sm ${isOpen ? city.color + '/70' : 'bg-zinc-400/25'}`}
+                  style={{ left: `${bar.l}%`, width: `${bar.w}%` }}
+                  title={`${city.name}: ${openET.toFixed(1)}-${closeET.toFixed(1)} ET`}
+                />
+              ))}
+              <span
+                className="absolute text-[6px] font-medium text-foreground/60 leading-2 pl-0.5 truncate"
+                style={{ top: 0, left: `${bars[0].l}%`, maxWidth: `${bars[0].w}%` }}
+              >
+                {city.market}
+              </span>
+            </div>
+          )
+        })}
+        {/* tick labels */}
+        <div className="relative h-3">
+          {tickHours.map(h => (
+            <span
+              key={h}
+              className="absolute text-[7px] text-muted-foreground/60 -translate-x-1/2"
+              style={{ left: `${(h / 24) * 100}%` }}
+            >
+              {h}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---- Main panel ----
+
+type Tab = 'clocks' | 'convert' | 'overlap'
+
+export default function WorldClockPanel() {
+  const [, setNow] = useState(Date.now())
+  const [tab, setTab] = useState<Tab>('clocks')
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'clocks', label: 'Clocks' },
+    { id: 'convert', label: 'Convert' },
+    { id: 'overlap', label: 'Overlap' },
+  ]
+
+  return (
+    <PanelWrapper title="World Clock">
+      <div className="flex gap-0.5 mb-2 border-b border-border/20 pb-1">
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-sm transition-colors ${
+              tab === t.id
+                ? 'bg-primary/10 text-primary font-medium'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tab === 'clocks' && <ClocksTab />}
+      {tab === 'convert' && <ConvertTab />}
+      {tab === 'overlap' && <OverlapTab />}
     </PanelWrapper>
   )
 }
