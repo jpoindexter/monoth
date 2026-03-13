@@ -10,6 +10,7 @@ export type PanelId =
   | 'macro-signals' | 'world-clock'
   | 'daily-brief' | 'supply-chain'
   | 'watchlist' | 'ai-insights' | 'export'
+  | 'market-video'
 
 export type PanelTier = 1 | 2 | 3
 
