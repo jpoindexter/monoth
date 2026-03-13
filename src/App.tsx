@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Landing } from '@/pages/Landing'
 import { Dashboard } from '@/pages/Dashboard'
@@ -52,6 +53,7 @@ export default function App() {
       <BrowserRouter>
         <AppInner />
       </BrowserRouter>
+      <Analytics />
     </ThemeProvider>
   )
 }

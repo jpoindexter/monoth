@@ -23,6 +23,8 @@ const panels: Record<string, React.LazyExoticComponent<() => React.JSX.Element>>
   'btc-etf': lazy(() => import('./BtcEtfPanel')),
   'stablecoins': lazy(() => import('./StablecoinsPanel')),
   'watchlist': lazy(() => import('./WatchlistPanel')),
+  'ai-insights': lazy(() => import('./AiInsightsPanel')),
+  'export': lazy(() => import('./ExportPanel')),
 }
 
 interface PanelRendererProps {
