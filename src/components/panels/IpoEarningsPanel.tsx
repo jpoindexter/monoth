@@ -61,8 +61,77 @@ const STATUS_CLS: Record<string, string> = {
   rumored: 'bg-zinc-500/20 text-muted-foreground',
 }
 
+const SEASON_DATA = {
+  reported: 312,
+  total: 500,
+  beatEps: 78,
+  beatRev: 62,
+  avgSurprise: '+5.2%',
+  bestSector: { name: 'Technology', surprise: '+8.1%' },
+  worstSector: { name: 'Healthcare', surprise: '-2.3%' },
+}
+
+const CALENDAR_DATA = [
+  {
+    day: 'Mon Mar 10',
+    today: false,
+    entries: [
+      { company: 'Oracle', ticker: 'ORCL', eps: '$1.61', time: 'AMC' },
+      { company: 'Casey\'s General', ticker: 'CASY', eps: '$3.12', time: 'AMC' },
+    ],
+  },
+  {
+    day: 'Tue Mar 11',
+    today: false,
+    entries: [
+      { company: 'Dick\'s Sporting', ticker: 'DKS', eps: '$3.74', time: 'BMO' },
+      { company: 'Stitch Fix', ticker: 'SFIX', eps: '-$0.12', time: 'AMC' },
+      { company: 'GitLab', ticker: 'GTLB', eps: '$0.22', time: 'AMC' },
+    ],
+  },
+  {
+    day: 'Wed Mar 12',
+    today: false,
+    entries: [
+      { company: 'Dollar Tree', ticker: 'DLTR', eps: '$2.19', time: 'BMO' },
+      { company: 'Adobe', ticker: 'ADBE', eps: '$4.97', time: 'AMC' },
+    ],
+  },
+  {
+    day: 'Thu Mar 13',
+    today: true,
+    entries: [
+      { company: 'Lennar', ticker: 'LEN', eps: '$2.63', time: 'BMO' },
+      { company: 'Ulta Beauty', ticker: 'ULTA', eps: '$6.56', time: 'AMC' },
+      { company: 'DocuSign', ticker: 'DOCU', eps: '$0.86', time: 'AMC' },
+    ],
+  },
+  {
+    day: 'Fri Mar 14',
+    today: false,
+    entries: [
+      { company: 'FedEx', ticker: 'FDX', eps: '$4.71', time: 'AMC' },
+      { company: 'Nike', ticker: 'NKE', eps: '$0.29', time: 'AMC' },
+    ],
+  },
+]
+
+function seasonGrade(beatEps: number): string {
+  if (beatEps > 80) return 'A+'
+  if (beatEps > 75) return 'A'
+  if (beatEps > 65) return 'B'
+  return 'C'
+}
+
+function gradeCls(grade: string): string {
+  if (grade === 'A+') return 'bg-emerald-500/20 text-emerald-600'
+  if (grade === 'A') return 'bg-emerald-500/15 text-emerald-500'
+  if (grade === 'B') return 'bg-amber-500/20 text-amber-600'
+  return 'bg-red-500/20 text-red-500'
+}
+
 export default function IpoEarningsPanel() {
-  const [tab, setTab] = useState<'earnings' | 'pipeline' | 'news'>('news')
+  const [tab, setTab] = useState<'earnings' | 'pipeline' | 'news' | 'season' | 'calendar'>('news')
   const { data: newsData, loading: newsLoading, error: newsError, refresh } = useNewsData('ipo')
 
   const { data: earningsData, loading: earningsLoading } = usePolling<Earning[]>({
@@ -82,9 +151,11 @@ export default function IpoEarningsPanel() {
 
   return (
     <PanelWrapper title="IPOs & Earnings" loading={newsLoading && earningsLoading} error={newsError} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex gap-1 mb-2 flex-wrap">
         <button className={tabCls(tab === 'earnings')} onClick={() => setTab('earnings')}>Earnings</button>
         <button className={tabCls(tab === 'pipeline')} onClick={() => setTab('pipeline')}>Pipeline</button>
+        <button className={tabCls(tab === 'season')} onClick={() => setTab('season')}>Season</button>
+        <button className={tabCls(tab === 'calendar')} onClick={() => setTab('calendar')}>Calendar</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
@@ -164,6 +235,95 @@ export default function IpoEarningsPanel() {
               <span className="text-[10px] tabular-nums text-muted-foreground">{ipo.valuation}</span>
               <span className="text-[9px] text-muted-foreground">{ipo.date}</span>
               <span className={`text-[8px] font-bold uppercase px-1 py-px rounded-sm ${STATUS_CLS[ipo.status]}`}>{ipo.status}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === 'season' && (() => {
+        const grade = seasonGrade(SEASON_DATA.beatEps)
+        const progressPct = Math.round((SEASON_DATA.reported / SEASON_DATA.total) * 100)
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Season Grade</span>
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-sm ${gradeCls(grade)}`}>{grade}</span>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                <span>Season Progress</span>
+                <span className="tabular-nums">{SEASON_DATA.reported} / {SEASON_DATA.total}</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
+                <div className="h-full bg-foreground rounded-full" style={{ width: `${progressPct}%` }} />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                <span>EPS Beat Rate</span>
+                <span className="tabular-nums">{SEASON_DATA.beatEps}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-red-400/40 overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${SEASON_DATA.beatEps}%` }} />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                <span>Revenue Beat Rate</span>
+                <span className="tabular-nums">{SEASON_DATA.beatRev}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-red-400/40 overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${SEASON_DATA.beatRev}%` }} />
+              </div>
+            </div>
+
+            <div className="border-t border-border/20 pt-2 space-y-1.5">
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Avg EPS Surprise</span>
+                <span className="tabular-nums font-medium text-emerald-600">{SEASON_DATA.avgSurprise}</span>
+              </div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Best Sector</span>
+                <span className="text-right">
+                  <span className="font-medium">{SEASON_DATA.bestSector.name}</span>
+                  <span className="tabular-nums text-emerald-600 ml-1">{SEASON_DATA.bestSector.surprise}</span>
+                </span>
+              </div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Worst Sector</span>
+                <span className="text-right">
+                  <span className="font-medium">{SEASON_DATA.worstSector.name}</span>
+                  <span className="tabular-nums text-red-500 ml-1">{SEASON_DATA.worstSector.surprise}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {tab === 'calendar' && (
+        <div className="space-y-0">
+          {CALENDAR_DATA.map((day) => (
+            <div key={day.day}>
+              <div className={`text-[9px] uppercase tracking-wider py-1 mt-1 font-medium ${day.today ? 'text-foreground' : 'text-muted-foreground'}`}>
+                {day.day}{day.today && <span className="ml-1 bg-foreground text-background text-[8px] px-1 py-px rounded-sm">Today</span>}
+              </div>
+              {day.entries.map((e) => (
+                <div
+                  key={e.ticker}
+                  className={`flex items-center gap-2 py-1 border-b border-border/20 last:border-0 ${day.today ? 'bg-zinc-100/60 dark:bg-zinc-800/40 -mx-1 px-1 rounded-sm' : ''}`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium text-[11px]">{e.company}</span>
+                    <span className="text-[9px] text-muted-foreground ml-1">{e.ticker}</span>
+                  </div>
+                  <span className="text-[10px] tabular-nums text-muted-foreground">{e.eps}</span>
+                  <span className={`text-[8px] font-bold uppercase px-1 py-px rounded-sm ${e.time === 'BMO' ? 'bg-amber-500/20 text-amber-600' : 'bg-zinc-500/15 text-muted-foreground'}`}>{e.time}</span>
+                </div>
+              ))}
             </div>
           ))}
         </div>
