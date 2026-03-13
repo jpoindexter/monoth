@@ -35,8 +35,133 @@ interface Stablecoin {
   volume24h: number
 }
 
+const DOMINANCE_COLORS: Record<string, string> = {
+  USDT: '#26a17b',
+  USDC: '#2775ca',
+  DAI: '#f5ac37',
+  FDUSD: '#0052ff',
+  USDE: '#6366f1',
+  Others: '#94a3b8',
+}
+
+const KNOWN_ORDER = ['USDT', 'USDC', 'DAI', 'FDUSD', 'USDE']
+
+function PegMonitor({ data }: { data: Stablecoin[] }) {
+  const avgDev = data.reduce((s, c) => s + c.pegDeviation, 0) / data.length
+  const healthLabel = avgDev < 0.0005 ? 'STRONG' : avgDev < 0.002 ? 'MODERATE' : 'WEAK'
+  const healthCls =
+    avgDev < 0.0005
+      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
+      : avgDev < 0.002
+      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
+      : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
+
+  return (
+    <div>
+      <div className="mb-3">
+        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${healthCls}`}>
+          Peg Health: {healthLabel}
+        </span>
+      </div>
+      <div className="space-y-2">
+        {data.map((coin) => {
+          const dev = coin.pegDeviation
+          const barColor =
+            dev < 0.001 ? '#10b981' : dev < 0.005 ? '#eab308' : '#ef4444'
+          const above = coin.price >= 1.0
+          const pct = Math.min(dev * 10000, 100)
+
+          return (
+            <div key={coin.id} className="flex items-center gap-2">
+              <span className="text-[10px] font-medium text-foreground w-10 shrink-0">
+                {coin.symbol.toUpperCase()}
+              </span>
+              <div className="flex items-center gap-px" style={{ width: 100 }}>
+                <div className="flex-1 flex justify-end" style={{ height: 8 }}>
+                  {!above && (
+                    <div
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: barColor,
+                        borderRadius: '2px 0 0 2px',
+                        height: '100%',
+                      }}
+                    />
+                  )}
+                </div>
+                <div style={{ width: 1, backgroundColor: '#6b7280', height: 10, flexShrink: 0 }} />
+                <div className="flex-1" style={{ height: 8 }}>
+                  {above && (
+                    <div
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: barColor,
+                        borderRadius: '0 2px 2px 0',
+                        height: '100%',
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              <span className="text-[10px] tabular-nums text-muted-foreground">
+                ${coin.price.toFixed(4)}
+              </span>
+              <span className={`text-[10px] tabular-nums font-medium ${pegColor(dev)}`}>
+                {above ? '+' : '-'}{(dev * 100).toFixed(3)}%
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function DominanceChart({ data }: { data: Stablecoin[] }) {
+  const total = data.reduce((s, c) => s + c.marketCap, 0)
+  const known = KNOWN_ORDER.map((sym) => data.find((c) => c.symbol.toUpperCase() === sym)).filter(Boolean) as Stablecoin[]
+  const knownCap = known.reduce((s, c) => s + c.marketCap, 0)
+  const othersCap = total - knownCap
+
+  const segments = [
+    ...known.map((c) => ({ label: c.symbol.toUpperCase(), cap: c.marketCap, pct: c.marketCap / total })),
+    ...(othersCap > 0 ? [{ label: 'Others', cap: othersCap, pct: othersCap / total }] : []),
+  ]
+
+  return (
+    <div>
+      <div className="h-4 rounded-full overflow-hidden flex mb-3">
+        {segments.map((seg) => (
+          <div
+            key={seg.label}
+            style={{
+              width: `${seg.pct * 100}%`,
+              backgroundColor: DOMINANCE_COLORS[seg.label] ?? '#94a3b8',
+            }}
+          />
+        ))}
+      </div>
+      <div className="space-y-1">
+        {segments.map((seg) => (
+          <div key={seg.label} className="flex items-center gap-2">
+            <div
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: DOMINANCE_COLORS[seg.label] ?? '#94a3b8' }}
+            />
+            <span className="text-[10px] font-medium text-foreground w-10">{seg.label}</span>
+            <span className="text-[10px] tabular-nums text-muted-foreground flex-1">{fmtCap(seg.cap)}</span>
+            <span className="text-[10px] tabular-nums font-medium text-foreground">
+              {(seg.pct * 100).toFixed(1)}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function StablecoinsPanel() {
-  const [tab, setTab] = useState<'data' | 'news'>('data')
+  const [tab, setTab] = useState<'data' | 'peg' | 'dominance' | 'news'>('data')
   const { data, loading, error, refresh } = usePolling<Stablecoin[]>({
     fetcher: async () => {
       const res = await fetch('/api/crypto/stablecoins')
@@ -60,6 +185,8 @@ export default function StablecoinsPanel() {
     <PanelWrapper title="Stablecoins" loading={loading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'data')} onClick={() => setTab('data')}>Data</button>
+        <button className={tabCls(tab === 'peg')} onClick={() => setTab('peg')}>Peg</button>
+        <button className={tabCls(tab === 'dominance')} onClick={() => setTab('dominance')}>Dominance</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
@@ -98,6 +225,16 @@ export default function StablecoinsPanel() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {tab === 'peg' && data && !!data.length && <PegMonitor data={data} />}
+      {tab === 'peg' && (!data || !data.length) && (
+        <div className="py-4 text-center text-[10px] text-muted-foreground">No data available.</div>
+      )}
+
+      {tab === 'dominance' && data && !!data.length && <DominanceChart data={data} />}
+      {tab === 'dominance' && (!data || !data.length) && (
+        <div className="py-4 text-center text-[10px] text-muted-foreground">No data available.</div>
       )}
 
       {tab === 'news' && (
