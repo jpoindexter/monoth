@@ -86,4 +86,9 @@ export const FEED_URLS: Record<string, { name: string; url: string }[]> = {
   energy: [
     { name: 'Energy', url: gn('"energy market" OR "natural gas" OR "renewable energy" OR nuclear when:3d') },
   ],
+  supplychain: [
+    { name: 'Supply Chain', url: gn('"supply chain" OR "shipping" OR "freight" when:3d') },
+    { name: 'Semiconductors', url: gn('"chip shortage" OR semiconductor OR TSMC OR NVIDIA when:3d') },
+    { name: 'Critical Minerals', url: gn('"rare earth" OR lithium OR "critical minerals" when:7d') },
+  ],
 }

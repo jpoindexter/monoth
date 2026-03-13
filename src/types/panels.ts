@@ -6,7 +6,9 @@ export type PanelId =
   | 'regulation' | 'hedge-funds-news' | 'market-analysis-news'
   | 'btc-etf' | 'stablecoins'
   | 'geopolitics' | 'real-estate' | 'energy'
-  | 'volatility' | 'bond-news'
+  | 'volatility' | 'bond-news' | 'predictions'
+  | 'macro-signals' | 'world-clock'
+  | 'daily-brief' | 'supply-chain'
   | 'watchlist' | 'ai-insights' | 'export'
 
 export type PanelTier = 1 | 2 | 3

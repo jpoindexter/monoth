@@ -27,9 +27,14 @@ const panels: Record<string, React.LazyExoticComponent<() => React.JSX.Element>>
   'energy': lazy(() => import('./EnergyPanel')),
   'volatility': lazy(() => import('./VolatilityPanel')),
   'bond-news': lazy(() => import('./BondNewsPanel')),
+  'macro-signals': lazy(() => import('./MacroSignalsPanel')),
+  'world-clock': lazy(() => import('./WorldClockPanel')),
   'watchlist': lazy(() => import('./WatchlistPanel')),
   'ai-insights': lazy(() => import('./AiInsightsPanel')),
   'export': lazy(() => import('./ExportPanel')),
+  'predictions': lazy(() => import('./PredictionsPanel')),
+  'daily-brief': lazy(() => import('./DailyBriefPanel')),
+  'supply-chain': lazy(() => import('./SupplyChainPanel')),
 }
 
 interface PanelRendererProps {
