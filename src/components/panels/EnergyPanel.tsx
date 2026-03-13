@@ -3,7 +3,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
@@ -44,6 +44,7 @@ const tabCls = (active: boolean) =>
   `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 export default function EnergyPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'mix' | 'chart' | 'news'>('news')
   const [chartSymbol, setChartSymbol] = useState('USO')
   const [chartData, setChartData] = useState<CandleData[]>([])
@@ -56,10 +57,10 @@ export default function EnergyPanel() {
   })
 
   useEffect(() => {
-    if (tab === 'chart') {
+    if (tab === 'chart' || expanded) {
       fetchCandles(chartSymbol).then(setChartData).catch(() => {})
     }
-  }, [tab, chartSymbol])
+  }, [tab, chartSymbol, expanded])
 
   const wti = seededPrice('WTI', 77, 7)
   const brent = wti + seededPrice('BrentSpread', 4, 1)
@@ -149,8 +150,9 @@ export default function EnergyPanel() {
         </div>
       )}
 
-      {tab === 'chart' && (
-        <div>
+      {(tab === 'chart' || expanded) && (
+        <div className={expanded ? 'mb-4' : ''}>
+          {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Chart</div>}
           <div className="flex gap-1 mb-1">
             {CHART_SYMBOLS.map((sym) => (
               <button
@@ -165,7 +167,7 @@ export default function EnergyPanel() {
           <LightweightChart
             type="candlestick"
             data={chartData}
-            height={140}
+            height={expanded ? 300 : 140}
           />
         </div>
       )}
@@ -184,7 +186,7 @@ export default function EnergyPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                  <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
               </a>

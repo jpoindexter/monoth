@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { useNewsData } from '@/hooks/use-news-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
 
@@ -73,6 +73,7 @@ const SUPERCYCLE_SECTORS: { name: string; phase: CyclePhase }[] = [
 ]
 
 export default function CommoditiesPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'news' | 'chart' | 'sectors' | 'supercycle'>('prices')
   const [chartData, setChartData] = useState<CandleData[]>([])
   const [chartSymbol, setChartSymbol] = useState<ChartSymbol>('GLD')
@@ -89,10 +90,10 @@ export default function CommoditiesPanel() {
   const { data: newsData } = useNewsData('commodities')
 
   useEffect(() => {
-    if (tab === 'chart') {
+    if (tab === 'chart' || expanded) {
       fetchCandles(chartSymbol).then(setChartData).catch(() => {})
     }
-  }, [tab, chartSymbol])
+  }, [tab, chartSymbol, expanded])
 
   const priceMap = Object.fromEntries((data ?? []).map((q) => [q.symbol, q]))
 
@@ -135,8 +136,9 @@ export default function CommoditiesPanel() {
         <button className={tabCls(tab === 'supercycle')} onClick={() => setTab('supercycle')}>Supercycle</button>
       </div>
 
-      {tab === 'chart' && (
-        <div>
+      {(tab === 'chart' || expanded) && (
+        <div className={expanded ? 'mb-4' : ''}>
+          {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Chart</div>}
           <div className="flex gap-1 mb-1">
             {CHART_SYMBOLS.map((sym) => (
               <button
@@ -152,7 +154,7 @@ export default function CommoditiesPanel() {
           <LightweightChart
             type="area"
             data={chartData}
-            height={140}
+            height={expanded ? 300 : 140}
             lineColor={CHART_COLORS[chartSymbol].line}
             areaTopColor={CHART_COLORS[chartSymbol].top}
             areaBottomColor={CHART_COLORS[chartSymbol].bottom}
@@ -308,7 +310,7 @@ export default function CommoditiesPanel() {
           {newsData?.map((item) => (
             <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
               className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 -mx-1 px-1 rounded-sm transition-colors">
-              <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2 flex-1">{item.title}</span>
+              <span className={`text-[11px] font-medium leading-snug text-foreground flex-1 ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
               <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
             </a>
           ))}

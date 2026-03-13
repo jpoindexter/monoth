@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useCorrelationEvents, useCorrelationMatrix } from '@/hooks/use-correlation-data'
 
 interface CorrelationEvent {
@@ -104,7 +104,30 @@ function computeRegime() {
   return { avg, regime, highest, lowest, divScore }
 }
 
+const ASSETS_EXPANDED = ['SPY', 'GLD', 'TLT', 'DXY', 'BTC', 'OIL', 'VIX', 'EEM']
+
+const STATIC_CORRELATIONS_EXPANDED: Record<string, Record<string, number>> = {
+  ...Object.fromEntries(
+    ASSETS_EXPANDED.map((a) => [
+      a,
+      Object.fromEntries(
+        ASSETS_EXPANDED.map((b) => {
+          const base = STATIC_CORRELATIONS[a]?.[b]
+          if (base != null) return [b, base]
+          const extras: Record<string, Record<string, number>> = {
+            OIL: { SPY: 0.22, GLD: 0.30, TLT: -0.18, DXY: -0.28, BTC: 0.15, OIL: 1.0, VIX: -0.35, EEM: 0.38 },
+            VIX: { SPY: -0.82, GLD: 0.20, TLT: 0.40, DXY: 0.10, BTC: -0.45, OIL: -0.35, VIX: 1.0, EEM: -0.70 },
+            EEM: { SPY: 0.75, GLD: 0.05, TLT: -0.30, DXY: -0.50, BTC: 0.40, OIL: 0.38, VIX: -0.70, EEM: 1.0 },
+          }
+          return [b, extras[a]?.[b] ?? extras[b]?.[a] ?? 0]
+        })
+      ),
+    ])
+  ),
+}
+
 export default function CorrelationPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'matrix' | 'cross' | 'events' | 'regime' | 'history'>('matrix')
   const events = useCorrelationEvents()
   const matrix = useCorrelationMatrix()
@@ -147,30 +170,42 @@ export default function CorrelationPanel() {
         <div className="min-w-0">
           {matrixList.length === 0 ? (
             <div className="overflow-x-auto">
-              <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(60px, 1fr) repeat(${ASSETS.length}, 44px)` }}>
-                <div className="text-[10px] font-medium uppercase text-muted-foreground pb-1">Indicator</div>
-                {ASSETS.map((a) => (
-                  <div key={a} className="text-center text-[10px] font-medium uppercase text-muted-foreground pb-1">{a}</div>
-                ))}
-                {ASSETS.map((row) => (
+              {(() => {
+                const assets = expanded ? ASSETS_EXPANDED : ASSETS
+                const corr = expanded ? STATIC_CORRELATIONS_EXPANDED : STATIC_CORRELATIONS
+                const cellW = expanded ? 48 : 44
+                const cellH = expanded ? 'h-10' : 'h-8'
+                const fontSize = expanded ? 'text-[10px]' : 'text-[9px]'
+                return (
                   <>
-                    <div key={`l-${row}`} className="text-[10px] font-medium uppercase py-0.5 truncate">{row}</div>
-                    {ASSETS.map((col) => {
-                      const val = STATIC_CORRELATIONS[row]?.[col] ?? 0
-                      const isDiag = row === col
-                      return (
-                        <div
-                          key={`${row}:${col}`}
-                          className={`w-11 h-8 flex items-center justify-center text-[9px] font-semibold tabular-nums rounded-sm ${correlationColor(val)} ${isDiag ? 'ring-1 ring-foreground/20' : ''}`}
-                        >
-                          {val.toFixed(2)}
-                        </div>
-                      )
-                    })}
+                    <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(60px, 1fr) repeat(${assets.length}, ${cellW}px)` }}>
+                      <div className="text-[10px] font-medium uppercase text-muted-foreground pb-1">Indicator</div>
+                      {assets.map((a) => (
+                        <div key={a} className="text-center text-[10px] font-medium uppercase text-muted-foreground pb-1">{a}</div>
+                      ))}
+                      {assets.map((row) => (
+                        <>
+                          <div key={`l-${row}`} className={`font-medium uppercase py-0.5 truncate ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{row}</div>
+                          {assets.map((col) => {
+                            const val = corr[row]?.[col] ?? 0
+                            const isDiag = row === col
+                            return (
+                              <div
+                                key={`${row}:${col}`}
+                                className={`flex items-center justify-center font-semibold tabular-nums rounded-sm ${cellH} ${fontSize} ${correlationColor(val)} ${isDiag ? 'ring-1 ring-foreground/20' : ''}`}
+                                style={{ width: cellW }}
+                              >
+                                {val.toFixed(2)}
+                              </div>
+                            )
+                          })}
+                        </>
+                      ))}
+                    </div>
+                    <div className="mt-2 text-[9px] text-muted-foreground">Static fallback — live data unavailable</div>
                   </>
-                ))}
-              </div>
-              <div className="mt-2 text-[9px] text-muted-foreground">Static fallback — live data unavailable</div>
+                )
+              })()}
             </div>
           ) : (
             <>
@@ -204,21 +239,29 @@ export default function CorrelationPanel() {
 
       {tab === 'cross' && (
         <div className="overflow-x-auto">
-          <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(36px, auto) repeat(${ASSETS.length}, 44px)` }}>
+          {(() => {
+            const assets = expanded ? ASSETS_EXPANDED : ASSETS
+            const corr = expanded ? STATIC_CORRELATIONS_EXPANDED : STATIC_CORRELATIONS
+            const cellW = expanded ? 48 : 44
+            const cellH = expanded ? 'h-10' : 'h-8'
+            const fontSize = expanded ? 'text-[10px]' : 'text-[9px]'
+            return (
+          <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(36px, auto) repeat(${assets.length}, ${cellW}px)` }}>
             <div className="pb-1" />
-            {ASSETS.map((a) => (
+            {assets.map((a) => (
               <div key={a} className="text-center text-[10px] font-medium uppercase text-muted-foreground pb-1">{a}</div>
             ))}
-            {ASSETS.map((row) => (
+            {assets.map((row) => (
               <>
-                <div key={`l-${row}`} className="text-[10px] font-medium uppercase flex items-center pr-1 text-muted-foreground">{row}</div>
-                {ASSETS.map((col) => {
-                  const val = STATIC_CORRELATIONS[row]?.[col] ?? 0
+                <div key={`l-${row}`} className={`font-medium uppercase flex items-center pr-1 text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{row}</div>
+                {assets.map((col) => {
+                  const val = corr[row]?.[col] ?? 0
                   const isDiag = row === col
                   return (
                     <div
                       key={`${row}:${col}`}
-                      className={`w-11 h-8 flex items-center justify-center text-[9px] font-semibold tabular-nums rounded-sm ${correlationColor(val)} ${isDiag ? 'ring-1 ring-foreground/20' : ''}`}
+                      className={`flex items-center justify-center font-semibold tabular-nums rounded-sm ${cellH} ${fontSize} ${correlationColor(val)} ${isDiag ? 'ring-1 ring-foreground/20' : ''}`}
+                      style={{ width: cellW }}
                     >
                       {val.toFixed(2)}
                     </div>
@@ -227,6 +270,8 @@ export default function CorrelationPanel() {
               </>
             ))}
           </div>
+            )
+          })()}
           <div className="mt-2 flex items-center gap-2 text-[9px] text-muted-foreground">
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-emerald-600" /> strong +</span>
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-muted border border-border" /> neutral</span>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useMacroData } from '@/hooks/use-macro-data'
 import { usePolling } from '@/hooks/use-polling'
 import type { FredSeries } from '@/services/api/macro'
@@ -202,7 +202,7 @@ function aboveAvgLabel(value: number, avg: number, seriesId: string): { text: st
   return { text: 'At Avg', cls: 'text-muted-foreground' }
 }
 
-function TrendsTab({ data }: { data: FredSeries[] }) {
+function TrendsTab({ data, expanded }: { data: FredSeries[]; expanded: boolean }) {
   const { score, label } = computeHealthScore(data)
 
   const scoreColor =
@@ -240,10 +240,10 @@ function TrendsTab({ data }: { data: FredSeries[] }) {
           return (
             <div key={s.seriesId}>
               <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[11px] font-medium text-foreground truncate max-w-[120px]">{s.name}</span>
+                <span className={`font-medium text-foreground ${expanded ? 'text-[12px]' : 'text-[11px] truncate max-w-[120px]'}`}>{s.name}</span>
                 <div className="flex items-center gap-1.5">
                   <span className={`text-[9px] font-medium ${aa.cls}`}>{aa.text}</span>
-                  <span className="text-[11px] tabular-nums text-foreground">{s.value.toFixed(2)}</span>
+                  <span className={`tabular-nums text-foreground ${expanded ? 'text-[13px] font-bold' : 'text-[11px]'}`}>{s.value.toFixed(2)}</span>
                 </div>
               </div>
               {/* horizontal range bar */}
@@ -323,6 +323,7 @@ function SurprisesTab() {
 }
 
 export default function EconomicDataPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'indicators' | 'calendar' | 'trends' | 'surprises'>('indicators')
   const { data, loading, error, refresh } = useMacroData()
 
@@ -379,13 +380,13 @@ export default function EconomicDataPanel() {
               const isPositive = diff >= 0
               return (
                 <tr key={series.seriesId} className="border-t border-border/20">
-                  <td className="py-1 font-medium flex items-center">
+                  <td className={`py-1 font-medium flex items-center ${expanded ? 'text-[12px]' : ''}`}>
                     {series.name}
                     {trendIcon(series.value, series.previous)}
                   </td>
-                  <td className="text-right tabular-nums">{series.value.toFixed(2)}</td>
+                  <td className={`text-right tabular-nums ${expanded ? 'text-[13px] font-bold' : ''}`}>{series.value.toFixed(2)}</td>
                   <td className="text-right tabular-nums text-muted-foreground">{series.previous.toFixed(2)}</td>
-                  <td className={`text-right tabular-nums font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                  <td className={`text-right tabular-nums font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'} ${expanded ? 'text-[12px]' : ''}`}>
                     {isPositive ? '+' : ''}{diff.toFixed(2)}
                   </td>
                 </tr>
@@ -411,7 +412,7 @@ export default function EconomicDataPanel() {
                   <div key={i} className="flex items-center gap-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${impactDot(evt.impact)}`} />
                     <span className="text-[11px] text-muted-foreground tabular-nums w-16 shrink-0">{evt.time}</span>
-                    <span className="text-[11px] text-foreground flex-1 truncate">{evt.name}</span>
+                    <span className={`text-[11px] text-foreground flex-1 ${expanded ? '' : 'truncate'}`}>{evt.name}</span>
                     <span className="text-[8px] font-bold uppercase px-1 rounded-sm bg-muted text-muted-foreground shrink-0">
                       {evt.country}
                     </span>
@@ -424,7 +425,7 @@ export default function EconomicDataPanel() {
       )}
 
       {tab === 'trends' && !loading && data && !!data.length && (
-        <TrendsTab data={data} />
+        <TrendsTab data={data} expanded={expanded} />
       )}
 
       {tab === 'trends' && !loading && data != null && !data.length && (

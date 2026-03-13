@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useMacroData } from '@/hooks/use-macro-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
@@ -58,6 +58,7 @@ const REAL_RATES = [
 ]
 
 export default function FixedIncomePanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'yields' | 'etfs' | 'spreads' | 'curve' | 'auctions' | 'real'>('yields')
   const { data, loading, error, refresh } = useMacroData()
 
@@ -150,24 +151,35 @@ export default function FixedIncomePanel() {
           {chartData && chartData.length > 0 && (
             <div className="mt-2 border-t border-border/20 pt-2">
               <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Yield Curve</div>
-              <ResponsiveContainer width="100%" height={80}>
+              <ResponsiveContainer width="100%" height={expanded ? 300 : 80}>
                 <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                  <XAxis dataKey="maturity" tick={{ fontSize: 9 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 9 }} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
-                  <Line type="monotone" dataKey="yield" stroke="hsl(var(--foreground))" strokeWidth={1.5} dot={{ r: 2.5, fill: 'hsl(var(--foreground))' }} />
+                  <XAxis dataKey="maturity" tick={{ fontSize: expanded ? 11 : 9 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: expanded ? 11 : 9 }} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
+                  <Line type="monotone" dataKey="yield" stroke="hsl(var(--foreground))" strokeWidth={expanded ? 2.5 : 1.5} dot={{ r: expanded ? 4 : 2.5, fill: 'hsl(var(--foreground))' }} />
                 </LineChart>
               </ResponsiveContainer>
+              {expanded && (
+                <div className="mt-2 grid grid-cols-2 gap-1.5">
+                  {chartData.map((d) => (
+                    <div key={d.maturity} className="flex items-center justify-between px-2 py-1 rounded-sm bg-muted/30">
+                      <span className="text-[11px] font-medium">{d.maturity}</span>
+                      <span className="text-[12px] tabular-nums font-bold">{d.yield.toFixed(2)}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </>
       )}
 
       {tab === 'etfs' && (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${expanded ? 'text-[12px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Name</th>
               <th className="text-right font-medium pb-1.5">Price</th>
+              <th className="text-right font-medium pb-1.5">Chg</th>
               <th className="text-right font-medium pb-1.5">Chg%</th>
             </tr>
           </thead>
@@ -176,11 +188,18 @@ export default function FixedIncomePanel() {
               const isPos = p.changePercent >= 0
               return (
                 <tr key={p.symbol} className="border-t border-border/20">
-                  <td className="py-0.5">
+                  <td className={`${expanded ? 'py-1' : 'py-0.5'}`}>
                     <span className="font-medium">{ETF_NAMES[p.symbol] || p.symbol}</span>
                     <span className="text-muted-foreground ml-1 text-[10px]">{p.symbol}</span>
                   </td>
                   <td className="text-right tabular-nums">${p.price.toFixed(2)}</td>
+                  {expanded ? (
+                    <td className={`text-right tabular-nums ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {isPos ? '+' : ''}${Math.abs((p as { change?: number }).change ?? 0).toFixed(2)}
+                    </td>
+                  ) : (
+                    <td className="text-right tabular-nums text-muted-foreground">—</td>
+                  )}
                   <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
                     {isPos ? '+' : ''}{p.changePercent.toFixed(2)}%
                   </td>
@@ -226,7 +245,7 @@ export default function FixedIncomePanel() {
             <p className="text-[10px] text-muted-foreground">Yield data loading...</p>
           ) : (() => {
             const W = 320
-            const H = 140
+            const H = expanded ? 240 : 140
             const padL = 28
             const padR = 8
             const padT = 12

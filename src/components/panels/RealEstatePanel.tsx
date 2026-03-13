@@ -4,7 +4,7 @@ import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { useMacroData } from '@/hooks/use-macro-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
@@ -51,6 +51,7 @@ function marketTemp(months: number): { label: string; color: string } {
 }
 
 export default function RealEstatePanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'reits' | 'rates' | 'housing' | 'chart' | 'news'>('reits')
   const [chartSymbol, setChartSymbol] = useState<ChartSymbol>('VNQ')
   const [candles, setCandles] = useState<CandleData[]>([])
@@ -101,7 +102,7 @@ export default function RealEstatePanel() {
       </div>
 
       {tab === 'reits' && (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Name</th>
@@ -115,8 +116,8 @@ export default function RealEstatePanel() {
               return (
                 <tr key={p.symbol} className="border-t border-border/20">
                   <td className="py-0.5">
-                    <span className="font-medium">{REIT_NAMES[p.symbol] || p.symbol}</span>
-                    <span className="text-muted-foreground ml-1 text-[10px]">{p.symbol}</span>
+                    <div className="font-medium">{REIT_NAMES[p.symbol] || p.symbol}</div>
+                    <div className="text-muted-foreground text-[10px]">{p.symbol}</div>
                   </td>
                   <td className="text-right tabular-nums">${p.price != null ? p.price.toFixed(2) : '--'}</td>
                   <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -179,7 +180,7 @@ export default function RealEstatePanel() {
             <span className="text-[9px] text-muted-foreground">{monthsSupply.toFixed(1)}mo supply</span>
           </div>
 
-          <table className="w-full text-[11px]">
+          <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
             <thead>
               <tr className="text-muted-foreground">
                 <th className="text-left font-medium pb-1.5">Metric</th>
@@ -227,7 +228,7 @@ export default function RealEstatePanel() {
           ) : candles.length === 0 ? (
             <p className="text-[11px] text-muted-foreground py-2">No data</p>
           ) : (
-            <LightweightChart type="candlestick" data={candles} height={130} className="w-full" />
+            <LightweightChart type="candlestick" data={candles} height={expanded ? 300 : 130} className="w-full" />
           )}
         </div>
       )}
@@ -246,7 +247,7 @@ export default function RealEstatePanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                  <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
               </a>

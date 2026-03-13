@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { GaugeChart } from '@/components/charts/GaugeChart'
 import { useMarketStore } from '@/stores'
 import { usePolling } from '@/hooks/use-polling'
@@ -263,6 +263,7 @@ function signalBadgeCls(direction: Signal['direction']) {
 }
 
 function SignalsTab({ indices, movers }: { indices: MarketDataPoint[]; movers: MoversData | null }) {
+  const expanded = useIsExpanded()
   const signals = deriveSignals(indices, movers)
   const composite = compositeSignal(signals)
 
@@ -272,15 +273,15 @@ function SignalsTab({ indices, movers }: { indices: MarketDataPoint[]; movers: M
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
           Market Signal
         </span>
-        <span className={`text-[11px] font-bold tracking-wide ${composite.color}`}>
+        <span className={`font-bold tracking-wide ${expanded ? 'text-[14px]' : 'text-[11px]'} ${composite.color}`}>
           {composite.label}
         </span>
       </div>
       <div className="space-y-1">
         {signals.map((s) => (
-          <div key={s.name} className="flex items-center justify-between py-1 px-1">
-            <span className="text-[10px] text-muted-foreground w-20">{s.name}</span>
-            <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${signalBadgeCls(s.direction)}`}>
+          <div key={s.name} className={`flex items-center justify-between px-1 ${expanded ? 'py-1.5' : 'py-1'}`}>
+            <span className={`text-muted-foreground ${expanded ? 'text-[12px] w-28' : 'text-[10px] w-20'}`}>{s.name}</span>
+            <span className={`font-semibold px-1.5 py-0.5 rounded ${expanded ? 'text-[11px]' : 'text-[9px]'} ${signalBadgeCls(s.direction)}`}>
               {s.value}
             </span>
           </div>
@@ -364,6 +365,7 @@ function AlertsTab({
   forex: ForexRate[]
   crypto: CryptoAsset[]
 }) {
+  const expanded = useIsExpanded()
   const alerts = deriveAlerts(indices, forex, crypto)
 
   if (alerts.length === 0) {
@@ -381,13 +383,13 @@ function AlertsTab({
       {alerts.map((a, i) => (
         <div
           key={i}
-          className="flex items-center justify-between py-1.5 px-2 rounded-md bg-muted/20 border border-border"
+          className={`flex items-center justify-between px-2 rounded-md bg-muted/20 border border-border ${expanded ? 'py-2.5' : 'py-1.5'}`}
         >
           <div className="flex items-center gap-2">
-            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${severityCls(a.severity)}`}>
+            <span className={`font-bold px-1.5 py-0.5 rounded ${expanded ? 'text-[11px]' : 'text-[9px]'} ${severityCls(a.severity)}`}>
               {a.severity}
             </span>
-            <span className="text-[10px] text-foreground font-medium">{a.title}</span>
+            <span className={`text-foreground font-medium ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{a.title}</span>
           </div>
           <span className="text-[9px] text-muted-foreground">{fmtTime(a.ts)}</span>
         </div>
@@ -399,6 +401,7 @@ function AlertsTab({
 // ── Main panel ───────────────────────────────────────────────────────────────
 
 export default function MarketRadarPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'gauges' | 'breadth' | 'signals' | 'alerts'>('gauges')
   const [movers, setMovers] = useState<MoversData | null>(null)
 
@@ -440,9 +443,9 @@ export default function MarketRadarPanel() {
       </div>
 
       {tab === 'gauges' && (
-        <div className="grid grid-cols-2 gap-4 p-2 h-full place-items-center">
+        <div className={`grid grid-cols-2 p-2 h-full place-items-center ${expanded ? 'gap-6' : 'gap-4'}`}>
           {gauges.map((g) => (
-            <GaugeChart key={g.label} value={g.value} label={g.label} size={110} />
+            <GaugeChart key={g.label} value={g.value} label={g.label} size={expanded ? 150 : 110} />
           ))}
         </div>
       )}

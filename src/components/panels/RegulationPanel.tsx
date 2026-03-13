@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
 function relTime(ts: number): string {
@@ -206,6 +206,7 @@ function ImpactBadge({ level }: { level: ImpactLevel }) {
 }
 
 export default function RegulationPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'tracker' | 'news' | 'timeline' | 'impact'>('tracker')
   const [filter, setFilter] = useState<string>('All')
   const { data, loading, error, refresh } = useNewsData('regulation')
@@ -290,7 +291,7 @@ export default function RegulationPanel() {
             ))}
           </div>
           <div className="space-y-0">
-            {filtered.map((item) => {
+            {(expanded ? filtered : filtered.slice(0, 8)).map((item) => {
               const cls = classifyHeadline(item.title)
               return (
                 <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
@@ -302,7 +303,7 @@ export default function RegulationPanel() {
                         {CATEGORY_LABELS[cls.category]}
                       </span>
                     )}
-                    <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                    <span className={`font-medium leading-snug text-foreground ${expanded ? 'text-[13px]' : 'text-[11px] line-clamp-2'}`}>{item.title}</span>
                   </div>
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
                 </a>
@@ -314,14 +315,14 @@ export default function RegulationPanel() {
 
       {tab === 'timeline' && (
         <div className="space-y-1.5">
-          {TIMELINE_EVENTS.map((ev) => {
+          {(expanded ? TIMELINE_EVENTS : TIMELINE_EVENTS.slice(0, 5)).map((ev) => {
             const days = daysUntil(ev.date)
             const isPast = days < 0
             const isUrgent = days >= 0 && days <= 14
             return (
               <div key={ev.id} className="border border-border/30 rounded-sm px-2 py-1.5">
                 <div className="flex items-start justify-between gap-1 mb-0.5">
-                  <span className="text-[10px] font-semibold text-foreground leading-tight flex-1 min-w-0 pr-1">
+                  <span className={`font-semibold text-foreground leading-tight flex-1 min-w-0 pr-1 ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>
                     {ev.title}
                   </span>
                   <ImpactBadge level={ev.impact} />
@@ -337,7 +338,7 @@ export default function RegulationPanel() {
                     {isPast ? `${Math.abs(days)}d ago` : days === 0 ? 'TODAY' : `${days}d`}
                   </span>
                 </div>
-                <p className="text-[9px] text-muted-foreground leading-snug line-clamp-2">{ev.description}</p>
+                <p className={`text-muted-foreground leading-snug ${expanded ? 'text-[11px]' : 'text-[9px] line-clamp-2'}`}>{ev.description}</p>
               </div>
             )
           })}

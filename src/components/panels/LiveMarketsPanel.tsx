@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useMarketData } from '@/hooks/use-market-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
@@ -190,6 +190,7 @@ function FuturesTab() {
 }
 
 export default function LiveMarketsPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<Tab>('indices')
   const [chartData, setChartData] = useState<CandleData[]>([])
   const [chartSymbol, setChartSymbol] = useState('SPY')
@@ -206,10 +207,10 @@ export default function LiveMarketsPanel() {
   })
 
   useEffect(() => {
-    if (tab === 'charts') {
+    if (tab === 'charts' || expanded) {
       fetchCandles(chartSymbol).then(setChartData).catch(() => {})
     }
-  }, [tab, chartSymbol])
+  }, [tab, chartSymbol, expanded])
 
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
@@ -231,8 +232,9 @@ export default function LiveMarketsPanel() {
         <button className={tabCls(tab === 'futures')} onClick={() => setTab('futures')}>Futures</button>
       </div>
 
-      {tab === 'charts' && (
-        <div>
+      {(tab === 'charts' || expanded) && (
+        <div className={expanded ? 'mb-4' : ''}>
+          {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Charts</div>}
           <div className="flex gap-1 mb-1">
             {['SPY', 'QQQ', 'DIA', 'IWM'].map((sym) => (
               <button
@@ -244,11 +246,13 @@ export default function LiveMarketsPanel() {
               </button>
             ))}
           </div>
-          <LightweightChart type="area" data={chartData} height={140} />
+          <LightweightChart type="area" data={chartData} height={expanded ? 300 : 140} />
         </div>
       )}
 
-      {tab === 'indices' && (
+      {(tab === 'indices' || expanded) && (
+        <div className={expanded ? 'mb-4' : ''}>
+        {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Indices</div>}
         <table className="w-full text-[11px]">
           <thead>
             <tr className="text-muted-foreground">
@@ -277,6 +281,7 @@ export default function LiveMarketsPanel() {
             })}
           </tbody>
         </table>
+        </div>
       )}
 
       {(tab === 'gainers' || tab === 'losers' || tab === 'active') && moversLoading && (
@@ -300,7 +305,7 @@ export default function LiveMarketsPanel() {
             </tr>
           </thead>
           <tbody>
-            {moversList.slice(0, 10).map((m) => {
+            {moversList.slice(0, expanded ? moversList.length : 10).map((m) => {
               const isPos = m.changePercent >= 0
               return (
                 <tr key={m.symbol} className="border-t border-border/20">
@@ -321,11 +326,19 @@ export default function LiveMarketsPanel() {
         </table>
       )}
 
-      {tab === 'breadth' && (
-        <BreadthTab moversData={moversData ?? null} moversLoading={moversLoading} />
+      {(tab === 'breadth' || expanded) && (
+        <div className={expanded ? 'mb-4' : ''}>
+          {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Market Breadth</div>}
+          <BreadthTab moversData={moversData ?? null} moversLoading={moversLoading} />
+        </div>
       )}
 
-      {tab === 'futures' && <FuturesTab />}
+      {(tab === 'futures' || expanded) && (
+        <div className={expanded ? 'mb-4' : ''}>
+          {expanded && <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold py-1 border-b border-border/30 mb-2">Futures</div>}
+          <FuturesTab />
+        </div>
+      )}
     </PanelWrapper>
   )
 }

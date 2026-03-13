@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
 function relTime(ts: number): string {
@@ -126,6 +126,7 @@ function RiskBar({ label, score, count }: { label: string; score: number; count:
 }
 
 export default function GeopoliticsPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'risk' | 'news' | 'timeline'>('risk')
   const { data, loading, error, refresh } = useNewsData('geopolitics')
 
@@ -202,7 +203,7 @@ export default function GeopoliticsPanel() {
 
       {tab === 'news' && (
         <div className="space-y-0">
-          {data?.map((item) => {
+          {(expanded ? data : data?.slice(0, 8))?.map((item) => {
             const cls = classifyHeadline(item.title)
             return (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
@@ -214,7 +215,7 @@ export default function GeopoliticsPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                  <span className={`font-medium leading-snug text-foreground ${expanded ? 'text-[13px]' : 'text-[11px] line-clamp-2'}`}>{item.title}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
               </a>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { useNewsData } from '@/hooks/use-news-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
 function fmtCap(num: number): string {
@@ -245,7 +245,7 @@ function YieldTab() {
   )
 }
 
-function PegMonitor({ data }: { data: Stablecoin[] }) {
+function PegMonitor({ data, expanded }: { data: Stablecoin[]; expanded: boolean }) {
   const avgDev = data.reduce((s, c) => s + c.pegDeviation, 0) / data.length
   const healthLabel = avgDev < 0.0005 ? 'STRONG' : avgDev < 0.002 ? 'MODERATE' : 'WEAK'
   const healthCls =
@@ -272,10 +272,13 @@ function PegMonitor({ data }: { data: Stablecoin[] }) {
 
           return (
             <div key={coin.id} className="flex items-center gap-2">
-              <span className="text-[10px] font-medium text-foreground w-10 shrink-0">
-                {coin.symbol.toUpperCase()}
-              </span>
-              <div className="flex items-center gap-px" style={{ width: 100 }}>
+              <div className="shrink-0 w-10">
+                <div className={`${expanded ? 'text-[12px]' : 'text-[10px]'} font-medium text-foreground`}>
+                  {coin.symbol.toUpperCase()}
+                </div>
+                {expanded && <div className="text-[9px] text-muted-foreground">{coin.name}</div>}
+              </div>
+              <div className="flex items-center gap-px" style={{ width: expanded ? 160 : 100 }}>
                 <div className="flex-1 flex justify-end" style={{ height: 8 }}>
                   {!above && (
                     <div
@@ -316,7 +319,7 @@ function PegMonitor({ data }: { data: Stablecoin[] }) {
   )
 }
 
-function DominanceChart({ data }: { data: Stablecoin[] }) {
+function DominanceChart({ data, expanded }: { data: Stablecoin[]; expanded: boolean }) {
   const total = data.reduce((s, c) => s + c.marketCap, 0)
   const known = KNOWN_ORDER.map((sym) => data.find((c) => c.symbol.toUpperCase() === sym)).filter(Boolean) as Stablecoin[]
   const knownCap = known.reduce((s, c) => s + c.marketCap, 0)
@@ -329,7 +332,7 @@ function DominanceChart({ data }: { data: Stablecoin[] }) {
 
   return (
     <div>
-      <div className="h-4 rounded-full overflow-hidden flex mb-3">
+      <div className={`${expanded ? 'h-6' : 'h-4'} rounded-full overflow-hidden flex mb-3`}>
         {segments.map((seg) => (
           <div
             key={seg.label}
@@ -347,9 +350,9 @@ function DominanceChart({ data }: { data: Stablecoin[] }) {
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: DOMINANCE_COLORS[seg.label] ?? '#94a3b8' }}
             />
-            <span className="text-[10px] font-medium text-foreground w-10">{seg.label}</span>
-            <span className="text-[10px] tabular-nums text-muted-foreground flex-1">{fmtCap(seg.cap)}</span>
-            <span className="text-[10px] tabular-nums font-medium text-foreground">
+            <span className={`${expanded ? 'text-[12px]' : 'text-[10px]'} font-medium text-foreground w-10`}>{seg.label}</span>
+            <span className={`${expanded ? 'text-[12px]' : 'text-[10px]'} tabular-nums text-muted-foreground flex-1`}>{fmtCap(seg.cap)}</span>
+            <span className={`${expanded ? 'text-[12px]' : 'text-[10px]'} tabular-nums font-medium text-foreground`}>
               {(seg.pct * 100).toFixed(1)}%
             </span>
           </div>
@@ -360,6 +363,7 @@ function DominanceChart({ data }: { data: Stablecoin[] }) {
 }
 
 export default function StablecoinsPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'data' | 'peg' | 'dominance' | 'reserves' | 'yield' | 'news'>('data')
   const { data, loading, error, refresh } = usePolling<Stablecoin[]>({
     fetcher: async () => {
@@ -398,20 +402,22 @@ export default function StablecoinsPanel() {
       )}
 
       {tab === 'data' && data && !!data.length && (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Name</th>
               <th className="text-right font-medium pb-1.5">Price</th>
               <th className="text-right font-medium pb-1.5">Peg</th>
               <th className="text-right font-medium pb-1.5">MCap</th>
+              {expanded && <th className="text-right font-medium pb-1.5">Vol 24h</th>}
             </tr>
           </thead>
           <tbody>
             {data?.map((coin) => (
               <tr key={coin.id} className="border-t border-border/20">
                 <td className="py-0.5">
-                  <span className="font-medium text-foreground">{coin.symbol.toUpperCase()}</span>
+                  <div className="font-medium text-foreground">{coin.symbol.toUpperCase()}</div>
+                  {expanded && <div className="text-[10px] text-muted-foreground">{coin.name}</div>}
                 </td>
                 <td className="text-right tabular-nums">
                   ${coin.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
@@ -422,18 +428,23 @@ export default function StablecoinsPanel() {
                 <td className="text-right tabular-nums text-muted-foreground">
                   {fmtCap(coin.marketCap)}
                 </td>
+                {expanded && (
+                  <td className="text-right tabular-nums text-muted-foreground">
+                    {fmtCap(coin.volume24h)}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       )}
 
-      {tab === 'peg' && data && !!data.length && <PegMonitor data={data} />}
+      {tab === 'peg' && data && !!data.length && <PegMonitor data={data} expanded={expanded} />}
       {tab === 'peg' && (!data || !data.length) && (
         <div className="py-4 text-center text-[10px] text-muted-foreground">No data available.</div>
       )}
 
-      {tab === 'dominance' && data && !!data.length && <DominanceChart data={data} />}
+      {tab === 'dominance' && data && !!data.length && <DominanceChart data={data} expanded={expanded} />}
       {tab === 'dominance' && (!data || !data.length) && (
         <div className="py-4 text-center text-[10px] text-muted-foreground">No data available.</div>
       )}
@@ -463,7 +474,7 @@ export default function StablecoinsPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">
+                  <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>
                     {item.title}
                   </span>
                 </div>

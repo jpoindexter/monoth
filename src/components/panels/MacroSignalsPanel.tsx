@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { useMacroData } from '@/hooks/use-macro-data'
 import { useMarketStore } from '@/stores/market-store'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import type { MarketDataPoint, ForexRate } from '@/types'
 import type { FredSeries } from '@/services/api/macro'
 
@@ -268,6 +268,7 @@ const LEI_COMPOSITE_COLORS: Record<LeiComposite, string> = {
 }
 
 function IndicatorsTab() {
+  const expanded = useIsExpanded()
   const { composite, score } = computeLei(LEADING_INDICATORS)
   const color = LEI_COMPOSITE_COLORS[composite]
 
@@ -279,22 +280,22 @@ function IndicatorsTab() {
       >
         <div>
           <div className="text-[9px] uppercase tracking-wider text-muted-foreground">LEI Composite</div>
-          <div className="text-base font-bold tracking-wider" style={{ color }}>{composite}</div>
+          <div className={`font-bold tracking-wider ${expanded ? 'text-xl' : 'text-base'}`} style={{ color }}>{composite}</div>
         </div>
         <div className="text-right">
           <div className="text-[9px] text-muted-foreground">Score</div>
-          <div className="text-lg font-bold tabular-nums" style={{ color }}>{score}</div>
+          <div className={`font-bold tabular-nums ${expanded ? 'text-2xl' : 'text-lg'}`} style={{ color }}>{score}</div>
         </div>
       </div>
 
       <div className="space-y-1">
         {LEADING_INDICATORS.map((ind) => (
-          <div key={ind.name} className={`flex items-center justify-between py-1 px-1.5 rounded-sm ${SIGNAL_BG[ind.signal]}`}>
+          <div key={ind.name} className={`flex items-center justify-between px-1.5 rounded-sm ${SIGNAL_BG[ind.signal]} ${expanded ? 'py-1.5' : 'py-1'}`}>
             <div className="min-w-0">
-              <div className="text-[10px] font-medium text-foreground leading-tight">{ind.name}</div>
-              <div className="text-[9px] text-muted-foreground tabular-nums">{ind.reading}</div>
+              <div className={`font-medium text-foreground leading-tight ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{ind.name}</div>
+              <div className={`text-muted-foreground tabular-nums ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{ind.reading}</div>
             </div>
-            <span className={`text-[9px] font-bold uppercase tracking-wider shrink-0 ml-2 ${SIGNAL_COLORS[ind.signal]}`}>
+            <span className={`font-bold uppercase tracking-wider shrink-0 ml-2 ${expanded ? 'text-[11px]' : 'text-[9px]'} ${SIGNAL_COLORS[ind.signal]}`}>
               {ind.badgeLabel}
             </span>
           </div>
@@ -450,6 +451,7 @@ function CycleTab() {
 // --- Main Panel ---
 
 export default function MacroSignalsPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'signals' | 'regime' | 'indicators' | 'cycle'>('signals')
 
   const fetcher = useCallback(async () => {
@@ -486,28 +488,35 @@ export default function MacroSignalsPanel() {
       {tab === 'signals' && (
         <>
           {fearGreed && (
-            <div className="flex items-center gap-3 mb-2 pb-2 border-b border-border/20">
-              <GaugeChart value={fearGreed.value} label={fearGreed.label} />
-              <div className="flex-1 text-[10px]">
+            <div className={`flex items-center gap-3 mb-2 pb-2 border-b border-border/20 ${expanded ? 'justify-center' : ''}`}>
+              <div style={{ width: expanded ? 140 : 100 }}>
+                <GaugeChart value={fearGreed.value} label={fearGreed.label} />
+              </div>
+              <div className={`flex-1 ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>
                 <div className="text-muted-foreground mb-1">Market Sentiment</div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <span className="text-emerald-600 font-medium">{bullCount} bullish</span>
                   <span className="text-red-500 font-medium">{bearCount} bearish</span>
                   <span className="text-muted-foreground">{total - bullCount - bearCount} neutral</span>
                 </div>
+                {expanded && (
+                  <div className="mt-1 text-[10px] text-muted-foreground">
+                    {fearGreed.value >= 60 ? 'Greed territory — risk appetite elevated.' : fearGreed.value <= 40 ? 'Fear territory — defensive positioning dominant.' : 'Neutral — no strong conviction.'}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           <div className="space-y-1">
             {otherSignals?.map((signal) => (
-              <div key={signal.name} className={`flex items-center justify-between py-1.5 px-1.5 rounded-sm ${STATUS_BG[signal.status]}`}>
+              <div key={signal.name} className={`flex items-center justify-between px-1.5 rounded-sm ${STATUS_BG[signal.status]} ${expanded ? 'py-2' : 'py-1.5'}`}>
                 <div className="min-w-0">
-                  <div className="text-[11px] font-medium text-foreground">{signal.name}</div>
-                  <div className="text-[9px] text-muted-foreground">{signal.detail}</div>
+                  <div className={`font-medium text-foreground ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{signal.name}</div>
+                  <div className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{signal.detail}</div>
                 </div>
                 <div className="text-right shrink-0 ml-2">
-                  <div className={`text-[11px] font-bold uppercase tracking-wider ${STATUS_COLORS[signal.status]}`}>
+                  <div className={`font-bold uppercase tracking-wider ${expanded ? 'text-[13px]' : 'text-[11px]'} ${STATUS_COLORS[signal.status]}`}>
                     {signal.label}
                   </div>
                 </div>

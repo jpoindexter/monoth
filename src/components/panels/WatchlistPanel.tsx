@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { DonutChart, PALETTE } from '@/components/charts/DonutChart'
 import { X } from 'lucide-react'
@@ -23,7 +23,7 @@ function saveShares(shares: Record<string, number>) {
   localStorage.setItem(SHARES_KEY, JSON.stringify(shares))
 }
 
-function MiniChart({ symbol }: { symbol: string }) {
+function MiniChart({ symbol, height = 100 }: { symbol: string; height?: number }) {
   const [candles, setCandles] = useState<CandleData[]>([])
 
   useEffect(() => {
@@ -31,14 +31,14 @@ function MiniChart({ symbol }: { symbol: string }) {
   }, [symbol])
 
   if (candles.length === 0) {
-    return <div className="h-[100px] flex items-center justify-center text-muted-foreground text-[10px]">Loading...</div>
+    return <div className="flex items-center justify-center text-muted-foreground text-[10px]" style={{ height }}>Loading...</div>
   }
 
   return (
     <LightweightChart
       type="area"
       data={candles}
-      height={100}
+      height={height}
       lineColor="#6366f1"
       areaTopColor="rgba(99, 102, 241, 0.2)"
       areaBottomColor="rgba(99, 102, 241, 0.02)"
@@ -47,6 +47,7 @@ function MiniChart({ symbol }: { symbol: string }) {
 }
 
 export default function WatchlistPanel() {
+  const isPanelExpanded = useIsExpanded()
   const watchlist = useUserStore((s) => s.watchlist)
   const addToWatchlist = useUserStore((s) => s.addToWatchlist)
   const removeFromWatchlist = useUserStore((s) => s.removeFromWatchlist)
@@ -140,11 +141,12 @@ export default function WatchlistPanel() {
           Type a ticker and press Enter
         </div>
       ) : tab === 'quotes' ? (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${isPanelExpanded ? 'text-[13px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Symbol</th>
               <th className="text-right font-medium pb-1.5">Price</th>
+              {isPanelExpanded && <th className="text-right font-medium pb-1.5">Chg</th>}
               <th className="text-right font-medium pb-1.5">Chg%</th>
               <th className="w-4"></th>
             </tr>
@@ -179,6 +181,11 @@ export default function WatchlistPanel() {
                     <td className="text-right tabular-nums">
                       {point ? `$${point.price.toFixed(2)}` : '-'}
                     </td>
+                    {isPanelExpanded && (
+                      <td className={`text-right tabular-nums font-medium ${point ? (isPos ? 'text-emerald-600' : 'text-red-500') : ''}`}>
+                        {point ? `${isPos ? '+' : ''}${point.change.toFixed(2)}` : '-'}
+                      </td>
+                    )}
                     <td className={`text-right tabular-nums font-medium ${point ? (isPos ? 'text-emerald-600' : 'text-red-500') : ''}`}>
                       {point ? `${isPos ? '+' : ''}${point.changePercent.toFixed(2)}%` : '-'}
                     </td>
@@ -253,7 +260,7 @@ export default function WatchlistPanel() {
                     <tr key={`${sym}-chart`}>
                       <td colSpan={4} className="pb-2">
                         <div className="bg-muted/30 rounded px-2 pt-1">
-                          <MiniChart symbol={sym} />
+                          <MiniChart symbol={sym} height={isPanelExpanded ? 300 : 100} />
                         </div>
                       </td>
                     </tr>
@@ -276,7 +283,7 @@ export default function WatchlistPanel() {
               .filter((s) => s.value > 0)
             return segments.length > 0 ? (
               <div className="mb-3">
-                <DonutChart segments={segments} size={120} />
+                <DonutChart segments={segments} size={isPanelExpanded ? 200 : 120} />
               </div>
             ) : null
           })()}

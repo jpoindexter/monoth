@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
 function relTime(ts: number): string {
@@ -45,6 +45,7 @@ export interface NewsFeedPanelProps {
 }
 
 export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
+  const expanded = useIsExpanded()
   const { data, loading, error, refresh } = useNewsData(category)
   const [activeTab, setActiveTab] = useState<FilterTab>('All')
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set())
@@ -95,7 +96,7 @@ export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
         ))}
       </div>
       <div className="space-y-0">
-        {filtered.map((item) => {
+        {(expanded ? filtered : filtered.slice(0, 10)).map((item) => {
           const cls = classifyHeadline(item.title)
           const domain = extractDomain(item.url)
           const isUnread = !seenIds.has(item.id)
@@ -106,7 +107,7 @@ export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setSeenIds((prev) => new Set([...prev, item.id]))}
-              className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors"
+              className="flex items-start gap-2 py-1.5 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors"
             >
               {isUnread && (
                 <span className="w-1 h-1 rounded-full bg-blue-500 shrink-0 mt-1.5" />
@@ -128,7 +129,7 @@ export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
                   )}
                   <span className="text-[8px] text-muted-foreground">{readingTime(item.title)}</span>
                 </div>
-                <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">
+                <span className={`font-medium leading-snug text-foreground ${expanded ? 'text-[13px]' : 'text-[11px] line-clamp-2'}`}>
                   {item.title}
                 </span>
               </div>

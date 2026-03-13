@@ -3,7 +3,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
@@ -71,6 +71,7 @@ const tabCls = (active: boolean) =>
   `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 export default function FintechPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'networks' | 'trends' | 'chart' | 'news'>('prices')
   const [chartSymbol, setChartSymbol] = useState('ARKF')
   const [chartData, setChartData] = useState<CandleData[]>([])
@@ -110,7 +111,7 @@ export default function FintechPanel() {
       </div>
 
       {tab === 'prices' && (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Name</th>
@@ -124,8 +125,9 @@ export default function FintechPanel() {
               return (
                 <tr key={p.symbol} className="border-t border-border/20">
                   <td className="py-0.5">
-                    <span className="font-medium">{FINTECH_NAMES[p.symbol] || p.symbol}</span>
-                    <span className="text-muted-foreground ml-1 text-[10px]">{p.symbol}</span>
+                    <div className="font-medium">{FINTECH_NAMES[p.symbol] || p.symbol}</div>
+                    {expanded && <div className="text-[10px] text-muted-foreground">{p.symbol}</div>}
+                    {!expanded && <span className="text-muted-foreground ml-1 text-[10px]">{p.symbol}</span>}
                   </td>
                   <td className="text-right tabular-nums">${p.price != null ? p.price.toFixed(2) : '--'}</td>
                   <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -210,12 +212,12 @@ export default function FintechPanel() {
               <div key={t.name}>
                 <div className="flex items-center justify-between mb-0.5">
                   <div>
-                    <span className="text-[11px] font-medium">{t.label}</span>
-                    <span className="text-[9px] text-muted-foreground ml-1.5">{t.size}</span>
+                    <span className={`${expanded ? 'text-[13px]' : 'text-[11px]'} font-medium`}>{t.label}</span>
+                    <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} text-muted-foreground ml-1.5`}>{t.size}</span>
                   </div>
-                  <span className="text-[11px] font-bold tabular-nums text-emerald-600">+{t.growth}%</span>
+                  <span className={`${expanded ? 'text-[13px]' : 'text-[11px]'} font-bold tabular-nums text-emerald-600`}>+{t.growth}%</span>
                 </div>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className={`${expanded ? 'h-2.5' : 'h-1.5'} bg-muted rounded-full overflow-hidden`}>
                   <div
                     className={`h-full rounded-full transition-all ${growthBarColor(t.growth)}`}
                     style={{ width: `${(t.growth / maxGrowth) * 100}%` }}
@@ -247,7 +249,7 @@ export default function FintechPanel() {
           <LightweightChart
             type="candlestick"
             data={chartData}
-            height={140}
+            height={expanded ? 300 : 140}
           />
         </div>
       )}
@@ -266,7 +268,7 @@ export default function FintechPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                  <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
               </a>

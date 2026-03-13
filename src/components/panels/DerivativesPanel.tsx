@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { useMarketStore } from '@/stores/market-store'
@@ -76,6 +76,7 @@ const FLOW_PC_RATIO = +(PUT_VOL / CALL_VOL).toFixed(2)
 const FLOW_PUTS_WIDTH = Math.min(Math.max((PUT_PREMIUM / (CALL_PREMIUM + PUT_PREMIUM)) * 100, 10), 90)
 
 export default function DerivativesPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'term' | 'news' | 'greeks' | 'flow'>('prices')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('derivatives')
   const { data: priceData, loading: priceLoading } = usePolling({
@@ -111,7 +112,7 @@ export default function DerivativesPanel() {
       </div>
 
       {tab === 'prices' && (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Name</th>
@@ -125,8 +126,8 @@ export default function DerivativesPanel() {
               return (
                 <tr key={p.symbol} className="border-t border-border/20">
                   <td className="py-0.5">
-                    <span className="font-medium">{VOL_NAMES[p.symbol] || p.symbol}</span>
-                    <span className="text-muted-foreground ml-1 text-[10px]">{p.symbol}</span>
+                    <div className="font-medium">{VOL_NAMES[p.symbol] || p.symbol}</div>
+                    <div className="text-muted-foreground text-[10px]">{p.symbol}</div>
                   </td>
                   <td className="text-right tabular-nums">${p.price.toFixed(2)}</td>
                   <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -151,7 +152,7 @@ export default function DerivativesPanel() {
           <LightweightChart
             type="area"
             data={chartData}
-            height={120}
+            height={expanded ? 300 : 120}
             lineColor="#f59e0b"
             areaTopColor="rgba(245,158,11,0.18)"
             areaBottomColor="rgba(245,158,11,0.02)"
@@ -263,12 +264,12 @@ export default function DerivativesPanel() {
           <div className="space-y-0">
             {FLOW_DATA.map((r, i) => (
               <div key={i} className={`flex items-center gap-1 py-0.5 border-b border-border/20 last:border-0 rounded-sm px-0.5 ${r.type === 'CALL' ? 'bg-emerald-500/5' : 'bg-red-500/5'}`}>
-                <span className="font-bold text-[10px] w-10 shrink-0">{r.symbol}</span>
-                <span className={`text-[9px] font-bold w-8 shrink-0 ${r.type === 'CALL' ? 'text-emerald-600' : 'text-red-500'}`}>{r.type}</span>
-                <span className="text-[9px] text-muted-foreground w-10 shrink-0">${r.strike}</span>
-                <span className="text-[9px] text-muted-foreground w-10 shrink-0">{r.expiry}</span>
-                <span className="text-[9px] tabular-nums text-muted-foreground flex-1 text-right">{(r.volume / 1000).toFixed(1)}K</span>
-                <span className="text-[9px] tabular-nums font-medium flex-1 text-right">${r.premium}M</span>
+                <span className={`font-bold ${expanded ? 'text-[12px]' : 'text-[10px]'} w-10 shrink-0`}>{r.symbol}</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} font-bold w-8 shrink-0 ${r.type === 'CALL' ? 'text-emerald-600' : 'text-red-500'}`}>{r.type}</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} text-muted-foreground w-10 shrink-0`}>${r.strike}</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} text-muted-foreground w-10 shrink-0`}>{r.expiry}</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} tabular-nums text-muted-foreground flex-1 text-right`}>{(r.volume / 1000).toFixed(1)}K</span>
+                <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} tabular-nums font-medium flex-1 text-right`}>${r.premium}M</span>
                 <span className={`text-[8px] font-bold px-1 py-px rounded-sm shrink-0 ${r.tag === 'SWEEP' ? 'text-amber-600 bg-amber-500/15' : 'text-violet-600 bg-violet-500/15'}`}>
                   {r.tag}
                 </span>
@@ -292,7 +293,7 @@ export default function DerivativesPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                  <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
               </a>

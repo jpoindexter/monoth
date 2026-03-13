@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useMarketStore } from '@/stores'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import type { MarketDataPoint, CryptoAsset, ForexRate, YieldData } from '@/types'
 
 interface BriefSection {
@@ -243,6 +243,7 @@ function Scorecard({
 }
 
 export default function DailyBriefPanel() {
+  const expanded = useIsExpanded()
   const indices     = useMarketStore((s) => s.indices)
   const crypto      = useMarketStore((s) => s.crypto)
   const forex       = useMarketStore((s) => s.forex)
@@ -287,12 +288,12 @@ export default function DailyBriefPanel() {
       )}
 
       {tab === 'rules' && hasData && (
-        <div className="space-y-2">
+        <div className={`space-y-${expanded ? '3' : '2'}`}>
           {brief.map((section) => (
             <div key={section.title}>
               <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{section.title}</span>
-                <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm ${
+                <span className={`font-semibold uppercase tracking-wider text-muted-foreground ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{section.title}</span>
+                <span className={`font-bold uppercase tracking-wider px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[8px]'} ${
                   section.sentiment === 'bullish' ? 'bg-emerald-500/10 text-emerald-600' :
                   section.sentiment === 'bearish' ? 'bg-red-500/10 text-red-500' :
                   'bg-yellow-500/10 text-yellow-600'
@@ -300,7 +301,7 @@ export default function DailyBriefPanel() {
                   {section.sentiment}
                 </span>
               </div>
-              <p className="text-[11px] leading-relaxed text-foreground/80">{section.content}</p>
+              <p className={`leading-relaxed text-foreground/80 ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{section.content}</p>
             </div>
           ))}
         </div>
@@ -327,7 +328,7 @@ export default function DailyBriefPanel() {
       )}
 
       {tab === 'ai' && aiSummary && (
-        <div className="text-[11px] leading-relaxed text-foreground/80 whitespace-pre-line">
+        <div className={`leading-relaxed text-foreground/80 whitespace-pre-line ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
           {aiSummary}
         </div>
       )}

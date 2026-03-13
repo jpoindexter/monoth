@@ -3,7 +3,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
@@ -129,6 +129,7 @@ function relTime(ts: number): string {
 }
 
 export default function SupplyChainPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'disruptions' | 'news' | 'routes' | 'chart'>('prices')
   const [chartSymbol, setChartSymbol] = useState<ChartSymbol>('IYT')
   const [candles, setCandles] = useState<CandleData[]>([])
@@ -174,7 +175,7 @@ export default function SupplyChainPanel() {
       </div>
 
       {tab === 'prices' && (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Name</th>
@@ -188,8 +189,8 @@ export default function SupplyChainPanel() {
               return (
                 <tr key={p.symbol} className="border-t border-border/20">
                   <td className="py-0.5">
-                    <span className="font-medium">{SC_NAMES[p.symbol] || p.symbol}</span>
-                    <span className="text-muted-foreground ml-1 text-[10px]">{p.symbol}</span>
+                    <div className="font-medium">{SC_NAMES[p.symbol] || p.symbol}</div>
+                    <div className="text-muted-foreground text-[10px]">{p.symbol}</div>
                   </td>
                   <td className="text-right tabular-nums">${p.price.toFixed(2)}</td>
                   <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -210,7 +211,7 @@ export default function SupplyChainPanel() {
               return (
                 <div key={region.name} className="flex items-center gap-2 py-0.5">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${RISK_DOT[level]}`} />
-                  <span className="text-[11px] flex-1">{region.name}</span>
+                  <span className={`${expanded ? 'text-[13px]' : 'text-[11px]'} flex-1`}>{region.name}</span>
                   <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm ${RISK_BADGE[level]}`}>
                     {level}
                   </span>
@@ -260,8 +261,8 @@ export default function SupplyChainPanel() {
                 <div key={route.name} className="flex items-center gap-2 py-0.5 border-t border-border/20 first:border-0">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${ROUTE_STATUS_DOT[status]}`} />
                   <div className="flex-1 min-w-0">
-                    <span className="text-[11px] font-medium">{route.name}</span>
-                    <span className="text-[9px] text-muted-foreground ml-1">{route.pair}</span>
+                    <span className={`${expanded ? 'text-[13px]' : 'text-[11px]'} font-medium`}>{route.name}</span>
+                    <span className={`${expanded ? 'text-[11px]' : 'text-[9px]'} text-muted-foreground ml-1`}>{route.pair}</span>
                   </div>
                   <span className="text-[9px] text-muted-foreground tabular-nums shrink-0">~{route.transitDays}d</span>
                   <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded-sm shrink-0 ${ROUTE_STATUS_BADGE[status]}`}>
@@ -291,7 +292,7 @@ export default function SupplyChainPanel() {
           {candlesLoading ? (
             <div className="h-[120px] flex items-center justify-center text-[10px] text-muted-foreground">Loading…</div>
           ) : candles.length > 0 ? (
-            <LightweightChart type="area" data={candles} height={120} />
+            <LightweightChart type="area" data={candles} height={expanded ? 300 : 120} />
           ) : (
             <div className="h-[120px] flex items-center justify-center text-[10px] text-muted-foreground">No data</div>
           )}
@@ -312,7 +313,7 @@ export default function SupplyChainPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                  <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
               </a>

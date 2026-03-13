@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useUserStore } from '@/stores/user-store'
 import { useMarketStore } from '@/stores/market-store'
 import { useNewsData } from '@/hooks/use-news-data'
@@ -113,6 +113,7 @@ function scoreThemes(items: NewsItem[]) {
 }
 
 function ThemesTab() {
+  const expanded = useIsExpanded()
   const { data: headlines } = useNewsData('headlines')
 
   const themes = useMemo(() => scoreThemes(headlines ?? []), [headlines])
@@ -142,7 +143,7 @@ function ThemesTab() {
             <div key={theme}>
               <div className="flex items-center justify-between mb-0.5">
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-foreground/80">{theme}</span>
+                  <span className={`text-foreground/80 ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{theme}</span>
                   <span
                     className="text-[8px] font-medium"
                     style={{
@@ -152,9 +153,9 @@ function ThemesTab() {
                     {trend === 'rising' ? '▲' : trend === 'falling' ? '▼' : '—'}
                   </span>
                 </div>
-                <span className="text-[9px] text-muted-foreground">{count}</span>
+                <span className={`text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{count} stories</span>
               </div>
-              <div className="h-1.5 w-full bg-border/20 rounded-[2px] overflow-hidden">
+              <div className={`w-full bg-border/20 rounded-[2px] overflow-hidden ${expanded ? 'h-2.5' : 'h-1.5'}`}>
                 <div
                   className="h-full rounded-[2px] transition-all"
                   style={{ width: `${pct}%`, backgroundColor: THEME_COLORS[theme] }}
@@ -236,6 +237,7 @@ function compositeLevelColor(level: 'LOW' | 'MODERATE' | 'ELEVATED') {
 }
 
 function RisksTab() {
+  const expanded = useIsExpanded()
   const { data: headlines } = useNewsData('headlines')
 
   const { scores, level } = useMemo(() => {
@@ -271,12 +273,12 @@ function RisksTab() {
           return (
             <div key={risk}>
               <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[10px] text-foreground/80">{risk}</span>
-                <span className="text-[9px] tabular-nums" style={{ color }}>
-                  {score.toFixed(1)}
+                <span className={`text-foreground/80 ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{risk}</span>
+                <span className={`tabular-nums font-medium ${expanded ? 'text-[11px]' : 'text-[9px]'}`} style={{ color }}>
+                  {score.toFixed(1)}/10
                 </span>
               </div>
-              <div className="h-1.5 w-full bg-border/20 rounded-[2px] overflow-hidden">
+              <div className={`w-full bg-border/20 rounded-[2px] overflow-hidden ${expanded ? 'h-2.5' : 'h-1.5'}`}>
                 <div
                   className="h-full rounded-[2px] transition-all"
                   style={{ width: `${pct}%`, backgroundColor: color }}
@@ -297,6 +299,7 @@ function RisksTab() {
 // ── Sentiment tab (unchanged) ─────────────────────────────────────────────────
 
 function SentimentTab() {
+  const expanded = useIsExpanded()
   const { data: headlines } = useNewsData('headlines')
 
   const { score, categoryBreakdown, topThreats } = useMemo(() => {
@@ -343,8 +346,8 @@ function SentimentTab() {
   return (
     <div className="space-y-3">
       <div className="flex flex-col items-center py-2">
-        <span className="text-3xl font-bold tabular-nums" style={{ color }}>{score}</span>
-        <span className="text-[10px] uppercase tracking-wider font-bold mt-0.5" style={{ color }}>{label}</span>
+        <span className={`font-bold tabular-nums ${expanded ? 'text-5xl' : 'text-3xl'}`} style={{ color }}>{score}</span>
+        <span className={`uppercase tracking-wider font-bold mt-0.5 ${expanded ? 'text-[13px]' : 'text-[10px]'}`} style={{ color }}>{label}</span>
         <span className="text-[9px] text-muted-foreground mt-0.5">{(headlines ?? []).length} headlines analyzed</span>
       </div>
 
@@ -378,7 +381,7 @@ function SentimentTab() {
         <div>
           <div className="text-[9px] text-muted-foreground mb-1 uppercase tracking-wider">Top threats</div>
           <div className="space-y-1">
-            {topThreats.map((t, i) => (
+            {(expanded ? topThreats : topThreats.slice(0, 3)).map((t, i) => (
               <div key={i} className="flex items-start gap-1.5">
                 <span
                   className="text-[8px] font-bold uppercase px-1 py-0.5 rounded-[2px] shrink-0 mt-px"
@@ -389,7 +392,7 @@ function SentimentTab() {
                 >
                   {t.level}
                 </span>
-                <span className="text-[10px] text-foreground/80 leading-tight line-clamp-2">{t.title}</span>
+                <span className={`text-foreground/80 leading-tight ${expanded ? 'text-[12px]' : 'text-[10px] line-clamp-2'}`}>{t.title}</span>
               </div>
             ))}
           </div>
@@ -406,6 +409,7 @@ function SentimentTab() {
 // ── Main panel ────────────────────────────────────────────────────────────────
 
 export default function AiInsightsPanel() {
+  const expanded = useIsExpanded()
   const tier = useUserStore((s) => s.tier)
   const session = useUserStore((s) => s.session)
   const indices = useMarketStore((s) => s.indices)
@@ -525,7 +529,7 @@ export default function AiInsightsPanel() {
           {error && <p className="text-[10px] text-red-500 mb-1">{error}</p>}
 
           {brief && (
-            <div className="text-[11px] leading-relaxed text-foreground/80 whitespace-pre-line">
+            <div className={`leading-relaxed text-foreground/80 whitespace-pre-line ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
               {brief}
             </div>
           )}

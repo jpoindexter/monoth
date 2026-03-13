@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useMarketStore } from '@/stores/market-store'
 import { usePanelStore } from '@/stores/panel-store'
 import { useUserStore } from '@/stores/user-store'
@@ -40,6 +40,7 @@ function byteSize(s: string) {
 }
 
 export default function ExportPanel() {
+  const expanded = useIsExpanded()
   const indices = useMarketStore((s) => s.indices)
   const crypto = useMarketStore((s) => s.crypto)
   const forex = useMarketStore((s) => s.forex)
@@ -200,14 +201,14 @@ export default function ExportPanel() {
               Reset
             </button>
           </div>
-          <div className="max-h-[300px] overflow-y-auto -mx-1 px-1">
+          <div className={`${expanded ? '' : 'max-h-[300px] overflow-y-auto'} -mx-1 px-1`}>
             {panels.map((p: PanelConfig) => (
-              <label key={p.id} className="flex items-center gap-1.5 py-0.5 text-[10px] cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 px-1 rounded-sm">
+              <label key={p.id} className={`flex items-center gap-1.5 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 px-1 rounded-sm ${expanded ? 'py-1 text-[12px]' : 'py-0.5 text-[10px]'}`}>
                 <input
                   type="checkbox"
                   checked={p.enabled}
                   onChange={() => togglePanel(p.id)}
-                  className="accent-foreground w-3 h-3"
+                  className={`accent-foreground ${expanded ? 'w-4 h-4' : 'w-3 h-3'}`}
                 />
                 <span className={p.enabled ? 'text-foreground font-medium' : 'text-muted-foreground'}>{p.name}</span>
                 {p.tier === 1 && <span className="text-[7px] text-muted-foreground/50 ml-auto">CORE</span>}
@@ -220,18 +221,19 @@ export default function ExportPanel() {
       {tab === 'export' && (
         <div>
           <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold mb-1.5">Export Data</p>
-          <div className="grid grid-cols-1 gap-1 mb-3">
+          <div className={`gap-1 mb-3 ${expanded ? 'grid grid-cols-2' : 'grid grid-cols-1'}`}>
             {exportButtons.map((btn) => (
               <button
                 key={`${btn.label}-${btn.sublabel}`}
                 onClick={btn.action}
-                className="text-[10px] font-medium bg-foreground/5 hover:bg-foreground/10 px-3 py-2 rounded-sm transition-colors text-left flex items-center justify-between"
+                className={`font-medium bg-foreground/5 hover:bg-foreground/10 rounded-sm transition-colors text-left flex items-center justify-between ${expanded ? 'text-[12px] px-3 py-3' : 'text-[10px] px-3 py-2'}`}
               >
                 <span>
                   {btn.label} <span className="text-muted-foreground font-normal">.{btn.sublabel.toLowerCase()}</span>
-                  <span className="text-muted-foreground font-normal ml-1.5">— {btn.hint}</span>
+                  {!expanded && <span className="text-muted-foreground font-normal ml-1.5">— {btn.hint}</span>}
+                  {expanded && <div className="text-[10px] text-muted-foreground font-normal mt-0.5">{btn.hint}</div>}
                 </span>
-                <span className="text-[9px] text-muted-foreground ml-2 shrink-0">{btn.size}</span>
+                <span className={`text-muted-foreground ml-2 shrink-0 ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{btn.size}</span>
               </button>
             ))}
           </div>

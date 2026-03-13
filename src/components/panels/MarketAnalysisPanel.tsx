@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { useMarketStore } from '@/stores/market-store'
 import { fetchSectors } from '@/services/api'
@@ -120,6 +120,7 @@ function deriveRiskAppetite(): Signal {
 }
 
 export default function MarketAnalysisPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'events' | 'news' | 'sentiment' | 'technicals' | 'flows'>('news')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('analysis')
   const { data: events, loading: evLoading } = usePolling<CorrelationEvent[]>({
@@ -178,12 +179,12 @@ export default function MarketAnalysisPanel() {
 
       {tab === 'events' && (
         <div className="space-y-0">
-          {events?.slice(0, 15).map((ev, i) => {
+          {events?.slice(0, expanded ? 30 : 15).map((ev, i) => {
             const isPositive = ev.surprise > 0
             return (
               <div key={`${ev.event}-${i}`} className="flex items-center justify-between py-1 border-b border-border/20 last:border-0">
                 <div className="flex-1 min-w-0">
-                  <span className="text-[11px] font-medium truncate block">{ev.event}</span>
+                  <span className={`font-medium block ${expanded ? 'text-[13px]' : 'text-[11px] truncate'}`}>{ev.event}</span>
                   <span className="text-[9px] text-muted-foreground">{ev.date}</span>
                 </div>
                 <div className="text-right shrink-0 ml-2">
@@ -205,7 +206,7 @@ export default function MarketAnalysisPanel() {
 
       {tab === 'news' && (
         <div className="space-y-0">
-          {newsData?.map((item) => {
+          {(expanded ? newsData : newsData?.slice(0, 8))?.map((item) => {
             const cls = classifyHeadline(item.title)
             return (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
@@ -217,7 +218,7 @@ export default function MarketAnalysisPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                  <span className={`font-medium leading-snug text-foreground ${expanded ? 'text-[13px]' : 'text-[11px] line-clamp-2'}`}>{item.title}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
               </a>

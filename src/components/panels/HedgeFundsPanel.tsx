@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
 const HF_SYMBOLS = ['QAI', 'MNA', 'BTAL', 'DBMF', 'CTA', 'KMLM']
@@ -66,6 +66,7 @@ const CROWDING_STOCKS = [
 ]
 
 export default function HedgeFundsPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'strategies' | 'holdings' | 'news' | 'flows' | 'crowding'>('prices')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('hedgefunds')
   const { data: priceData, loading: priceLoading } = usePolling({
@@ -127,12 +128,13 @@ export default function HedgeFundsPanel() {
       </div>
 
       {tab === 'prices' && (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">Strategy</th>
               <th className="text-right font-medium pb-1.5">Price</th>
               <th className="text-right font-medium pb-1.5">Chg%</th>
+              {expanded && <th className="text-right font-medium pb-1.5">Ticker</th>}
             </tr>
           </thead>
           <tbody>
@@ -140,14 +142,15 @@ export default function HedgeFundsPanel() {
               const isPos = p.changePercent >= 0
               return (
                 <tr key={p.symbol} className="border-t border-border/20">
-                  <td className="py-0.5">
+                  <td className={`${expanded ? 'py-1.5' : 'py-0.5'}`}>
                     <span className="font-medium">{HF_NAMES[p.symbol] || p.symbol}</span>
-                    <span className="text-muted-foreground ml-1 text-[10px]">{p.symbol}</span>
+                    {!expanded && <span className="text-muted-foreground ml-1 text-[10px]">{p.symbol}</span>}
                   </td>
                   <td className="text-right tabular-nums">${p.price.toFixed(2)}</td>
                   <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
                     {isPos ? '+' : ''}{p.changePercent.toFixed(2)}%
                   </td>
+                  {expanded && <td className="text-right text-muted-foreground text-[11px]">{p.symbol}</td>}
                 </tr>
               )
             })}
@@ -193,7 +196,7 @@ export default function HedgeFundsPanel() {
 
       {tab === 'holdings' && (
         <div>
-          <table className="w-full text-[11px]">
+          <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
             <thead>
               <tr className="text-muted-foreground">
                 <th className="text-left font-medium pb-1.5">Stock</th>
@@ -202,11 +205,11 @@ export default function HedgeFundsPanel() {
               </tr>
             </thead>
             <tbody>
-              {holdingsData.map((h) => {
+              {(expanded ? holdingsData : holdingsData.slice(0, 6)).map((h) => {
                 const chgPos = h.change >= 0
                 return (
                   <tr key={h.symbol} className="border-t border-border/20">
-                    <td className="py-0.5">
+                    <td className={`${expanded ? 'py-1.5' : 'py-0.5'}`}>
                       <span className="font-medium">{h.symbol}</span>
                       <span className="text-muted-foreground ml-1 text-[10px]">{h.name}</span>
                     </td>
@@ -225,7 +228,7 @@ export default function HedgeFundsPanel() {
 
       {tab === 'news' && (
         <div className="space-y-0">
-          {newsData?.map((item) => {
+          {(expanded ? newsData : newsData?.slice(0, 8))?.map((item) => {
             const cls = classifyHeadline(item.title)
             return (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
@@ -237,7 +240,7 @@ export default function HedgeFundsPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">{item.title}</span>
+                  <span className={`font-medium leading-snug text-foreground ${expanded ? 'text-[13px]' : 'text-[11px] line-clamp-2'}`}>{item.title}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
               </a>

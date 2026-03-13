@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 import { useNewsData } from '@/hooks/use-news-data'
 import { fetchSectors } from '@/services/api'
@@ -27,6 +27,7 @@ function relTime(ts: number): string {
 type TabId = 'heatmap' | 'table' | 'news' | 'rotation' | 'performance'
 
 export default function SectorHeatmapPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<TabId>('heatmap')
   const fetcher = useCallback(() => fetchSectors(), [])
   const { data, loading, error, refresh } = usePolling({ fetcher, interval: 60_000 })
@@ -89,21 +90,22 @@ export default function SectorHeatmapPanel() {
 
       {tab === 'heatmap' && byMagnitude && (
         <div className="flex flex-col gap-1">
-          <div className="flex gap-1" style={{ minHeight: '60px' }}>
-            {byMagnitude.slice(0, 3).map((sector) => (
+          <div className="flex gap-1" style={{ minHeight: expanded ? '100px' : '60px' }}>
+            {byMagnitude.slice(0, expanded ? byMagnitude.length : 3).map((sector) => (
               <div
                 key={sector.symbol}
                 className="flex flex-col items-center justify-center rounded px-1 py-1 text-white"
-                style={{ ...getBlockStyle(sector.changePercent), flexGrow: Math.max(Math.abs(sector.changePercent), 1), minHeight: '50px' }}
+                style={{ ...getBlockStyle(sector.changePercent), flexGrow: Math.max(Math.abs(sector.changePercent), 1), minHeight: expanded ? '90px' : '50px' }}
               >
-                <span className="text-[9px] font-medium text-center leading-tight">{sector.name}</span>
-                <span className="text-[13px] font-bold tabular-nums">
+                <span className={`font-medium text-center leading-tight ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>{sector.name}</span>
+                <span className={`font-bold tabular-nums ${expanded ? 'text-[16px]' : 'text-[13px]'}`}>
                   {sector.changePercent >= 0 ? '+' : ''}{sector.changePercent.toFixed(2)}%
                 </span>
-                <span className="text-[8px] opacity-70">{sector.symbol}</span>
+                <span className={`opacity-70 ${expanded ? 'text-[10px]' : 'text-[8px]'}`}>{sector.symbol}</span>
               </div>
             ))}
           </div>
+          {!expanded && (
           <div className="flex gap-1" style={{ minHeight: '50px' }}>
             {byMagnitude.slice(3).map((sector) => (
               <div
@@ -119,6 +121,7 @@ export default function SectorHeatmapPanel() {
               </div>
             ))}
           </div>
+          )}
           {best && worst && (
             <div className="text-[10px] mt-0.5">
               <span className="text-emerald-500 font-medium">Best: {best.name} {best.changePercent >= 0 ? '+' : ''}{best.changePercent.toFixed(2)}%</span>
@@ -157,7 +160,7 @@ export default function SectorHeatmapPanel() {
 
       {tab === 'news' && (
         <div className="space-y-0">
-          {newsData?.slice(0, 10).map((item) => {
+          {newsData?.slice(0, expanded ? newsData.length : 10).map((item) => {
             const cls = classifyHeadline(item.title)
             return (
               <a
@@ -176,7 +179,7 @@ export default function SectorHeatmapPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">
+                  <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>
                     {item.title}
                   </span>
                 </div>

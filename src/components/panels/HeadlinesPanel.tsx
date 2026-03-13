@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
 function relTime(ts: number): string {
@@ -76,6 +76,7 @@ function gaugeColor(pct: number): string {
 }
 
 export default function HeadlinesPanel() {
+  const expanded = useIsExpanded()
   const [priority, setPriority] = useState<Priority>('All')
   const [tab, setTab] = useState<MainTab>('feed')
   const { data, loading, error, refresh } = useNewsData('markets')
@@ -239,16 +240,16 @@ export default function HeadlinesPanel() {
                             {CATEGORY_LABELS[cls.category]}
                           </span>
                         )}
-                        <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">
+                        <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>
                           {item.title}
                         </span>
                       </div>
                       <div className="text-right shrink-0 ml-1">
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap block">
+                        <span className={`text-muted-foreground whitespace-nowrap block ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>
                           {relTime(item.published)}
                         </span>
-                        <span className="text-[8px] text-muted-foreground/60 whitespace-nowrap block">
-                          {domain}
+                        <span className={`text-muted-foreground/60 whitespace-nowrap block ${expanded ? 'text-[10px]' : 'text-[8px]'}`}>
+                          {expanded ? extractFullDomain(item.url) : domain}
                         </span>
                       </div>
                     </a>
@@ -310,7 +311,7 @@ export default function HeadlinesPanel() {
                         className="flex items-start gap-1.5 hover:bg-zinc-800/50 -mx-1 px-1 py-0.5 rounded-sm transition-colors"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
-                        <span className="text-[10px] text-foreground leading-snug line-clamp-2">{item.title}</span>
+                        <span className={`text-[10px] text-foreground leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
                       </a>
                     ))}
                   </div>
@@ -331,7 +332,7 @@ export default function HeadlinesPanel() {
                         className="flex items-start gap-1.5 hover:bg-zinc-800/50 -mx-1 px-1 py-0.5 rounded-sm transition-colors"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                        <span className="text-[10px] text-foreground leading-snug line-clamp-2">{item.title}</span>
+                        <span className={`text-[10px] text-foreground leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
                       </a>
                     ))}
                   </div>

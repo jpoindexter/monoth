@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
 interface MacroSignal {
@@ -112,6 +112,7 @@ const QT_PACE_COLORS: Record<'ACCELERATING' | 'STEADY' | 'SLOWING', string> = {
 const GLOBAL_LIQUIDITY_USD = BALANCE_SHEETS.reduce((sum, b) => sum + b.usdEq, 0)
 
 export default function CentralBanksPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'signals' | 'news' | 'rates' | 'calendar' | 'dotplot' | 'balancesheet'>('signals')
   const { data: newsData, loading: newsLoading, error, refresh } = useNewsData('centralbanks')
   const { data: signals, loading: sigLoading } = usePolling<MacroSignal[]>({
@@ -151,12 +152,12 @@ export default function CentralBanksPanel() {
       {tab === 'signals' && (
         <div className="space-y-1.5">
           {signals?.map((s) => (
-            <div key={s.name} className="flex items-center justify-between py-0.5 border-b border-border/20 last:border-0">
+            <div key={s.name} className={`flex items-center justify-between border-b border-border/20 last:border-0 ${expanded ? 'py-1.5' : 'py-0.5'}`}>
               <div>
-                <span className="text-[11px] font-medium">{s.name}</span>
-                <span className="text-[10px] text-muted-foreground ml-1.5">{s.detail}</span>
+                <span className={`font-medium ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{s.name}</span>
+                <span className={`text-muted-foreground ml-1.5 ${expanded ? 'text-[11px] block mt-0.5' : 'text-[10px]'}`}>{s.detail}</span>
               </div>
-              <span className={`text-[10px] font-medium uppercase tracking-wider ${STATUS_COLORS[s.status]}`}>
+              <span className={`font-medium uppercase tracking-wider ${expanded ? 'text-[12px]' : 'text-[10px]'} ${STATUS_COLORS[s.status]}`}>
                 {s.label}
               </span>
             </div>
@@ -175,6 +176,7 @@ export default function CentralBanksPanel() {
             const dir = direction(bank.rate, bank.prev)
             const barPct = (bank.rate / maxRate) * 100
             const days = daysUntil(bank.next)
+            const changeBps = Math.round((bank.rate - bank.prev) * 100)
             return (
               <div key={bank.name} className="space-y-0.5">
                 <div className="flex items-center justify-between">
@@ -182,15 +184,25 @@ export default function CentralBanksPanel() {
                     <span className="text-[8px] font-bold bg-foreground/10 text-foreground px-1 py-px rounded-sm tabular-nums">
                       {CURRENCY_BADGE[bank.currency]}
                     </span>
-                    <span className="text-[11px] font-medium">{bank.name}</span>
+                    <span className={`font-medium ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{bank.name}</span>
+                    {expanded && <ActionBadge dir={dir} />}
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-[11px] tabular-nums font-bold">{bank.rate.toFixed(2)}%</span>
+                    <span className={`tabular-nums font-bold ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{bank.rate.toFixed(2)}%</span>
                     <Arrow dir={dir} />
-                    <span className="text-[9px] text-muted-foreground tabular-nums">{bank.next} ({days}d)</span>
+                    {expanded ? (
+                      <div className="text-right">
+                        <div className="text-[9px] text-muted-foreground tabular-nums">{bank.next} ({days}d)</div>
+                        <div className={`text-[9px] tabular-nums font-medium ${dir === 'cut' ? 'text-emerald-500' : dir === 'hike' ? 'text-red-500' : 'text-muted-foreground'}`}>
+                          {dir !== 'hold' ? `${changeBps > 0 ? '+' : ''}${changeBps}bps from ${bank.prev.toFixed(2)}%` : `Held at ${bank.prev.toFixed(2)}%`}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-[9px] text-muted-foreground tabular-nums">{bank.next} ({days}d)</span>
+                    )}
                   </div>
                 </div>
-                <div className="h-2 rounded-full bg-foreground/10 w-full overflow-hidden">
+                <div className={`rounded-full bg-foreground/10 w-full overflow-hidden ${expanded ? 'h-3' : 'h-2'}`}>
                   <div
                     className={`h-full rounded-full transition-all ${
                       dir === 'cut' ? 'bg-emerald-500' : dir === 'hike' ? 'bg-red-500' : 'bg-foreground/40'

@@ -4,7 +4,7 @@ import { useCryptoData } from '@/hooks/use-crypto-data'
 import { useMarketStore } from '@/stores'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
-import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 
@@ -65,6 +65,7 @@ function fmt(n: number): string {
 }
 
 export default function BtcEtfPanel() {
+  const expanded = useIsExpanded()
   const [tab, setTab] = useState<'etfs' | 'news' | 'chart' | 'flows' | 'compare'>('news')
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
   const { data: newsData, loading: newsLoading, error: newsError, refresh } = useNewsData('btcetf')
@@ -104,7 +105,7 @@ export default function BtcEtfPanel() {
         <div className="border-b border-border/20 pb-1.5 mb-1.5">
           <div className="flex items-baseline gap-2">
             <span className="text-[10px] text-muted-foreground">BTC</span>
-            <span className="text-sm font-bold tabular-nums">
+            <span className={`${expanded ? 'text-xl' : 'text-sm'} font-bold tabular-nums`}>
               ${btc.price.toLocaleString('en-US', { maximumFractionDigits: 0 })}
             </span>
             <span className={`text-[10px] font-medium tabular-nums ${btc.changePercent24h >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -126,7 +127,7 @@ export default function BtcEtfPanel() {
         <LightweightChart
           type="area"
           data={chartData}
-          height={140}
+          height={expanded ? 300 : 140}
           lineColor="#f59e0b"
           areaTopColor="rgba(245, 158, 11, 0.2)"
           areaBottomColor="rgba(245, 158, 11, 0.02)"
@@ -134,7 +135,7 @@ export default function BtcEtfPanel() {
       )}
 
       {tab === 'etfs' && (
-        <table className="w-full text-[11px]">
+        <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
           <thead>
             <tr className="text-muted-foreground">
               <th className="text-left font-medium pb-1.5">ETF</th>
@@ -146,9 +147,15 @@ export default function BtcEtfPanel() {
           <tbody>
             {etfData?.map((etf) => {
               const isPos = (etf.changePercent ?? 0) >= 0
+              const meta = ETF_META[etf.symbol]
               return (
                 <tr key={etf.symbol} className="border-t border-border/20">
-                  <td className="py-0.5 font-medium">{etf.symbol}</td>
+                  <td className="py-0.5">
+                    <div className="font-medium">{etf.symbol}</div>
+                    {expanded && meta && (
+                      <div className="text-[10px] text-muted-foreground">{meta.fullName}</div>
+                    )}
+                  </td>
                   <td className="text-right tabular-nums">${etf.price.toFixed(2)}</td>
                   <td className={`text-right tabular-nums ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
                     {isPos ? '+' : ''}{(etf.change ?? 0).toFixed(2)}
@@ -168,7 +175,7 @@ export default function BtcEtfPanel() {
 
       {tab === 'news' && (
         <div className="space-y-0">
-          {newsData?.slice(0, 10).map((item) => {
+          {newsData?.slice(0, expanded ? undefined : 10).map((item) => {
             const cls = classifyHeadline(item.title)
             return (
               <a
@@ -187,7 +194,7 @@ export default function BtcEtfPanel() {
                       {CATEGORY_LABELS[cls.category]}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium leading-snug text-foreground line-clamp-2">
+                  <span className={`text-[11px] font-medium leading-snug text-foreground ${expanded ? '' : 'line-clamp-2'}`}>
                     {item.title}
                   </span>
                 </div>
