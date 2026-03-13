@@ -217,6 +217,9 @@ export default function FundFlowsPanel() {
 
   return (
     <PanelWrapper title="Fund Flows">
+      <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
+        <span className="text-[9px] text-yellow-500/80 uppercase tracking-wider">Estimated flows · not official data</span>
+      </div>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'etf')} onClick={() => setTab('etf')}>ETF Flows</button>
         <button className={tabCls(tab === 'sector')} onClick={() => setTab('sector')}>Sector</button>

@@ -202,6 +202,9 @@ export default function BtcEtfPanel() {
 
       {tab === 'flows' && (
         <div className="space-y-2">
+          <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-yellow-500/10 border border-yellow-500/20">
+            <span className="text-[9px] text-yellow-500/80 uppercase tracking-wider">Estimated flows · not official data</span>
+          </div>
           <div className="flex items-center justify-between mb-1">
             <div>
               <span className="text-[10px] text-muted-foreground mr-1.5">Net today</span>
