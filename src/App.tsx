@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ToastContainer } from '@/components/Toast'
 import { Landing } from '@/pages/Landing'
 import { Dashboard } from '@/pages/Dashboard'
 import { CommandPalette } from '@/components/CommandPalette'
@@ -32,6 +33,7 @@ function AppInner() {
         toggleLock()
       } else if (e.key === 'R' || e.key === 'r') {
         window.dispatchEvent(new CustomEvent('monoth:refresh-all'))
+        window.dispatchEvent(new CustomEvent('monoth:toast', { detail: 'Refreshing all panels...' }))
       }
     }
     window.addEventListener('keydown', onKey)
@@ -46,6 +48,7 @@ function AppInner() {
         <Route path="/symbol/:ticker" element={<Dashboard />} />
       </Routes>
       <CommandPalette />
+      <ToastContainer />
     </>
   )
 }

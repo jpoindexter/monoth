@@ -31,5 +31,13 @@ export function usePolling<T>({ fetcher, interval, enabled = true }: UsePollingO
     return () => clearInterval(timerRef.current)
   }, [refresh, interval, enabled])
 
+  // Listen for global refresh event (R key, command palette "Refresh all")
+  useEffect(() => {
+    if (!enabled) return
+    const handler = () => refresh()
+    window.addEventListener('monoth:refresh-all', handler)
+    return () => window.removeEventListener('monoth:refresh-all', handler)
+  }, [refresh, enabled])
+
   return { data, loading, error, refresh }
 }
