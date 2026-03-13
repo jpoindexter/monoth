@@ -7,14 +7,7 @@ import { fetchQuotes } from '@/services/api/market'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
-}
+import { relTime } from '@/lib/panel-utils'
 
 // Seeded pseudo-random: stable for a given date seed + index
 function seededRand(seed: number, index: number): number {

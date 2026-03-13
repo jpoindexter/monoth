@@ -4,6 +4,7 @@ import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
+import { relTime } from '@/lib/panel-utils'
 
 const HF_SYMBOLS = ['QAI', 'MNA', 'BTAL', 'DBMF', 'CTA', 'KMLM']
 const HF_NAMES: Record<string, string> = {
@@ -41,14 +42,6 @@ function seededReturn(name: string, min: number, max: number): number {
   for (const ch of name + day) hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0
   const norm = (Math.abs(hash) % 1000) / 1000
   return min + norm * (max - min)
-}
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
 }
 
 const FLOW_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']

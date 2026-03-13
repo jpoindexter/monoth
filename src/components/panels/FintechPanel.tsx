@@ -6,6 +6,7 @@ import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 const FINTECH_SYMBOLS = ['ARKF', 'FINX', 'IPAY', 'SQ', 'PYPL', 'COIN']
 const FINTECH_NAMES: Record<string, string> = {
@@ -59,16 +60,6 @@ function seededValue(name: string, base: number, variance: number): number {
   return base + ((Math.abs(hash) % 1000) / 1000 - 0.5) * variance * 2
 }
 
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
-}
-
-const tabCls = (active: boolean) =>
-  `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 export default function FintechPanel() {
   const expanded = useIsExpanded()

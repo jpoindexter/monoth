@@ -5,6 +5,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 const COMMODITY_SYMBOLS = ['GLD', 'SLV', 'USO', 'COPX', 'UNG', 'WEAT', 'DBA', 'PALL', 'PPLT']
 const COMMODITY_NAMES: Record<string, string> = {
@@ -26,16 +27,6 @@ const SECTORS = [
   { name: 'Agriculture', symbols: ['WEAT', 'DBA'], color: '#10b981' },
 ]
 
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
-}
-
-const tabCls = (active: boolean) =>
-  `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 const CHART_SYMBOLS = ['GLD', 'SLV', 'USO', 'DBA'] as const
 type ChartSymbol = typeof CHART_SYMBOLS[number]

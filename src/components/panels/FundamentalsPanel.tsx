@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
+import { tabCls } from '@/lib/panel-utils'
 
 interface Fundamentals {
   symbol: string
@@ -60,8 +61,6 @@ function fmtNum(n: number | null, digits = 2): string {
 
 type Tab = 'valuation' | 'profitability' | 'growth' | 'balance'
 
-const tabCls = (active: boolean) =>
-  `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 function Row({ label, value, colored }: { label: string; value: string; colored?: 'pos' | 'neg' | null }) {
   return (

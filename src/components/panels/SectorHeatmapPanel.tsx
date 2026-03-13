@@ -4,6 +4,7 @@ import { usePolling } from '@/hooks/use-polling'
 import { useNewsData } from '@/hooks/use-news-data'
 import { fetchSectors } from '@/services/api'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
+import { relTime } from '@/lib/panel-utils'
 
 function getBlockStyle(changePercent: number): React.CSSProperties {
   const magnitude = Math.min(Math.abs(changePercent) / 3, 1)
@@ -14,14 +15,6 @@ function getBlockStyle(changePercent: number): React.CSSProperties {
     const lightness = Math.round(35 - magnitude * 20)
     return { backgroundColor: `hsl(0, 70%, ${lightness}%)` }
   }
-}
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
 }
 
 type TabId = 'heatmap' | 'table' | 'news' | 'rotation' | 'performance'

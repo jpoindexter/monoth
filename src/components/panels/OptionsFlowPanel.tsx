@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 
 type Tab = 'unusual' | 'putscalls' | 'expiry'
 
@@ -101,8 +102,6 @@ function groupByExpiry(flows: FlowEntry[]) {
   return Object.values(groups)
 }
 
-const tabCls = (active: boolean) =>
-  `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 const sentimentColor = (s: FlowEntry['sentiment']) =>
   s === 'Bullish' ? 'text-emerald-500' : s === 'Bearish' ? 'text-red-500' : 'text-yellow-500'

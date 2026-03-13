@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 
 type Tab = 'buys' | 'sells' | 'recent'
 
@@ -89,8 +90,6 @@ function generateTransactions(): InsiderTx[] {
   return entries
 }
 
-const tabCls = (active: boolean) =>
-  `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 export default function InsiderTradingPanel() {
   const expanded = useIsExpanded()

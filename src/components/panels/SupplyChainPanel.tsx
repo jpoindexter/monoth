@@ -6,6 +6,7 @@ import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
+import { relTime } from '@/lib/panel-utils'
 
 const SC_SYMBOLS = ['IYT', 'XTN', 'SEA', 'FDX', 'UPS', 'ZIM']
 const SC_NAMES: Record<string, string> = {
@@ -118,14 +119,6 @@ function flowScoreColor(score: number): string {
   if (score >= 75) return 'text-emerald-600 dark:text-emerald-400'
   if (score >= 45) return 'text-amber-600 dark:text-amber-400'
   return 'text-red-600 dark:text-red-400'
-}
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
 }
 
 export default function SupplyChainPanel() {

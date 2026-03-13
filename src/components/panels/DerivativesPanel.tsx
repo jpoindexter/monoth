@@ -6,6 +6,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { useMarketStore } from '@/stores/market-store'
+import { relTime } from '@/lib/panel-utils'
 
 const VOL_SYMBOLS = ['VIXY', 'UVXY', 'SVXY', 'SQQQ', 'TQQQ', 'SPXS']
 const VOL_NAMES: Record<string, string> = {
@@ -14,14 +15,6 @@ const VOL_NAMES: Record<string, string> = {
 }
 
 const MONTH_LABELS = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
-}
 
 function buildTermStructure(spot: number) {
   // Typical contango: each month adds 0.5-1.5pts, with slight mean reversion flattening

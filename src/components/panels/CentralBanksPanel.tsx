@@ -3,6 +3,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
+import { relTime } from '@/lib/panel-utils'
 
 interface MacroSignal {
   name: string
@@ -65,14 +66,6 @@ function ActionBadge({ dir }: { dir: 'cut' | 'hold' | 'hike' }) {
       {dir}
     </span>
   )
-}
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
 }
 
 const CURRENT_FED_RATE = 4.50

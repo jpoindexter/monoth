@@ -1,14 +1,7 @@
 import { useState } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
-}
+import { relTime } from '@/lib/panel-utils'
 
 const TARIFFS = [
   { pair: 'US → China', rate: 145, sector: 'Most Goods', status: 'Active', impact: 'Supply chain disruption, consumer prices' },

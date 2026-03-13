@@ -3,6 +3,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
+import { relTime } from '@/lib/panel-utils'
 
 interface Earning {
   date: string
@@ -33,14 +34,6 @@ const STATIC_EARNINGS = [
   { company: 'Alphabet', ticker: 'GOOGL', date: 'Apr 29', expected: '$2.02', time: 'AMC' },
   { company: 'NVIDIA', ticker: 'NVDA', date: 'May 28', expected: '$0.89', time: 'AMC' },
 ]
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
-}
 
 function fmtRev(n: number | null): string {
   if (n == null) return '-'

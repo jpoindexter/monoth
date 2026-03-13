@@ -6,6 +6,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { classifyHeadline, CATEGORY_LABELS } from '@/lib/news-classifier'
 import type { ThreatCategory } from '@/lib/news-classifier'
 import type { NewsItem } from '@/types'
+import { tabCls } from '@/lib/panel-utils'
 
 const LS_KEY = 'monoth-ai-key'
 
@@ -48,14 +49,6 @@ function sentimentColor(score: number): string {
   if (score < 60) return '#eab308'
   if (score < 75) return '#86efac'
   return '#22c55e'
-}
-
-function tabCls(active: boolean) {
-  return `text-[10px] uppercase tracking-wider font-medium pb-0.5 transition-colors ${
-    active
-      ? 'text-foreground border-b border-foreground'
-      : 'text-muted-foreground hover:text-foreground/70'
-  }`
 }
 
 // ── Theme definitions ─────────────────────────────────────────────────────────

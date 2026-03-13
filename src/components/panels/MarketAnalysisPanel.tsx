@@ -5,6 +5,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { useMarketStore } from '@/stores/market-store'
 import { fetchSectors } from '@/services/api'
+import { relTime } from '@/lib/panel-utils'
 
 interface CorrelationEvent {
   event: string
@@ -19,14 +20,6 @@ type Signal = 'bullish' | 'bearish' | 'neutral'
 interface SentimentSource {
   name: string
   signal: Signal
-}
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
 }
 
 const SIGNAL_COLORS: Record<Signal, string> = {

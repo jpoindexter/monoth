@@ -3,6 +3,7 @@ import { usePolling } from '@/hooks/use-polling'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
+import { relTime } from '@/lib/panel-utils'
 
 function fmtCap(num: number): string {
   if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T'
@@ -15,14 +16,6 @@ function pegColor(deviation: number): string {
   if (deviation < 0.001) return 'text-emerald-600'
   if (deviation < 0.005) return 'text-yellow-500'
   return 'text-red-600'
-}
-
-function relTime(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  return `${Math.floor(diff / 86400)}d`
 }
 
 interface Stablecoin {

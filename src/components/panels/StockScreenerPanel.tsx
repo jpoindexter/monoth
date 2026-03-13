@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
+import { tabCls } from '@/lib/panel-utils'
 
 interface ScreenerResult {
   symbol: string
@@ -41,8 +42,6 @@ function fmtVol(n: number | null): string {
   return String(n)
 }
 
-const tabCls = (active: boolean) =>
-  `text-[9px] px-1.5 h-4 rounded-sm font-medium transition-colors ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 export default function StockScreenerPanel() {
   const expanded = useIsExpanded()
