@@ -1,4 +1,4 @@
-import { useState, createContext, useContext } from 'react'
+import { useState, useRef, useEffect, createContext, useContext } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Maximize2, Minimize2, RefreshCw } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,6 +13,69 @@ export function PanelIdProvider({ id, children }: { id: string; children: React.
   return <PanelIdContext.Provider value={id}>{children}</PanelIdContext.Provider>
 }
 
+function SpanPicker({ panelId }: { panelId: string }) {
+  const [open, setOpen] = useState(false)
+  const [hover, setHover] = useState<{ col: number; row: number } | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const getSpan = useSpanStore((s) => s.getSpan)
+  const setSpan = useSpanStore((s) => s.setSpan)
+  const span = getSpan(panelId)
+  const spanLabel = `${span.col}×${span.row}`
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  const hoverLabel = hover ? `${hover.col}×${hover.row}` : spanLabel
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="px-1 py-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors text-[8px] font-medium tabular-nums"
+        title={`Resize (${spanLabel})`}
+      >
+        {spanLabel}
+      </button>
+      {open && (
+        <div className="absolute top-full right-0 mt-1 z-50 bg-zinc-900 dark:bg-zinc-800 border border-border/40 rounded-md shadow-lg p-2 flex flex-col items-center gap-1">
+          <div
+            className="grid gap-[2px]"
+            style={{ gridTemplateColumns: 'repeat(3, 12px)' }}
+            onMouseLeave={() => setHover(null)}
+          >
+            {[1, 2, 3].map((row) =>
+              [1, 2, 3].map((col) => {
+                const lit = hover ? col <= hover.col && row <= hover.row : col <= span.col && row <= span.row
+                return (
+                  <div
+                    key={`${col}-${row}`}
+                    className={`w-3 h-3 rounded-[2px] cursor-pointer transition-colors ${lit ? 'bg-foreground/50' : 'bg-border/30'}`}
+                    onMouseEnter={() => setHover({ col, row })}
+                    onClick={() => {
+                      setSpan(panelId, col, row)
+                      setOpen(false)
+                      setHover(null)
+                    }}
+                  />
+                )
+              })
+            )}
+          </div>
+          <span className="text-[8px] text-muted-foreground tabular-nums">{hoverLabel}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface PanelWrapperProps {
   title: string
   panelId?: string
@@ -24,12 +87,8 @@ interface PanelWrapperProps {
 
 export function PanelWrapper({ title, panelId, children, loading, error, onRetry }: PanelWrapperProps) {
   const [expanded, setExpanded] = useState(false)
-  const cycleSpan = useSpanStore((s) => s.cycleSpan)
-  const getSpan = useSpanStore((s) => s.getSpan)
   const contextPanelId = usePanelId()
   const effectivePanelId = panelId ?? contextPanelId
-  const span = effectivePanelId ? getSpan(effectivePanelId) : { col: 1, row: 1 }
-  const spanLabel = span.col === 1 && span.row === 1 ? '1×1' : `${span.col}×${span.row}`
 
   const panel = (
     <motion.div
@@ -55,15 +114,7 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
               <RefreshCw className="w-2.5 h-2.5" />
             </button>
           )}
-          {effectivePanelId && (
-            <button
-              onClick={() => cycleSpan(effectivePanelId)}
-              className="px-1 py-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors text-[8px] font-medium tabular-nums"
-              title={`Resize (${spanLabel})`}
-            >
-              {spanLabel}
-            </button>
-          )}
+          {effectivePanelId && <SpanPicker panelId={effectivePanelId} />}
           <button
             onClick={() => setExpanded(!expanded)}
             className="p-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
