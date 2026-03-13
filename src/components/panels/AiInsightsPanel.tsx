@@ -108,7 +108,7 @@ function scoreThemes(items: NewsItem[]) {
 
 function ThemesTab() {
   const expanded = useIsExpanded()
-  const { data: headlines } = useNewsData('headlines')
+  const { data: headlines } = useNewsData('markets')
 
   const themes = useMemo(() => scoreThemes(headlines ?? []), [headlines])
   const maxCount = themes[0]?.count ?? 1
@@ -232,7 +232,7 @@ function compositeLevelColor(level: 'LOW' | 'MODERATE' | 'ELEVATED') {
 
 function RisksTab() {
   const expanded = useIsExpanded()
-  const { data: headlines } = useNewsData('headlines')
+  const { data: headlines } = useNewsData('markets')
 
   const { scores, level } = useMemo(() => {
     const items = headlines ?? []
@@ -294,7 +294,7 @@ function RisksTab() {
 
 function SentimentTab() {
   const expanded = useIsExpanded()
-  const { data: headlines } = useNewsData('headlines')
+  const { data: headlines } = useNewsData('markets')
 
   const { score, categoryBreakdown, topThreats } = useMemo(() => {
     const items = headlines ?? []
