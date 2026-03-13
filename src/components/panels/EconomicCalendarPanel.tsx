@@ -1,4 +1,4 @@
-'use client'
+
 
 import { useState, useEffect, useCallback } from 'react'
 import { usePolling } from '@/hooks/use-polling'

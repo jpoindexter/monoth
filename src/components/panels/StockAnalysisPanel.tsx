@@ -1,4 +1,4 @@
-'use client'
+
 
 import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
