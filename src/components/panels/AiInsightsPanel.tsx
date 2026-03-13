@@ -1,41 +1,9 @@
 import { useState } from 'react'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useUserStore } from '@/stores/user-store'
 import { useMarketStore } from '@/stores/market-store'
 
 const LS_KEY = 'monoth-ai-key'
-
-function buildPrompt(
-  indices: ReturnType<typeof useMarketStore.getState>['indices'],
-  crypto: ReturnType<typeof useMarketStore.getState>['crypto'],
-  forex: ReturnType<typeof useMarketStore.getState>['forex'],
-): string {
-  const topIndices = indices
-    .slice(0, 5)
-    .map((i) => `${i.symbol}: ${i.price.toFixed(2)} (${i.changePercent >= 0 ? '+' : ''}${i.changePercent.toFixed(2)}%)`)
-    .join(', ')
-
-  const topCrypto = crypto
-    .slice(0, 3)
-    .map((c) => `${c.symbol.toUpperCase()}: $${c.price.toLocaleString('en-US', { maximumFractionDigits: 2 })} (${c.changePercent24h >= 0 ? '+' : ''}${c.changePercent24h.toFixed(2)}%)`)
-    .join(', ')
-
-  const topForex = forex
-    .slice(0, 3)
-    .map((f) => `${f.pair}: ${f.rate.toFixed(4)} (${f.changePercent >= 0 ? '+' : ''}${f.changePercent.toFixed(2)}%)`)
-    .join(', ')
-
-  return `You are a concise financial analyst. Based on current market data, provide a brief (3-4 paragraph) market intelligence summary.
-
-Current market snapshot:
-- Equity indices: ${topIndices || 'No data available'}
-- Crypto: ${topCrypto || 'No data available'}
-- Forex: ${topForex || 'No data available'}
-
-Focus on: key trends, notable movers, cross-asset correlations, and one actionable insight. Be direct and professional. No disclaimers.`
-}
 
 export default function AiInsightsPanel() {
   const tier = useUserStore((s) => s.tier)
@@ -55,10 +23,8 @@ export default function AiInsightsPanel() {
 
   function saveKey(val: string) {
     setApiKey(val)
-    if (typeof window !== 'undefined') {
-      if (val) localStorage.setItem(LS_KEY, val)
-      else localStorage.removeItem(LS_KEY)
-    }
+    if (val) localStorage.setItem(LS_KEY, val)
+    else localStorage.removeItem(LS_KEY)
   }
 
   async function generate() {
@@ -79,8 +45,11 @@ export default function AiInsightsPanel() {
         const data = await res.json()
         setBrief(data.brief)
       } else {
-        if (!apiKey.trim()) throw new Error('Enter your Anthropic API key to continue')
-        const prompt = buildPrompt(indices, crypto, forex)
+        if (!apiKey.trim()) throw new Error('Enter your Anthropic API key')
+        const topIndices = indices.slice(0, 5).map((i) => `${i.symbol}: ${i.changePercent >= 0 ? '+' : ''}${i.changePercent.toFixed(2)}%`).join(', ')
+        const topCrypto = crypto.slice(0, 3).map((c) => `${c.symbol.toUpperCase()}: $${c.price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`).join(', ')
+        const prompt = `Concise financial analyst. Current market: Indices: ${topIndices || 'N/A'}. Crypto: ${topCrypto || 'N/A'}. Give 3-4 paragraph market brief. Direct, no disclaimers.`
+
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -97,7 +66,7 @@ export default function AiInsightsPanel() {
         })
         if (!res.ok) {
           const body = await res.json().catch(() => ({}))
-          throw new Error(body.error?.message ?? `Anthropic error (${res.status})`)
+          throw new Error(body.error?.message ?? `Error (${res.status})`)
         }
         const data = await res.json()
         setBrief(data.content?.[0]?.text ?? '')
@@ -110,54 +79,41 @@ export default function AiInsightsPanel() {
   }
 
   return (
-    <PanelWrapper title="AI Market Insights">
-      <div className="flex flex-col gap-4 p-1">
-        {!isPro && (
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-muted-foreground">
-              Anthropic API key (stored locally, never sent to our servers)
-            </label>
-            <Input
-              type="password"
-              placeholder="sk-ant-..."
-              value={apiKey}
-              onChange={(e) => saveKey(e.target.value)}
-              className="font-mono text-xs"
-            />
-          </div>
-        )}
+    <PanelWrapper title="AI Insights">
+      {!isPro && (
+        <div className="mb-2">
+          <div className="text-[9px] text-muted-foreground mb-1">Anthropic API key (stored locally)</div>
+          <input
+            type="password"
+            placeholder="sk-ant-..."
+            value={apiKey}
+            onChange={(e) => saveKey(e.target.value)}
+            className="w-full bg-transparent border border-border/30 rounded-sm px-1.5 py-0.5 text-[11px] font-mono text-foreground placeholder:text-muted-foreground outline-none focus:border-foreground/30"
+          />
+        </div>
+      )}
 
-        <Button
-          onClick={generate}
-          disabled={loading || (!isPro && !apiKey.trim())}
-          size="sm"
-          className="w-fit"
-        >
-          {loading ? 'Generating...' : 'Generate Brief'}
-        </Button>
+      <button
+        onClick={generate}
+        disabled={loading || (!isPro && !apiKey.trim())}
+        className="text-[10px] font-medium bg-foreground text-background px-2 py-1 rounded-sm disabled:opacity-50 mb-2"
+      >
+        {loading ? 'Generating...' : 'Generate Brief'}
+      </button>
 
-        {error && (
-          <p className="text-xs text-red-600">{error}</p>
-        )}
+      {error && <p className="text-[10px] text-red-500 mb-1">{error}</p>}
 
-        {brief && !loading && (
-          <div className="flex flex-col gap-2">
-            {brief.split('\n').filter(Boolean).map((para, i) => (
-              <p key={i} className="text-sm leading-relaxed text-foreground/90">
-                {para}
-              </p>
-            ))}
-          </div>
-        )}
+      {brief && (
+        <div className="text-[11px] leading-relaxed text-foreground/80 whitespace-pre-line">
+          {brief}
+        </div>
+      )}
 
-        {!brief && !loading && !error && (
-          <p className="text-xs text-muted-foreground">
-            {isPro
-              ? 'Click Generate Brief to get an AI-powered market analysis.'
-              : 'Enter your Anthropic API key above, then click Generate Brief.'}
-          </p>
-        )}
-      </div>
+      {!brief && !loading && !error && (
+        <p className="text-[10px] text-muted-foreground">
+          {isPro ? 'Generate an AI market analysis.' : 'Add API key above to generate briefs.'}
+        </p>
+      )}
     </PanelWrapper>
   )
 }

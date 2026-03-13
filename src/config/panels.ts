@@ -30,7 +30,7 @@ export const PANELS: PanelConfig[] = [
   { id: 'predictions', name: 'Predictions', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'daily-brief', name: 'Daily Brief', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'supply-chain', name: 'Supply Chain', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
-  { id: 'watchlist', name: 'Watchlist', tier: 3, enabled: false, defaultWidth: 4, defaultHeight: 4 },
-  { id: 'ai-insights', name: 'AI Insights', tier: 3, enabled: false, defaultWidth: 6, defaultHeight: 4 },
-  { id: 'export', name: 'Export', tier: 3, enabled: false, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'watchlist', name: 'Watchlist', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'ai-insights', name: 'AI Insights', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
+  { id: 'export', name: 'Export', tier: 2, enabled: true, defaultWidth: 4, defaultHeight: 3 },
 ]
