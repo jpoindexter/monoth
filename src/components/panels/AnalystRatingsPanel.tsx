@@ -63,8 +63,8 @@ function buildMockData(): RatingEntry[] {
   const entries: RatingEntry[] = []
 
   for (let i = 0; i < TICKERS.length; i++) {
-    const ticker = TICKERS[i]
-    const firm = FIRMS[Math.floor(rng() * FIRMS.length)]
+    const ticker = TICKERS[i] ?? ''
+    const firm = FIRMS[Math.floor(rng() * FIRMS.length)] ?? FIRMS[0]!
     const base = basePrices[ticker] ?? 100
     const prevTarget = +(base * (0.85 + rng() * 0.3)).toFixed(0)
     const ptMove = (rng() - 0.45) * 0.25
@@ -74,8 +74,8 @@ function buildMockData(): RatingEntry[] {
     const fromIdx = Math.floor(rng() * RATINGS.length)
     let toIdx = Math.floor(rng() * RATINGS.length)
     while (toIdx === fromIdx) toIdx = Math.floor(rng() * RATINGS.length)
-    const fromRating = RATINGS[fromIdx]
-    const toRating = RATINGS[toIdx]
+    const fromRating = RATINGS[fromIdx] ?? 'Hold'
+    const toRating = RATINGS[toIdx] ?? 'Hold'
 
     const fromRank = RATING_RANK[fromRating] ?? 3
     const toRank = RATING_RANK[toRating] ?? 3
@@ -101,10 +101,6 @@ function buildMockData(): RatingEntry[] {
 
 const MOCK_DATA = buildMockData()
 
-function fmtDate(dateStr: string) {
-  const d = new Date(dateStr + 'T12:00:00')
-  return d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
-}
 
 function ratingColor(rating: string) {
   const rank = RATING_RANK[rating] ?? 3
@@ -133,7 +129,6 @@ function UpgradesTab({ entries, expanded }: { entries: RatingEntry[]; expanded: 
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground tabular-nums text-right w-[34px]">PT</span>
       </div>
       {rows.map((e, i) => {
-        const tag = e.action === 'Initiate' ? 'INIT' : 'UP'
         return (
           <div key={i} className="flex items-center gap-1.5 border-t border-border/15 pt-1">
             <span className="text-[11px] font-bold text-foreground w-[44px] shrink-0 tabular-nums">{e.ticker}</span>

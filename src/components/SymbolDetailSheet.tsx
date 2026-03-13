@@ -102,7 +102,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
 
   // Related news
   const relatedNews = allNews
-    .filter((n) => n.title.toLowerCase().includes(ticker.toLowerCase().replace('^', '')) || (name.length > 4 && n.title.toLowerCase().includes(name.toLowerCase().split(' ')[0])))
+    .filter((n) => n.title.toLowerCase().includes(ticker.toLowerCase().replace('^', '')) || (name.length > 4 && n.title.toLowerCase().includes(name.toLowerCase().split(' ')[0] ?? '')))
     .slice(0, 8)
 
   const tabCls = (active: boolean) =>
@@ -275,18 +275,18 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                 <div className="text-[10px] text-muted-foreground text-center py-8">No fundamental data available</div>
               )}
               {!fundsLoading && fundamentals && (() => {
-                function fmtBig(n: number | null) {
+                function fmtBig(n: number | null | undefined) {
                   if (n == null) return '—'
                   if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T'
                   if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B'
                   if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M'
                   return '$' + n.toLocaleString()
                 }
-                function fmtPct(n: number | null) {
+                function fmtPct(n: number | null | undefined) {
                   if (n == null) return '—'
                   return (n * 100).toFixed(1) + '%'
                 }
-                function fmtNum(n: number | null, digits = 2) {
+                function fmtNum(n: number | null | undefined, digits = 2) {
                   if (n == null) return '—'
                   return n.toFixed(digits)
                 }
@@ -298,7 +298,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                     </div>
                   )
                 }
-                const f = fundamentals as Record<string, number | null>
+                const f = fundamentals as Record<string, number | null | undefined>
                 return (
                   <div className="space-y-4">
                     {(fundamentals.sector || fundamentals.industry) && (
@@ -352,7 +352,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                   {relatedNews.map((item, i) => (
                     <a
                       key={i}
-                      href={item.link}
+                      href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block border border-border/20 rounded-sm p-3 hover:border-border/50 hover:bg-white/[0.02] transition-colors"

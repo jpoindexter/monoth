@@ -40,19 +40,19 @@ export const useSpanStore = create<SpanStore>((set, get) => ({
   cycleSpan: (id) => {
     const current = get().spans[id] ?? { col: 1, row: 1 }
     const idx = CYCLE.findIndex((s) => s.col === current.col && s.row === current.row)
-    const next = CYCLE[(idx + 1) % CYCLE.length]
-    const spans = { ...get().spans, [id]: next }
-    if (next.col === 1 && next.row === 1) {
-      delete spans[id]
-    }
+    const next = CYCLE[(idx + 1) % CYCLE.length] ?? { col: 1, row: 1 }
+    const { [id]: _removed, ...rest } = get().spans
+    const spans: Record<string, SpanConfig> = next.col === 1 && next.row === 1
+      ? rest
+      : { ...rest, [id]: next }
     saveSpans(spans)
     set({ spans })
   },
   setSpan: (id, col, row) => {
-    const spans = { ...get().spans, [id]: { col, row } }
-    if (col === 1 && row === 1) {
-      delete spans[id]
-    }
+    const { [id]: _removed, ...rest } = get().spans
+    const spans: Record<string, SpanConfig> = col === 1 && row === 1
+      ? rest
+      : { ...rest, [id]: { col, row } }
     saveSpans(spans)
     set({ spans })
   },

@@ -42,7 +42,7 @@ function initPanels(): PanelConfig[] {
     : [...PANELS]
 
   if (order) {
-    const byId = new Map(panels.map((p) => [p.id, p]))
+    const byId = new Map(panels.map((p) => [p.id as string, p]))
     const ordered: PanelConfig[] = []
     for (const id of order) {
       const p = byId.get(id)
@@ -85,6 +85,7 @@ export const usePanelStore = create<PanelStore>((set, get) => ({
       const toIdx = panels.findIndex((p) => p.id === toId)
       if (fromIdx === -1 || toIdx === -1) return state
       const [moved] = panels.splice(fromIdx, 1)
+      if (!moved) return state
       panels.splice(toIdx, 0, moved)
       saveOrder(panels)
       return { panels }
