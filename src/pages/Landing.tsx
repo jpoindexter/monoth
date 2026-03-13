@@ -4,9 +4,9 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 const STATS = [
-  { label: '22 Panels', sub: 'dashboard widgets' },
-  { label: '7 Data Sources', sub: 'live market feeds' },
-  { label: '5 Asset Classes', sub: 'in a single view' },
+  { label: '36 Panels', sub: 'dashboard widgets' },
+  { label: '10 Data Sources', sub: 'live market feeds' },
+  { label: '6 Asset Classes', sub: 'in a single view' },
   { label: 'Free Forever', sub: 'no credit card needed' },
 ]
 
@@ -19,17 +19,17 @@ const FEATURES = [
   {
     tag: 'LIVE DATA',
     title: 'Real-Time Data',
-    desc: 'Live prices from Finnhub, FRED, CoinGecko, and more. Streams update continuously, no refresh needed.',
+    desc: 'Live prices from Finnhub, FRED, CoinGecko, Polymarket, and more. Auto-refreshing, no manual reload.',
   },
   {
-    tag: 'EXPORT',
-    title: 'Export Pipeline',
-    desc: 'CSV, JSON, and API access for your trading bots. Pull exactly the data you need, when you need it.',
+    tag: 'AI INSIGHTS',
+    title: 'AI Market Brief',
+    desc: 'Daily AI-generated market summaries powered by Groq. Macro signals, sentiment analysis, and trend detection.',
   },
   {
     tag: 'MULTI-ASSET',
     title: 'All Asset Classes',
-    desc: 'Equities, crypto, forex, commodities, and fixed income all in one view. No tab-switching.',
+    desc: 'Equities, crypto, forex, commodities, fixed income, derivatives, and prediction markets in one view.',
   },
 ]
 
@@ -40,7 +40,7 @@ const TIERS = [
     note: 'forever',
     highlight: false,
     features: [
-      'All 22 panels',
+      'All 36 panels',
       '5-15 min delayed data',
       'Bring your own AI key',
       '5 watchlist items',
@@ -88,7 +88,7 @@ const TIERS = [
   },
 ]
 
-const SOURCES = ['Finnhub', 'FRED', 'CoinGecko', 'Frankfurter', 'Federal Reserve', 'SEC']
+const SOURCES = ['Finnhub', 'FRED', 'CoinGecko', 'Frankfurter', 'Polymarket', 'Google News', 'Groq AI', 'Mempool']
 
 export function Landing() {
   return (
