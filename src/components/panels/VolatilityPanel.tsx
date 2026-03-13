@@ -1,8 +1,10 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { LightweightChart } from '@/components/charts/LightweightChart'
+import { fetchCandles, type CandleData } from '@/services/api/candles'
 
 const VOL_SYMBOLS = ['VIXY', 'UVXY', 'SVXY', 'VXX']
 const VOL_NAMES: Record<string, string> = {
@@ -21,10 +23,17 @@ function relTime(ts: number): string {
 }
 
 export default function VolatilityPanel() {
-  const [tab, setTab] = useState<'etfs' | 'news'>('etfs')
+  const [tab, setTab] = useState<'etfs' | 'news' | 'chart'>('etfs')
+  const [chartData, setChartData] = useState<CandleData[]>([])
   const fetcher = useCallback(() => fetchQuotes(VOL_SYMBOLS), [])
   const { data, loading, error, refresh } = usePolling({ fetcher, interval: 300_000 })
   const { data: newsData } = useNewsData('derivatives')
+
+  useEffect(() => {
+    if (tab === 'chart') {
+      fetchCandles('VIXY').then(setChartData).catch(() => {})
+    }
+  }, [tab])
 
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
@@ -34,7 +43,19 @@ export default function VolatilityPanel() {
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'etfs')} onClick={() => setTab('etfs')}>ETFs</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
+        <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
       </div>
+
+      {tab === 'chart' && (
+        <LightweightChart
+          type="area"
+          data={chartData}
+          height={140}
+          lineColor="#ef4444"
+          areaTopColor="rgba(239, 68, 68, 0.2)"
+          areaBottomColor="rgba(239, 68, 68, 0.02)"
+        />
+      )}
 
       {tab === 'etfs' && (
         <table className="w-full text-[11px]">

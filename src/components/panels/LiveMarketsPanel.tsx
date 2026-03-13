@@ -1,7 +1,9 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useMarketData } from '@/hooks/use-market-data'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
+import { LightweightChart } from '@/components/charts/LightweightChart'
+import { fetchCandles, type CandleData } from '@/services/api/candles'
 
 interface Mover {
   symbol: string
@@ -18,7 +20,9 @@ interface MoversData {
 }
 
 export default function LiveMarketsPanel() {
-  const [tab, setTab] = useState<'indices' | 'movers'>('indices')
+  const [tab, setTab] = useState<'indices' | 'movers' | 'charts'>('indices')
+  const [chartData, setChartData] = useState<CandleData[]>([])
+  const [chartSymbol, setChartSymbol] = useState('SPY')
   const { data, loading, error, refresh } = useMarketData()
   const { data: moversData, loading: moversLoading } = usePolling<MoversData>({
     fetcher: useCallback(async () => {
@@ -30,6 +34,12 @@ export default function LiveMarketsPanel() {
     enabled: tab === 'movers',
   })
 
+  useEffect(() => {
+    if (tab === 'charts') {
+      fetchCandles(chartSymbol).then(setChartData).catch(() => {})
+    }
+  }, [tab, chartSymbol])
+
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
@@ -38,9 +48,27 @@ export default function LiveMarketsPanel() {
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'indices')} onClick={() => setTab('indices')}>Indices</button>
         <button className={tabCls(tab === 'movers')} onClick={() => setTab('movers')}>Movers</button>
+        <button className={tabCls(tab === 'charts')} onClick={() => setTab('charts')}>Charts</button>
       </div>
 
-      <table className="w-full text-[11px]">
+      {tab === 'charts' && (
+        <div>
+          <div className="flex gap-1 mb-1">
+            {['SPY', 'QQQ', 'DIA', 'IWM'].map((sym) => (
+              <button
+                key={sym}
+                className={`text-[8px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+                onClick={() => setChartSymbol(sym)}
+              >
+                {sym}
+              </button>
+            ))}
+          </div>
+          <LightweightChart type="area" data={chartData} height={140} />
+        </div>
+      )}
+
+      {tab !== 'charts' && <table className="w-full text-[11px]">
         <thead>
           <tr className="text-muted-foreground">
             <th className="text-left font-medium pb-1.5">Symbol</th>
@@ -83,7 +111,7 @@ export default function LiveMarketsPanel() {
               </tr>
             ))}
         </tbody>
-      </table>
+      </table>}
     </PanelWrapper>
   )
 }

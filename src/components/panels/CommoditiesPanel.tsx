@@ -1,8 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
+import { LightweightChart } from '@/components/charts/LightweightChart'
+import { fetchCandles, type CandleData } from '@/services/api/candles'
 
 const COMMODITY_SYMBOLS = ['GLD', 'SLV', 'USO', 'COPX', 'UNG', 'WEAT', 'DBA', 'PALL', 'PPLT']
 const COMMODITY_NAMES: Record<string, string> = {
@@ -29,7 +31,9 @@ const tabCls = (active: boolean) =>
   `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
 export default function CommoditiesPanel() {
-  const [tab, setTab] = useState<'prices' | 'news'>('prices')
+  const [tab, setTab] = useState<'prices' | 'news' | 'chart'>('prices')
+  const [chartData, setChartData] = useState<CandleData[]>([])
+  const [chartSymbol, setChartSymbol] = useState('GLD')
 
   const fetcher = useCallback(async () => {
     return fetchQuotes(COMMODITY_SYMBOLS)
@@ -42,12 +46,36 @@ export default function CommoditiesPanel() {
 
   const { data: newsData } = useNewsData('commodities')
 
+  useEffect(() => {
+    if (tab === 'chart') {
+      fetchCandles(chartSymbol).then(setChartData).catch(() => {})
+    }
+  }, [tab, chartSymbol])
+
   return (
     <PanelWrapper title="Commodities" loading={loading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'prices')} onClick={() => setTab('prices')}>Prices</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
+        <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
       </div>
+
+      {tab === 'chart' && (
+        <div>
+          <div className="flex gap-1 mb-1">
+            {['GLD', 'USO', 'SLV', 'UNG'].map((sym) => (
+              <button
+                key={sym}
+                className={`text-[8px] px-1 rounded-sm ${chartSymbol === sym ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+                onClick={() => setChartSymbol(sym)}
+              >
+                {sym}
+              </button>
+            ))}
+          </div>
+          <LightweightChart type="area" data={chartData} height={140} lineColor="#059669" areaTopColor="rgba(5, 150, 105, 0.2)" areaBottomColor="rgba(5, 150, 105, 0.02)" />
+        </div>
+      )}
 
       {tab === 'prices' && (
         <table className="w-full text-[11px]">

@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useCryptoData } from '@/hooks/use-crypto-data'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
+import { LightweightChart } from '@/components/charts/LightweightChart'
 
 function fmtCap(num: number): string {
   if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T'
@@ -27,7 +28,8 @@ interface Stablecoin {
 }
 
 export default function CryptoPanel() {
-  const [tab, setTab] = useState<'top15' | 'stables'>('top15')
+  const [tab, setTab] = useState<'top15' | 'stables' | 'chart'>('top15')
+  const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
   const { data, loading, error, refresh } = useCryptoData()
   const { data: stableData, loading: stableLoading } = usePolling<Stablecoin[]>({
     fetcher: useCallback(async () => {
@@ -39,6 +41,23 @@ export default function CryptoPanel() {
     enabled: tab === 'stables',
   })
 
+  useEffect(() => {
+    if (tab === 'chart') {
+      fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=90')
+        .then(r => r.json())
+        .then(json => {
+          const points = json.prices?.map(([ts, price]: [number, number]) => ({
+            time: new Date(ts).toISOString().slice(0, 10),
+            value: price,
+          })) ?? []
+          const seen = new Map<string, { time: string; value: number }>()
+          for (const p of points) seen.set(p.time, p)
+          setChartData(Array.from(seen.values()))
+        })
+        .catch(() => {})
+    }
+  }, [tab])
+
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
@@ -47,7 +66,19 @@ export default function CryptoPanel() {
       <div className="flex gap-1 mb-2">
         <button className={tabCls(tab === 'top15')} onClick={() => setTab('top15')}>Top 15</button>
         <button className={tabCls(tab === 'stables')} onClick={() => setTab('stables')}>Stables</button>
+        <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
       </div>
+
+      {tab === 'chart' && (
+        <LightweightChart
+          type="area"
+          data={chartData}
+          height={160}
+          lineColor="#f59e0b"
+          areaTopColor="rgba(245, 158, 11, 0.2)"
+          areaBottomColor="rgba(245, 158, 11, 0.02)"
+        />
+      )}
 
       {tab === 'top15' && (
         <table className="w-full text-[11px]">
