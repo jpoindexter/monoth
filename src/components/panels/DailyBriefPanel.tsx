@@ -76,6 +76,8 @@ export default function DailyBriefPanel() {
   const crypto = useMarketStore((s) => s.crypto)
   const forex = useMarketStore((s) => s.forex)
   const [brief, setBrief] = useState<BriefSection[]>([])
+  const [aiSummary, setAiSummary] = useState<string | null>(null)
+  const [tab, setTab] = useState<'rules' | 'ai'>('rules')
 
   useEffect(() => {
     if (indices.length > 0 || crypto.length > 0 || forex.length > 0) {
@@ -83,13 +85,34 @@ export default function DailyBriefPanel() {
     }
   }, [indices, crypto, forex])
 
+  useEffect(() => {
+    if (tab === 'ai' && !aiSummary) {
+      fetch('/api/ai/summary')
+        .then(r => r.json())
+        .then(data => {
+          if (data.summary) setAiSummary(data.summary)
+        })
+        .catch(() => {})
+    }
+  }, [tab, aiSummary])
+
   const hasData = indices.length > 0 || crypto.length > 0 || forex.length > 0
+
+  const tabCls = (active: boolean) =>
+    `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Daily Brief">
-      {!hasData ? (
+      <div className="flex gap-1 mb-2">
+        <button className={tabCls(tab === 'rules')} onClick={() => setTab('rules')}>Analysis</button>
+        <button className={tabCls(tab === 'ai')} onClick={() => setTab('ai')}>AI Summary</button>
+      </div>
+
+      {tab === 'rules' && !hasData && (
         <div className="py-4 text-center text-muted-foreground text-[10px]">Waiting for market data...</div>
-      ) : (
+      )}
+
+      {tab === 'rules' && hasData && (
         <div className="space-y-2">
           {brief.map((section) => (
             <div key={section.title}>
@@ -106,6 +129,18 @@ export default function DailyBriefPanel() {
               <p className="text-[11px] leading-relaxed text-foreground/80">{section.content}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {tab === 'ai' && !aiSummary && (
+        <div className="py-4 text-center text-muted-foreground text-[10px]">
+          Loading AI summary...
+        </div>
+      )}
+
+      {tab === 'ai' && aiSummary && (
+        <div className="text-[11px] leading-relaxed text-foreground/80 whitespace-pre-line">
+          {aiSummary}
         </div>
       )}
     </PanelWrapper>

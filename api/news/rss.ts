@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { XMLParser } from 'fast-xml-parser'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-import { FEED_URLS } from './_feed-urls.js'
+import { getFeedUrls, CATEGORIES } from './_feed-urls.js'
 
 const parser = new XMLParser({ ignoreAttributes: false })
 
@@ -36,13 +36,15 @@ function parseRSSItems(xml: string, sourceName: string, category: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   const category = req.query.category as string
-  if (!category || !FEED_URLS[category]) {
+  const region = (req.query.region as string) || 'global'
+
+  if (!category || !CATEGORIES.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' })
   }
 
   try {
-    const { data, stale } = await cached(`news:${category}`, 300_000, async () => {
-      const feeds = FEED_URLS[category]
+    const { data, stale } = await cached(`news:${category}:${region}`, 300_000, async () => {
+      const feeds = getFeedUrls(category, region)
       const results = await Promise.allSettled(
         feeds.map(async ({ name, url }) => {
           const r = await fetch(url, { headers: { 'User-Agent': 'Monoth/1.0' } })

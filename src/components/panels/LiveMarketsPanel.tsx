@@ -20,10 +20,11 @@ interface MoversData {
 }
 
 export default function LiveMarketsPanel() {
-  const [tab, setTab] = useState<'indices' | 'movers' | 'charts'>('indices')
+  const [tab, setTab] = useState<'indices' | 'gainers' | 'losers' | 'active' | 'charts'>('indices')
   const [chartData, setChartData] = useState<CandleData[]>([])
   const [chartSymbol, setChartSymbol] = useState('SPY')
   const { data, loading, error, refresh } = useMarketData()
+  const isMoversTab = tab === 'gainers' || tab === 'losers' || tab === 'active'
   const { data: moversData, loading: moversLoading } = usePolling<MoversData>({
     fetcher: useCallback(async () => {
       const res = await fetch('/api/market/movers')
@@ -31,7 +32,7 @@ export default function LiveMarketsPanel() {
       return res.json()
     }, []),
     interval: 300_000,
-    enabled: tab === 'movers',
+    enabled: isMoversTab,
   })
 
   useEffect(() => {
@@ -43,11 +44,18 @@ export default function LiveMarketsPanel() {
   const tabCls = (active: boolean) =>
     `text-[9px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
+  const moversList = tab === 'gainers' ? moversData?.gainers
+    : tab === 'losers' ? moversData?.losers
+    : tab === 'active' ? moversData?.active
+    : null
+
   return (
     <PanelWrapper title="Live Markets" loading={loading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex gap-1 mb-2 flex-wrap">
         <button className={tabCls(tab === 'indices')} onClick={() => setTab('indices')}>Indices</button>
-        <button className={tabCls(tab === 'movers')} onClick={() => setTab('movers')}>Movers</button>
+        <button className={tabCls(tab === 'gainers')} onClick={() => setTab('gainers')}>Gainers</button>
+        <button className={tabCls(tab === 'losers')} onClick={() => setTab('losers')}>Losers</button>
+        <button className={tabCls(tab === 'active')} onClick={() => setTab('active')}>Active</button>
         <button className={tabCls(tab === 'charts')} onClick={() => setTab('charts')}>Charts</button>
       </div>
 
@@ -68,17 +76,17 @@ export default function LiveMarketsPanel() {
         </div>
       )}
 
-      {tab !== 'charts' && <table className="w-full text-[11px]">
-        <thead>
-          <tr className="text-muted-foreground">
-            <th className="text-left font-medium pb-1.5">Symbol</th>
-            <th className="text-right font-medium pb-1.5">Price</th>
-            <th className="text-right font-medium pb-1.5">Chg%</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tab === 'indices' &&
-            data?.filter((p) => p.price != null).map((point) => {
+      {tab === 'indices' && (
+        <table className="w-full text-[11px]">
+          <thead>
+            <tr className="text-muted-foreground">
+              <th className="text-left font-medium pb-1.5">Symbol</th>
+              <th className="text-right font-medium pb-1.5">Price</th>
+              <th className="text-right font-medium pb-1.5">Chg%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.filter((p) => p.price != null).map((point) => {
               const isPositive = point.changePercent >= 0
               return (
                 <tr key={point.symbol} className="border-t border-border/20">
@@ -95,23 +103,45 @@ export default function LiveMarketsPanel() {
                 </tr>
               )
             })}
-          {tab === 'movers' && moversLoading && (
-            <tr><td colSpan={3} className="py-4 text-center text-muted-foreground text-[10px]">Loading...</td></tr>
-          )}
-          {tab === 'movers' &&
-            moversData?.gainers?.slice(0, 5).map((m) => (
-              <tr key={m.symbol} className="border-t border-border/20">
-                <td className="py-1 font-medium">{m.symbol}</td>
-                <td className="text-right tabular-nums font-medium">
-                  {m.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </td>
-                <td className="text-right tabular-nums font-medium text-emerald-600">
-                  +{m.changePercent.toFixed(2)}%
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>}
+          </tbody>
+        </table>
+      )}
+
+      {isMoversTab && moversLoading && (
+        <div className="py-4 text-center text-muted-foreground text-[10px]">Loading...</div>
+      )}
+
+      {isMoversTab && moversList && (
+        <table className="w-full text-[11px]">
+          <thead>
+            <tr className="text-muted-foreground">
+              <th className="text-left font-medium pb-1.5">Symbol</th>
+              <th className="text-right font-medium pb-1.5">Price</th>
+              <th className="text-right font-medium pb-1.5">Chg%</th>
+              <th className="text-right font-medium pb-1.5">Vol</th>
+            </tr>
+          </thead>
+          <tbody>
+            {moversList.slice(0, 10).map((m) => {
+              const isPos = m.changePercent >= 0
+              return (
+                <tr key={m.symbol} className="border-t border-border/20">
+                  <td className="py-0.5 font-medium">{m.symbol}</td>
+                  <td className="text-right tabular-nums">
+                    ${m.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td className={`text-right tabular-nums font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {isPos ? '+' : ''}{m.changePercent.toFixed(2)}%
+                  </td>
+                  <td className="text-right tabular-nums text-muted-foreground text-[10px]">
+                    {m.volume >= 1e6 ? (m.volume / 1e6).toFixed(1) + 'M' : (m.volume / 1e3).toFixed(0) + 'K'}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      )}
     </PanelWrapper>
   )
 }
