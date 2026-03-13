@@ -31,6 +31,7 @@ interface LightweightChartProps {
   areaTopColor?: string
   areaBottomColor?: string
   className?: string
+  showAxes?: boolean
 }
 
 function getDataKey(d: ChartDataPoint) {
@@ -55,6 +56,11 @@ function CustomTooltip({ active, payload }: any) {
   )
 }
 
+function fmtPrice(v: number) {
+  if (v >= 1000) return '$' + v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  return '$' + v.toFixed(2)
+}
+
 export function LightweightChart({
   type = 'area',
   data,
@@ -63,6 +69,7 @@ export function LightweightChart({
   areaTopColor = 'rgba(37, 99, 235, 0.2)',
   areaBottomColor = 'rgba(37, 99, 235, 0.02)',
   className = '',
+  showAxes = false,
 }: LightweightChartProps) {
   const gradId = useId()
 
@@ -73,10 +80,12 @@ export function LightweightChart({
 
   const shared = {
     data,
-    margin: { top: 4, right: 4, left: 0, bottom: 0 },
+    margin: showAxes
+      ? { top: 4, right: 8, left: 4, bottom: 0 }
+      : { top: 4, right: 4, left: 0, bottom: 0 },
   }
 
-  const xAxis = (
+  const xAxis = showAxes ? (
     <XAxis
       dataKey="time"
       tick={tickStyle}
@@ -86,9 +95,22 @@ export function LightweightChart({
       tickCount={tickCount}
       minTickGap={40}
     />
+  ) : (
+    <XAxis dataKey="time" hide />
   )
 
-  const yAxis = <YAxis hide domain={['auto', 'auto']} />
+  const yAxis = showAxes ? (
+    <YAxis
+      domain={['auto', 'auto']}
+      tick={tickStyle}
+      axisLine={false}
+      tickLine={false}
+      tickFormatter={fmtPrice}
+      width={52}
+    />
+  ) : (
+    <YAxis hide domain={['auto', 'auto']} />
+  )
 
   const tooltip = <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(156,163,175,0.3)', strokeWidth: 1 }} />
 

@@ -103,6 +103,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
+        showCloseButton={false}
         className="w-full sm:w-[420px] p-0 overflow-hidden flex flex-col border-l border-border/40 bg-[#0e0e0e]"
       >
         {/* Header */}
@@ -239,6 +240,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                     lineColor={isPos ? '#34d399' : '#f87171'}
                     areaTopColor={isPos ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)'}
                     areaBottomColor="rgba(0,0,0,0)"
+                    showAxes
                   />
                 ) : (
                   <div className="h-64 flex items-center justify-center text-[9px] text-muted-foreground">No data</div>
@@ -269,7 +271,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                       <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
                         <span>{item.source}</span>
                         <span>·</span>
-                        <span>{relTime(item.publishedAt)}</span>
+                        <span>{relTime(item.published)}</span>
                       </div>
                     </a>
                   ))}
