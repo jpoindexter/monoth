@@ -11,8 +11,47 @@ interface Prediction {
   endDate: string
 }
 
+interface BotPosition {
+  id: number
+  market: string
+  direction: string
+  entry_price: number
+  current_price: number
+  entry_time: string
+  size: number
+  unrealized_pnl: number
+}
+
+interface BotTrade {
+  id: number
+  market: string
+  direction: string
+  entry_price: number
+  exit_price: number
+  size: number
+  pnl: number
+  entry_time: string
+  exit_time: string
+}
+
+interface BotPerformance {
+  total_pnl: number
+  win_rate: number
+  total_trades: number
+  open_positions: number
+  profit_factor: number
+  avg_win: number
+  avg_loss: number
+}
+
+interface BotSnapshot {
+  positions: BotPosition[]
+  trades: BotTrade[]
+  performance: BotPerformance | null
+}
+
 type Category = 'All' | 'Politics' | 'Finance' | 'Crypto' | 'Sports' | 'Tech'
-type TopTab = 'Markets' | 'Trending' | 'Stats'
+type TopTab = 'Markets' | 'Trending' | 'Stats' | 'Signals'
 
 const CATEGORY_KEYWORDS: Record<Exclude<Category, 'All'>, string[]> = {
   Politics: ['election', 'president', 'congress', 'senate', 'vote', 'trump', 'biden', 'party', 'governor'],
@@ -57,7 +96,7 @@ function getMomentum(yesPct: number): { label: string; cls: string } {
 }
 
 const CATEGORY_TABS: Category[] = ['All', 'Politics', 'Finance', 'Crypto', 'Sports', 'Tech']
-const TOP_TABS: TopTab[] = ['Markets', 'Trending', 'Stats']
+const TOP_TABS: TopTab[] = ['Markets', 'Trending', 'Stats', 'Signals']
 
 export default function PredictionsPanel() {
   const expanded = useIsExpanded()
@@ -71,6 +110,18 @@ export default function PredictionsPanel() {
   }, [])
 
   const { data, loading, error, refresh } = usePolling({ fetcher, interval: 300_000 })
+
+  const botFetcher = useCallback(async () => {
+    const res = await fetch('/api/predictions/bot')
+    if (!res.ok) return { positions: [], trades: [], performance: null } as BotSnapshot
+    return res.json() as Promise<BotSnapshot>
+  }, [])
+
+  const { data: botData, loading: botLoading } = usePolling({
+    fetcher: botFetcher,
+    interval: 15_000,
+    enabled: topTab === 'Signals',
+  })
 
   const categorized = (data ?? []).map((p) => ({ ...p, volume: Number(p.volume) || 0, category: getCategory(p.title) }))
 
@@ -251,6 +302,87 @@ export default function PredictionsPanel() {
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {topTab === 'Signals' && (
+          <div className="space-y-3">
+            {botLoading && !botData && (
+              <div className="py-4 text-center text-[10px] text-muted-foreground">Connecting to bot...</div>
+            )}
+            {!botLoading && !botData?.performance && botData?.positions.length === 0 && (
+              <div className="py-4 text-center text-[10px] text-muted-foreground">
+                Bot offline or no data. Start the Polymarket bot to see signals.
+              </div>
+            )}
+
+            {/* Performance header */}
+            {botData?.performance && (
+              <div className={`grid gap-2 ${expanded ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                <div className="rounded-md border border-border/30 p-2 text-center">
+                  <div className={`text-[16px] font-bold ${botData.performance.total_pnl >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+                    {botData.performance.total_pnl >= 0 ? '+' : ''}{botData.performance.total_pnl.toFixed(3)}
+                  </div>
+                  <div className="text-[9px] text-muted-foreground uppercase tracking-wide">P&L (7d)</div>
+                </div>
+                <div className="rounded-md border border-border/30 p-2 text-center">
+                  <div className="text-[16px] font-bold text-foreground">{(botData.performance.win_rate * 100).toFixed(0)}%</div>
+                  <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Win Rate</div>
+                </div>
+                <div className="rounded-md border border-border/30 p-2 text-center">
+                  <div className="text-[16px] font-bold text-foreground">{botData.performance.total_trades}</div>
+                  <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Trades</div>
+                </div>
+                {expanded && (
+                  <div className="rounded-md border border-border/30 p-2 text-center">
+                    <div className="text-[16px] font-bold text-indigo-400">{botData.performance.open_positions}</div>
+                    <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Open</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Open positions */}
+            {(botData?.positions.length ?? 0) > 0 && (
+              <div className="rounded-md border border-border/30 p-2">
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">
+                  Open Positions ({botData!.positions.length})
+                </div>
+                <div className="space-y-1">
+                  {botData!.positions.map((p) => (
+                    <div key={p.id} className="flex items-center gap-2 py-1 border-b border-border/15 last:border-0">
+                      <span className={`text-[9px] font-bold px-1 rounded-sm ${p.direction === 'up' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {p.direction === 'up' ? 'YES' : 'NO'}
+                      </span>
+                      <span className="text-[10px] text-foreground flex-1 truncate">{p.market.slice(-30)}</span>
+                      <span className={`text-[10px] tabular-nums shrink-0 ${p.unrealized_pnl >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+                        {p.unrealized_pnl >= 0 ? '+' : ''}{p.unrealized_pnl.toFixed(3)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent closed trades */}
+            {(botData?.trades.length ?? 0) > 0 && (
+              <div className="rounded-md border border-border/30 p-2">
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">Recent Trades</div>
+                <div className="space-y-1">
+                  {botData!.trades.slice(0, expanded ? 15 : 8).map((t) => (
+                    <div key={t.id} className="flex items-center gap-2 py-0.5 border-b border-border/15 last:border-0">
+                      <span className={`text-[9px] font-bold px-1 rounded-sm shrink-0 ${t.direction === 'up' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {t.direction === 'up' ? 'YES' : 'NO'}
+                      </span>
+                      <span className="text-[10px] text-foreground flex-1 truncate">{t.market.slice(-28)}</span>
+                      <span className={`text-[10px] tabular-nums shrink-0 ${t.pnl >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+                        {t.pnl >= 0 ? '+' : ''}{t.pnl.toFixed(3)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
