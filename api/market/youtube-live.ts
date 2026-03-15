@@ -4,10 +4,21 @@ import { cached } from '../_cache.js'
 
 // Channel IDs for live stream resolution
 const CHANNEL_IDS: Record<string, string> = {
-  BloombergTV: 'UCIALMKvObZNtJ6AmdCLP7Lg',
-  CNBCtelevision: 'UCvJJ_dzjViJCoLf5uKUTwoA',
-  YahooFinance: 'UCEAZeUIeJs0IjQiqTCdVSIg',
-  FoxBusiness: 'UCF9IOB2TExg3QIBupFtBDxg',
+  BloombergTV:     'UCIALMKvObZNtJ6AmdCLP7Lg',
+  CNBCtelevision:  'UCvJJ_dzjViJCoLf5uKUTwoA',
+  FoxBusiness:     'UCCXoCcu9Rp7NPbTzIvogpZg',
+  YahooFinance:    'UCEAZeUIeJs0IjQiqTCdVSIg',
+  MSNBC:           'UCaXkIU1QidjPwiAYu6GcHjg',
+  CNN:             'UCupvZG-5ko_eiXAupbDfxWw',
+  BBCNews:         'UC16niRr50-MSBwiO3YDb3RA',
+  AlJazeeraEnglish:'UCNye-wNBqNL5ZzHSJj3l8Bg',
+  SkyNews:         'UCoMdktPbSTixAyNGwb-UYkQ',
+  ABCNews:         'UCBi2mrWuNuyYy4gbM6fU18Q',
+  Reuters:         'UChqUTb7kYRX8-EiaN3XFrSQ',
+  NTDNews:         'UCjz-4y6ts-VF2KSQX-jsnVg',
+  Newsmax:         'UCaDCI0bxPZ_ZHdtx9LXOxRw',
+  OANN:            'UCNbIDJNNgaRrXOD7VllIMRQ',
+  CNBCi:           'UCo7a6riBFJ3tkeHjvkXVOGojBQ',
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -33,16 +44,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const html = await r.text()
 
-      // Scope to videoDetails block — only return videoId when isLive:true is in the same block
+      // YouTube's /channel/{id}/live page no longer uses a videoDetails block with isLive flag.
+      // Strategy 1: currentVideoEndpoint (set when channel is actively live)
+      // Strategy 2: first richItemRenderer / videoRenderer on the /live page
+      // Both return the live stream video ID reliably.
       let videoId: string | null = null
-      const detailsIdx = html.indexOf('"videoDetails"')
-      if (detailsIdx !== -1) {
-        const block = html.substring(detailsIdx, detailsIdx + 5000)
-        const vidMatch = block.match(/"videoId":"([a-zA-Z0-9_-]{11})"/)
-        const liveMatch = block.match(/"isLive"\s*:\s*true/)
-        if (vidMatch && liveMatch) {
-          videoId = vidMatch[1]
-        }
+
+      const currentEndpoint = html.match(/"currentVideoEndpoint"\s*:\s*\{[^}]*"videoId"\s*:\s*"([a-zA-Z0-9_-]{11})"/)
+      if (currentEndpoint) {
+        videoId = currentEndpoint[1]
+      } else {
+        const richItem = html.match(/"(?:richItemRenderer|videoRenderer)"[^]*?"videoId"\s*:\s*"([a-zA-Z0-9_-]{11})"/)
+        if (richItem) videoId = richItem[1]
       }
 
       return { videoId, handle }

@@ -7,15 +7,28 @@ type Tab = 'live' | 'latest' | 'shows' | 'trending'
 const LIVE_CHANNELS = [
   { id: 'bloomberg', name: 'Bloomberg TV', channelId: 'UCIALMKvObZNtJ6AmdCLP7Lg', color: 'border-blue-500', desc: '24/7 markets & business', handle: 'BloombergTV' },
   { id: 'cnbc', name: 'CNBC', channelId: 'UCvJJ_dzjViJCoLf5uKUTwoA', color: 'border-yellow-500', desc: 'Markets, investing & earnings', handle: 'CNBCtelevision' },
+  { id: 'fox-business', name: 'Fox Business', channelId: 'UCCXoCcu9Rp7NPbTzIvogpZg', color: 'border-red-500', desc: 'Business & financial news', handle: 'FoxBusiness' },
   { id: 'yahoo-finance', name: 'Yahoo Finance', channelId: 'UCEAZeUIeJs0IjQiqTCdVSIg', color: 'border-purple-500', desc: 'Real-time market coverage', handle: 'YahooFinance' },
-  { id: 'fox-business', name: 'Fox Business', channelId: 'UCF9IOB2TExg3QIBupFtBDxg', color: 'border-red-500', desc: 'Business news', handle: 'FoxBusiness' },
+  { id: 'msnbc', name: 'MSNBC', channelId: 'UCaXkIU1QidjPwiAYu6GcHjg', color: 'border-sky-500', desc: 'News & political coverage', handle: 'MSNBC' },
+  { id: 'cnn', name: 'CNN', channelId: 'UCupvZG-5ko_eiXAupbDfxWw', color: 'border-red-700', desc: 'Breaking news & world events', handle: 'CNN' },
+  { id: 'bbc-news', name: 'BBC News', channelId: 'UC16niRr50-MSBwiO3YDb3RA', color: 'border-rose-400', desc: 'Global news coverage', handle: 'BBCNews' },
+  { id: 'al-jazeera', name: 'Al Jazeera', channelId: 'UCNye-wNBqNL5ZzHSJj3l8Bg', color: 'border-amber-500', desc: 'International news', handle: 'AlJazeeraEnglish' },
+  { id: 'sky-news', name: 'Sky News', channelId: 'UCoMdktPbSTixAyNGwb-UYkQ', color: 'border-cyan-500', desc: 'UK & world news', handle: 'SkyNews' },
+  { id: 'abc-news', name: 'ABC News', channelId: 'UCBi2mrWuNuyYy4gbM6fU18Q', color: 'border-indigo-400', desc: 'US breaking news', handle: 'ABCNews' },
+  { id: 'reuters', name: 'Reuters', channelId: 'UChqUTb7kYRX8-EiaN3XFrSQ', color: 'border-orange-400', desc: 'Wire news & markets', handle: 'Reuters' },
+  { id: 'ntd', name: 'NTD', channelId: 'UCjz-4y6ts-VF2KSQX-jsnVg', color: 'border-green-400', desc: 'Independent global news', handle: 'NTDNews' },
+  { id: 'newsmax', name: 'Newsmax', channelId: 'UCaDCI0bxPZ_ZHdtx9LXOxRw', color: 'border-red-400', desc: 'Conservative news', handle: 'Newsmax' },
+  { id: 'oann', name: 'OAN', channelId: 'UCNbIDJNNgaRrXOD7VllIMRQ', color: 'border-blue-300', desc: 'One America News Network', handle: 'OANN' },
+  { id: 'cnbc-intl', name: 'CNBC Intl', channelId: 'UCo7a6riBFJ3tkeHjvkXVOGojBQ', color: 'border-yellow-300', desc: 'International markets', handle: 'CNBCi' },
 ]
 
-// All channels for latest videos
+// All channels for latest videos feed
 const CHANNELS = [
   ...LIVE_CHANNELS,
   { id: 'real-vision', name: 'Real Vision', channelId: 'UCXgqMEMGRMcQNStdYCBgPaA', color: 'border-emerald-500', desc: 'Macro & deep dives' },
   { id: 'tasty-trades', name: 'tastylive', channelId: 'UCv1HRYS9_A9NI1xAiUnJGcA', color: 'border-orange-500', desc: 'Options & trading' },
+  { id: 'wsj', name: 'Wall Street Journal', channelId: 'UCK7tptUDHh-RYDsdxO1-5QQ', color: 'border-gray-400', desc: 'Finance & business journalism' },
+  { id: 'the-street', name: 'TheStreet', channelId: 'UCp6aBHRM6ZS_kLeC57HV4kg', color: 'border-teal-400', desc: 'Stocks & market analysis' },
 ]
 
 const SHOWS = [
