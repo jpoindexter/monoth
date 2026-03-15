@@ -184,21 +184,6 @@ async function start() {
     })
   })
 
-  // Proxy /api/bot/* → Polymarket bot FastAPI at localhost:8000
-  const BOT_URL = process.env.BOT_API_URL ?? 'http://localhost:8000'
-  app.use('/api/bot', async (req, res) => {
-    const target = `${BOT_URL}/api${req.path}${req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''}`
-    try {
-      const r = await fetch(target, {
-        headers: { ...(req.headers as Record<string, string>), host: new URL(BOT_URL).host },
-      })
-      const body = await r.text()
-      res.status(r.status).set('Content-Type', r.headers.get('content-type') ?? 'application/json').send(body)
-    } catch {
-      res.status(503).json({ error: 'Bot offline' })
-    }
-  })
-
   console.log('')
   app.listen(3000, () => {
     console.log('API server running at http://localhost:3000')
