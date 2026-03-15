@@ -105,13 +105,45 @@ interface PanelWrapperProps {
   loading?: boolean
   error?: string | null
   onRetry?: () => void
+  noScroll?: boolean
+  headerActions?: React.ReactNode
 }
 
-export function PanelWrapper({ title, panelId, children, loading, error, onRetry }: PanelWrapperProps) {
+function useDataAge(loading: boolean | undefined): string {
+  const [refreshedAt, setRefreshedAt] = useState<number | null>(null)
+  const [age, setAge] = useState('')
+  const prevLoading = useRef(loading)
+
+  useEffect(() => {
+    if (prevLoading.current === true && loading === false) {
+      setRefreshedAt(Date.now())
+    }
+    prevLoading.current = loading
+  }, [loading])
+
+  useEffect(() => {
+    if (refreshedAt == null) return
+    function update() {
+      if (refreshedAt == null) return
+      const s = Math.floor((Date.now() - refreshedAt) / 1000)
+      if (s < 60) setAge(`${s}s`)
+      else if (s < 3600) setAge(`${Math.floor(s / 60)}m`)
+      else setAge(`${Math.floor(s / 3600)}h`)
+    }
+    update()
+    const id = setInterval(update, 15_000)
+    return () => clearInterval(id)
+  }, [refreshedAt])
+
+  return age
+}
+
+export function PanelWrapper({ title, panelId, children, loading, error, onRetry, noScroll, headerActions }: PanelWrapperProps) {
   const [expanded, setExpanded] = useState(false)
   const [hovered, setHovered] = useState(false)
   const contextPanelId = usePanelId()
   const effectivePanelId = panelId ?? contextPanelId
+  const age = useDataAge(loading)
 
   const panel = (
     <motion.div
@@ -132,6 +164,10 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
     >
       <div className={`px-2 py-1 shrink-0 border-b flex items-center transition-colors duration-150 ${hovered ? 'border-border/40 bg-black/[0.04] dark:bg-white/[0.05]' : 'border-border/20 bg-black/[0.02] dark:bg-white/[0.02]'}`}>
         <h3 className={`text-[10px] font-semibold uppercase tracking-[1px] flex-1 transition-colors duration-150 ${hovered ? 'text-foreground/80' : 'text-muted-foreground'}`}>{title}</h3>
+        {headerActions && <div className="flex items-center gap-1 mr-1">{headerActions}</div>}
+        {age && !loading && !error && (
+          <span className="text-[9px] tabular-nums text-muted-foreground/40 mr-1" title="Last updated">{age}</span>
+        )}
         <div className="flex items-center gap-0.5">
           {onRetry && (
             <button
@@ -174,7 +210,7 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.2, delay: 0.1 }}
-              className="h-full overflow-auto p-2"
+              className={`h-full p-2 ${noScroll ? 'overflow-hidden flex flex-col' : 'overflow-auto'}`}
             >
               {children}
             </motion.div>

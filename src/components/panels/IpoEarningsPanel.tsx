@@ -64,50 +64,6 @@ const SEASON_DATA = {
   worstSector: { name: 'Healthcare', surprise: '-2.3%' },
 }
 
-const CALENDAR_DATA = [
-  {
-    day: 'Mon Mar 10',
-    today: false,
-    entries: [
-      { company: 'Oracle', ticker: 'ORCL', eps: '$1.61', time: 'AMC' },
-      { company: 'Casey\'s General', ticker: 'CASY', eps: '$3.12', time: 'AMC' },
-    ],
-  },
-  {
-    day: 'Tue Mar 11',
-    today: false,
-    entries: [
-      { company: 'Dick\'s Sporting', ticker: 'DKS', eps: '$3.74', time: 'BMO' },
-      { company: 'Stitch Fix', ticker: 'SFIX', eps: '-$0.12', time: 'AMC' },
-      { company: 'GitLab', ticker: 'GTLB', eps: '$0.22', time: 'AMC' },
-    ],
-  },
-  {
-    day: 'Wed Mar 12',
-    today: false,
-    entries: [
-      { company: 'Dollar Tree', ticker: 'DLTR', eps: '$2.19', time: 'BMO' },
-      { company: 'Adobe', ticker: 'ADBE', eps: '$4.97', time: 'AMC' },
-    ],
-  },
-  {
-    day: 'Thu Mar 13',
-    today: true,
-    entries: [
-      { company: 'Lennar', ticker: 'LEN', eps: '$2.63', time: 'BMO' },
-      { company: 'Ulta Beauty', ticker: 'ULTA', eps: '$6.56', time: 'AMC' },
-      { company: 'DocuSign', ticker: 'DOCU', eps: '$0.86', time: 'AMC' },
-    ],
-  },
-  {
-    day: 'Fri Mar 14',
-    today: false,
-    entries: [
-      { company: 'FedEx', ticker: 'FDX', eps: '$4.71', time: 'AMC' },
-      { company: 'Nike', ticker: 'NKE', eps: '$0.29', time: 'AMC' },
-    ],
-  },
-]
 
 function seasonGrade(beatEps: number): string {
   if (beatEps > 80) return 'A+'
@@ -125,7 +81,7 @@ function gradeCls(grade: string): string {
 
 export default function IpoEarningsPanel() {
   const expanded = useIsExpanded()
-  const [tab, setTab] = useState<'earnings' | 'pipeline' | 'news' | 'season' | 'calendar'>('news')
+  const [tab, setTab] = useState<'earnings' | 'pipeline' | 'news' | 'season'>('news')
   const { data: newsData, loading: newsLoading, error: newsError, refresh } = useNewsData('ipo')
 
   const { data: earningsData, loading: earningsLoading } = usePolling<Earning[]>({
@@ -149,7 +105,6 @@ export default function IpoEarningsPanel() {
         <button className={tabCls(tab === 'earnings')} onClick={() => setTab('earnings')}>Earnings</button>
         <button className={tabCls(tab === 'pipeline')} onClick={() => setTab('pipeline')}>Pipeline</button>
         <button className={tabCls(tab === 'season')} onClick={() => setTab('season')}>Season</button>
-        <button className={tabCls(tab === 'calendar')} onClick={() => setTab('calendar')}>Calendar</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
@@ -202,7 +157,8 @@ export default function IpoEarningsPanel() {
 
       {tab === 'earnings' && !earningsLoading && !hasEarnings && (
         <div className="space-y-0">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Upcoming</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Upcoming</p>
+          <p className="text-[9px] text-muted-foreground/60 mb-1.5">Reference · estimated Q1 2026 season dates</p>
           {STATIC_EARNINGS.map((e) => (
             <div key={e.ticker} className={`flex items-center gap-2 border-b border-border/20 last:border-0 ${expanded ? 'py-1.5' : 'py-1'}`}>
               <div className="flex-1 min-w-0">
@@ -242,6 +198,7 @@ export default function IpoEarningsPanel() {
         const progressPct = Math.round((SEASON_DATA.reported / SEASON_DATA.total) * 100)
         return (
           <div className="space-y-3">
+            <p className="text-[9px] text-muted-foreground/60">Reference · Q4 2024 season estimates</p>
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Season Grade</span>
               <span className={`text-[11px] font-bold px-2 py-0.5 rounded-sm ${gradeCls(grade)}`}>{grade}</span>
@@ -300,32 +257,6 @@ export default function IpoEarningsPanel() {
           </div>
         )
       })()}
-
-      {tab === 'calendar' && (
-        <div className="space-y-0">
-          {CALENDAR_DATA.map((day) => (
-            <div key={day.day}>
-              <div className={`uppercase tracking-wider py-1 mt-1 font-medium ${day.today ? 'text-foreground' : 'text-muted-foreground'} ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>
-                {day.day}{day.today && <span className="ml-1 bg-foreground text-background text-[9px] px-1 py-px rounded-sm">Today</span>}
-              </div>
-              {day.entries.map((e) => (
-                <div
-                  key={e.ticker}
-                  className={`flex items-center gap-2 border-b border-border/20 last:border-0 ${day.today ? 'bg-zinc-100/60 dark:bg-zinc-800/40 -mx-1 px-1 rounded-sm' : ''} ${expanded ? 'py-1.5' : 'py-1'}`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <span className={`font-medium ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>{e.company}</span>
-                    <span className={`text-muted-foreground ml-1 ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{e.ticker}</span>
-                  </div>
-                  {expanded && <span className="text-[10px] text-muted-foreground">EPS</span>}
-                  <span className={`tabular-nums text-muted-foreground ${expanded ? 'text-[12px] font-medium' : 'text-[10px]'}`}>{e.eps}</span>
-                  <span className={`font-bold uppercase px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[9px]'} ${e.time === 'BMO' ? 'bg-amber-500/20 text-amber-600' : 'bg-zinc-500/15 text-muted-foreground'}`}>{e.time}</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
 
       {tab === 'news' && (
         <div className="space-y-0">

@@ -365,6 +365,7 @@ export default function StablecoinsPanel() {
       return res.json()
     },
     interval: 300_000,
+    enabled: tab !== 'reserves' && tab !== 'yield' && tab !== 'news',
   })
   const { data: newsData } = useNewsData('stablecoins')
 

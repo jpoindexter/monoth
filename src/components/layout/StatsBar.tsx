@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useMarketData } from '@/hooks/use-market-data'
 import { useCryptoData } from '@/hooks/use-crypto-data'
 import { useMarketStore } from '@/stores'
+import { useMarketStream } from '@/hooks/use-market-stream'
 
 interface StatItem {
   label: string
@@ -40,6 +41,7 @@ export function StatsBar() {
   const navigate = useNavigate()
   useMarketData()
   useCryptoData()
+  useMarketStream()
 
   const indices = useMarketStore((s) => s.indices)
   const crypto = useMarketStore((s) => s.crypto)

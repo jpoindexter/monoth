@@ -23,7 +23,7 @@ export default function SectorHeatmapPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<TabId>('heatmap')
   const fetcher = useCallback(() => fetchSectors(), [])
-  const { data, loading, error, refresh } = usePolling({ fetcher, interval: 60_000 })
+  const { data, loading, error, refresh } = usePolling({ fetcher, interval: 60_000, enabled: tab !== 'news' })
   const { data: newsData } = useNewsData('analysis')
 
   const sorted = data ? [...data].filter(s => s.changePercent != null).sort((a, b) => b.changePercent - a.changePercent) : null

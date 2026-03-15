@@ -1,6 +1,15 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
+import { wmGet } from '../_wm.js'
+
+interface WmQuote {
+  symbol: string
+  name: string
+  price: number
+  change: number // percent
+  sparkline: number[]
+}
 
 const YF_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
@@ -8,7 +17,7 @@ const YF_HEADERS = {
   'Accept-Language': 'en-US,en;q=0.9',
 }
 
-async function fetchV8Quote(symbol: string) {
+async function fetchYFQuote(symbol: string) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`
   const r = await fetch(url, { headers: YF_HEADERS })
   if (!r.ok) throw new Error(`Yahoo Finance error: ${r.status}`)
@@ -28,7 +37,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!symbols.length) return res.status(400).json({ error: 'symbols param required' })
   try {
     const quotes = await cached(`quote:${symbols.join(',')}`, 30_000, async () => {
-      return Promise.all(symbols.map((s) => fetchV8Quote(s)))
+      // Primary: worldmonitor
+      try {
+        const resp = await wmGet<{ quotes: WmQuote[] }>(
+          '/api/market/v1/list-market-quotes',
+          { symbols },
+        )
+        if (resp.quotes?.length) {
+          return resp.quotes.map(q => {
+            const changePct = q.change
+            const absChange = q.price * changePct / (100 + changePct)
+            return { symbol: q.symbol, price: q.price, change: absChange, changePercent: changePct, volume: 0, timestamp: Date.now(), source: 'wm' }
+          })
+        }
+      } catch {}
+      // Fallback: direct Yahoo Finance
+      return Promise.all(symbols.map(s => fetchYFQuote(s)))
     })
     res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
     res.json(quotes.data)

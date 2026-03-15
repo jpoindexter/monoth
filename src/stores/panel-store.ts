@@ -35,10 +35,24 @@ function saveOrder(panels: PanelConfig[]) {
 }
 
 function initPanels(): PanelConfig[] {
+  // One-time migration: layout presets previously force-disabled panels — restore all
+  if (!localStorage.getItem('monoth-panels-reset-v1')) {
+    localStorage.removeItem(LS_KEY)
+    localStorage.removeItem(LS_ORDER_KEY)
+    localStorage.setItem('monoth-panels-reset-v1', '1')
+    return [...PANELS]
+  }
+
   const saved = loadEnabledIds()
   const order = loadOrder()
+  // "known" = panels the user has seen before (in order list, or in saved enabled list)
+  // New panels not in either set use their config default (enabled: true)
+  const knownIds = new Set([...(order ?? []), ...Array.from(saved ?? [])])
   let panels = saved
-    ? PANELS.map((p) => ({ ...p, enabled: saved.has(p.id) }))
+    ? PANELS.map((p) => {
+        const isKnown = knownIds.has(p.id)
+        return { ...p, enabled: isKnown ? saved.has(p.id) : p.enabled }
+      })
     : [...PANELS]
 
   if (order) {

@@ -16,8 +16,6 @@ const VOL_NAMES: Record<string, string> = {
   'VXX': 'VIX Mid-Term',
 }
 
-const VIX_RANGE = { low52: 11.5, high52: 35.2, avg: 18.5 }
-
 const STRIKES = ['-10%', '-5%', 'ATM', '+5%', '+10%']
 const STRIKES_EXPANDED = ['-20%', '-15%', '-10%', '-5%', 'ATM', '+5%', '+10%', '+15%', '+20%']
 const MONTHS = ['1M', '2M', '3M', '6M']
@@ -55,6 +53,18 @@ export default function VolatilityPanel() {
   const vixEntry = indices.find((i) => i.symbol === 'VIX' || i.symbol === 'VIXY')
   const vixSpot = vixEntry?.price ?? 18.5
 
+  const { data: vixRange } = usePolling<{ low52: number; high52: number; avg: number; current: number }>({
+    fetcher: useCallback(async () => {
+      const res = await fetch('/api/market/vix-range')
+      if (!res.ok) throw new Error('Failed')
+      return res.json()
+    }, []),
+    interval: 3_600_000,
+    enabled: tab === 'surface',
+  })
+  const vixLow52 = vixRange?.low52 ?? 11.5
+  const vixHigh52 = vixRange?.high52 ?? 35.2
+
   useEffect(() => {
     if (tab === 'chart') {
       fetchCandles('VIXY').then(setChartData).catch(() => {})
@@ -75,7 +85,7 @@ export default function VolatilityPanel() {
   const skewLabel = skew > 5 ? 'Heavy put demand' : skew >= 2 ? 'Normal skew' : 'Low skew / complacency'
   const skewColor = skew > 5 ? 'text-red-500' : skew >= 2 ? 'text-muted-foreground' : 'text-amber-500'
 
-  const pct = Math.round(((vixSpot - VIX_RANGE.low52) / (VIX_RANGE.high52 - VIX_RANGE.low52)) * 100)
+  const pct = Math.round(((vixSpot - vixLow52) / (vixHigh52 - vixLow52)) * 100)
   const markerLeft = Math.min(100, Math.max(0, pct))
 
   return (
@@ -148,7 +158,7 @@ export default function VolatilityPanel() {
         <div className="space-y-3">
           {/* Vol surface heatmap */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">IV Surface</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">IV Surface · skew model anchored to VIX spot</div>
             <div className="overflow-x-auto">
               <table className="text-[10px]">
                 <thead>
@@ -200,9 +210,9 @@ export default function VolatilityPanel() {
                 />
               </div>
               <div className="flex justify-between mt-1">
-                <span className="text-[10px] text-muted-foreground tabular-nums">{VIX_RANGE.low52}</span>
+                <span className="text-[10px] text-muted-foreground tabular-nums">{vixLow52}</span>
                 <span className="text-[10px] font-semibold tabular-nums">{vixSpot.toFixed(1)} ({pct}th pct)</span>
-                <span className="text-[10px] text-muted-foreground tabular-nums">{VIX_RANGE.high52}</span>
+                <span className="text-[10px] text-muted-foreground tabular-nums">{vixHigh52}</span>
               </div>
             </div>
           </div>

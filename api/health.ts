@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-let cache: { result: Record<string, unknown>; expires: number } | null = null
+let servicesCache: { result: Record<string, unknown>; expires: number } | null = null
 
 async function ping(url: string): Promise<'up' | 'down'> {
   try {
@@ -11,9 +11,14 @@ async function ping(url: string): Promise<'up' | 'down'> {
   }
 }
 
-export default async function handler(_req: VercelRequest, res: VercelResponse) {
-  if (cache && Date.now() < cache.expires) {
-    return res.json(cache.result)
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Fast readiness check — used by start script to know the server is up
+  if (req.query.ready !== undefined) {
+    return res.json({ status: 'ok' })
+  }
+
+  if (servicesCache && Date.now() < servicesCache.expires) {
+    return res.json(servicesCache.result)
   }
 
   const [finnhub, coingecko, fred, frankfurter] = await Promise.all([
@@ -29,6 +34,6 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     timestamp: new Date().toISOString(),
   }
 
-  cache = { result, expires: Date.now() + 5 * 60 * 1000 }
+  servicesCache = { result, expires: Date.now() + 5 * 60 * 1000 }
   res.json(result)
 }

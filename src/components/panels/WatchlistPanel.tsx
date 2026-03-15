@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useUserStore } from '@/stores'
+import { supabase } from '@/lib/supabase'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
@@ -50,10 +51,33 @@ export default function WatchlistPanel() {
   const watchlist = useUserStore((s) => s.watchlist)
   const addToWatchlist = useUserStore((s) => s.addToWatchlist)
   const removeFromWatchlist = useUserStore((s) => s.removeFromWatchlist)
+  const authenticated = useUserStore((s) => s.authenticated)
   const [input, setInput] = useState('')
   const [tab, setTab] = useState<'quotes' | 'portfolio'>('quotes')
   const [shares, setShares] = useState<Record<string, number>>(loadShares)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const syncedRef = useRef(false)
+
+  // Load portfolio from Supabase on sign-in (once)
+  useEffect(() => {
+    if (!authenticated || syncedRef.current) return
+    syncedRef.current = true
+    supabase.auth.getUser().then(async ({ data }) => {
+      const userId = data.user?.id
+      if (!userId) return
+      const { data: rows } = await supabase
+        .from('monoth_portfolio')
+        .select('symbol, shares')
+        .eq('user_id', userId)
+      if (!rows || rows.length === 0) return
+      const remote: Record<string, number> = {}
+      for (const r of rows) { if (r.symbol && r.shares > 0) remote[r.symbol] = r.shares }
+      if (Object.keys(remote).length > 0) {
+        setShares(remote)
+        saveShares(remote)
+      }
+    }).catch(() => {})
+  }, [authenticated])
   const [alertOpen, setAlertOpen] = useState<string | null>(null)
   const [alertPrice, setAlertPrice] = useState('')
   const alerts = useAlertStore((s) => s.alerts)
@@ -63,7 +87,7 @@ export default function WatchlistPanel() {
   const fetcher = useCallback(() => fetchQuotes(watchlist), [watchlist])
   const { data, loading, error, refresh } = usePolling({
     fetcher,
-    interval: 15000,
+    interval: 30_000,
     enabled: watchlist.length > 0,
   })
 
@@ -85,6 +109,18 @@ export default function WatchlistPanel() {
     }
     setShares(next)
     saveShares(next)
+    // Sync to Supabase when authenticated
+    if (authenticated) {
+      supabase.auth.getUser().then(async ({ data }) => {
+        const userId = data.user?.id
+        if (!userId) return
+        if (isNaN(n) || n <= 0) {
+          await supabase.from('monoth_portfolio').delete().eq('user_id', userId).eq('symbol', sym)
+        } else {
+          await supabase.from('monoth_portfolio').upsert({ user_id: userId, symbol: sym, shares: n, updated_at: new Date().toISOString() }, { onConflict: 'user_id,symbol' })
+        }
+      }).catch(() => {})
+    }
   }
 
   function toggleExpanded(sym: string) {

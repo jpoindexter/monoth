@@ -3,6 +3,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useForexData } from '@/hooks/use-forex-data'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
+import { useMarketStore } from '@/stores/market-store'
 
 const MAJOR_CURRENCIES = ['EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD']
 const EM_CURRENCIES = ['CNY', 'INR', 'BRL', 'MXN', 'ZAR', 'TRY', 'KRW', 'THB']
@@ -28,8 +29,6 @@ const RISK_COLORS: Record<string, string> = {
   HIGH: 'text-red-500 bg-red-500/10',
 }
 
-// Static VIX proxy: update manually when market conditions change
-const STATIC_VIX = 18.5
 
 function getCarryRisk(vix: number): { label: string; color: string } {
   if (vix < 20) return { label: 'SAFE', color: 'text-emerald-600' }
@@ -45,6 +44,8 @@ export default function ForexPanel() {
   const [dxyData, setDxyData] = useState<CandleData[]>([])
   const [dxyLoading, setDxyLoading] = useState(false)
   const { data, loading, error, refresh } = useForexData()
+  const indices = useMarketStore((s) => s.indices)
+  const vixSpot = indices.find((d) => d.symbol === 'VIX' || d.symbol === 'VIXY')?.price ?? 18.5
 
   const filtered = tab === 'major'
     ? (expanded ? data : data?.filter((rate) => MAJOR_CURRENCIES.some((c) => rate.pair.includes(c))))
@@ -253,14 +254,14 @@ export default function ForexPanel() {
       )}
 
       {tab === 'carry' && (() => {
-        const { label: riskLabel, color: riskColor } = getCarryRisk(STATIC_VIX)
+        const { label: riskLabel, color: riskColor } = getCarryRisk(vixSpot)
         const maxCarry = Math.max(...CARRY_PAIRS.map(p => p.carry))
         return (
           <div className="space-y-2">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Carry Trade Risk</span>
               <div className="flex items-center gap-1">
-                <span className="text-[10px] text-muted-foreground">VIX ~{STATIC_VIX}</span>
+                <span className="text-[10px] text-muted-foreground">VIX ~{vixSpot}</span>
                 <span className={`text-[10px] font-bold uppercase ${riskColor}`}>{riskLabel}</span>
               </div>
             </div>

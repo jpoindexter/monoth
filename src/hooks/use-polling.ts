@@ -10,28 +10,61 @@ export function usePolling<T>({ fetcher, interval, enabled = true }: UsePollingO
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined)
 
-  const refresh = useCallback(async () => {
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const failuresRef = useRef(0)
+  const fetcherRef = useRef(fetcher)
+  const intervalRef = useRef(interval)
+  // activeRef: true only when the hook is enabled AND mounted — guards both in-flight fetches and next-poll scheduling
+  const activeRef = useRef(false)
+  fetcherRef.current = fetcher
+  intervalRef.current = interval
+
+  const doFetch = useCallback(async () => {
+    if (!activeRef.current) return
     try {
       setError(null)
-      const result = await fetcher()
+      const result = await fetcherRef.current()
+      if (!activeRef.current) return
       setData(result)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    } finally {
       setLoading(false)
+      failuresRef.current = 0
+      timerRef.current = setTimeout(doFetch, intervalRef.current)
+    } catch (err) {
+      if (!activeRef.current) return
+      failuresRef.current++
+      setError(err instanceof Error ? err.message : 'Unknown error')
+      setLoading(false)
+      // Exponential backoff: 5s → 10s → 20s → 30s max
+      const backoff = Math.min(5_000 * Math.pow(2, failuresRef.current - 1), 30_000)
+      timerRef.current = setTimeout(doFetch, backoff)
     }
-  }, [fetcher])
+  }, []) // stable — reads everything via refs
+
+  const refresh = useCallback(() => {
+    if (!activeRef.current) return
+    clearTimeout(timerRef.current)
+    failuresRef.current = 0
+    doFetch()
+  }, [doFetch])
 
   useEffect(() => {
-    if (!enabled) return
-    refresh()
-    timerRef.current = setInterval(refresh, interval)
-    return () => clearInterval(timerRef.current)
-  }, [refresh, interval, enabled])
+    if (!enabled) {
+      activeRef.current = false
+      clearTimeout(timerRef.current)
+      return
+    }
+    activeRef.current = true
+    failuresRef.current = 0
+    // Random jitter 0–2s so 33 panels don't all fire simultaneously on mount
+    const jitter = Math.random() * 2_000
+    timerRef.current = setTimeout(doFetch, jitter)
+    return () => {
+      activeRef.current = false
+      clearTimeout(timerRef.current)
+    }
+  }, [enabled, doFetch])
 
-  // Listen for global refresh event (R key, command palette "Refresh all")
   useEffect(() => {
     if (!enabled) return
     const handler = () => refresh()

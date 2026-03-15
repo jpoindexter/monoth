@@ -51,8 +51,10 @@ export default function InsiderTradingPanel() {
   const tabCls = (active: boolean) =>
     `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
-  const buys = data?.filter((f) => f.transactionType === 'P') ?? []
-  const sells = data?.filter((f) => f.transactionType === 'S') ?? []
+  const isBuyType = (t: string) => t === 'Buy' || t === 'P' || t === 'A'
+  const isSellType = (t: string) => t === 'Sell' || t === 'S' || t === 'D'
+  const buys = data?.filter((f) => isBuyType(f.transactionType)) ?? []
+  const sells = data?.filter((f) => isSellType(f.transactionType)) ?? []
   const rows = tab === 'buys' ? buys : tab === 'sells' ? sells : (data ?? [])
   const visible = expanded ? rows : rows.slice(0, 12)
 
@@ -83,8 +85,8 @@ export default function InsiderTradingPanel() {
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground text-right w-[28px]">Date</span>
           </div>
           {visible.map((f, i) => {
-            const isBuy = f.transactionType === 'P'
-            const isSell = f.transactionType === 'S'
+            const isBuy = isBuyType(f.transactionType)
+            const isSell = isSellType(f.transactionType)
             const typeColor = isBuy ? 'text-emerald-500' : isSell ? 'text-red-500' : 'text-muted-foreground'
             const typeLabel = isBuy ? 'BUY' : isSell ? 'SELL' : f.transactionType
             return (

@@ -460,7 +460,7 @@ export default function MacroSignalsPanel() {
     return res.json() as Promise<MacroSignal[]>
   }, [])
 
-  const { data, loading, error, refresh } = usePolling({ fetcher, interval: 600_000 })
+  const { data, loading, error, refresh } = usePolling({ fetcher, interval: 600_000, enabled: tab === 'signals' })
   const { data: fredData } = useMacroData()
 
   const indices = useMarketStore((s) => s.indices)

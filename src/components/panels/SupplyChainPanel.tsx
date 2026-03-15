@@ -47,6 +47,17 @@ const TRADE_ROUTES: TradeRoute[] = [
   { name: 'Cape of Good Hope', pair: 'Asia–Europe Alt', transitDays: 20, keywords: ['cape of good hope', 'south africa route', 'suez alternate'] },
 ]
 
+interface ShippingRate {
+  indexId: string
+  name: string
+  currentValue: number
+  previousValue: number
+  changePct: number
+  unit: string
+  history: Array<{ date: string; value: number }>
+  spikeAlert: boolean
+}
+
 function scoreRegion(headlines: string[], keywords: string[]): RiskLevel {
   const text = headlines.join(' ').toLowerCase()
   const hits = keywords.filter(k => text.includes(k)).length
@@ -60,26 +71,7 @@ function scoreRoute(headlines: string[], route: TradeRoute): RouteStatus {
   const hits = route.keywords.filter(k => text.includes(k)).length
   if (hits >= 2) return 'DISRUPTED'
   if (hits === 1) return 'DELAYED'
-  // Use seeded value as a tiebreaker for visual variety on calm days
-  const seed = seededValue(route.name + 'status', 0, 10)
-  if (seed < 1.5) return 'DELAYED'
   return 'ON TIME'
-}
-
-function seededValue(name: string, min: number, max: number): number {
-  const day = new Date().toISOString().slice(0, 10)
-  let hash = 0
-  for (const ch of name + day) hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0
-  const norm = (Math.abs(hash) % 1000) / 1000
-  return min + norm * (max - min)
-}
-
-function seededChange(name: string): number {
-  const day = new Date().toISOString().slice(0, 10)
-  let hash = 0
-  for (const ch of name + day + 'chg') hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0
-  const norm = (Math.abs(hash) % 1000) / 1000
-  return (norm - 0.5) * 120
 }
 
 function globalFlowScore(routes: RouteStatus[]): number {
@@ -121,6 +113,34 @@ function flowScoreColor(score: number): string {
   return 'text-red-600 dark:text-red-400'
 }
 
+function Sparkline({ history }: { history: Array<{ date: string; value: number }> }) {
+  if (!history || history.length === 0) return null
+  const values = history.map(h => h.value)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = max - min || 1
+  return (
+    <div className="flex items-end gap-px h-6">
+      {history.map((h, i) => {
+        const height = Math.round(((h.value - min) / range) * 24)
+        return (
+          <div
+            key={i}
+            className="w-[3px] bg-current opacity-60 rounded-[1px] shrink-0"
+            style={{ height: `${Math.max(2, height)}px` }}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+async function fetchShippingRates(): Promise<ShippingRate[]> {
+  const res = await fetch('/api/macro/shipping-rates')
+  if (!res.ok) throw new Error('shipping-rates fetch failed')
+  return res.json()
+}
+
 export default function SupplyChainPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'disruptions' | 'news' | 'routes' | 'chart'>('prices')
@@ -133,6 +153,11 @@ export default function SupplyChainPanel() {
     fetcher: useCallback(() => fetchQuotes(SC_SYMBOLS), []),
     interval: 300_000,
     enabled: tab === 'prices',
+  })
+  const { data: shippingData } = usePolling<ShippingRate[]>({
+    fetcher: useCallback(() => fetchShippingRates(), []),
+    interval: 3_600_000,
+    enabled: tab === 'disruptions',
   })
 
   useEffect(() => {
@@ -149,13 +174,10 @@ export default function SupplyChainPanel() {
 
   const headlines = newsData?.map(n => n.title) ?? []
 
-  const bdi = seededValue('BDI', 1200, 2200)
-  const bdiChg = seededChange('BDI')
-  const cfi = seededValue('CFI', 800, 3000)
-  const cfiChg = seededChange('CFI')
-
   const routeStatuses = TRADE_ROUTES.map(r => scoreRoute(headlines, r))
   const flowScore = globalFlowScore(routeStatuses)
+
+  const hasLiveShipping = shippingData && shippingData.length > 0
 
   return (
     <PanelWrapper title="Supply Chain" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
@@ -214,27 +236,58 @@ export default function SupplyChainPanel() {
           </div>
 
           <div className="border-t border-border/20 pt-2 space-y-1">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Shipping Indices</p>
-            {[
-              { label: 'Baltic Dry Index', abbr: 'BDI', value: bdi, chg: bdiChg },
-              { label: 'Container Freight Index', abbr: 'CFI', value: cfi, chg: cfiChg },
-            ].map(idx => {
-              const isPos = idx.chg >= 0
-              return (
+            <div className="mb-1 px-1.5 py-0.5 rounded-sm bg-border/20 border border-border/30">
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                {hasLiveShipping ? 'Shipping Rates · Live' : 'Reference · Baltic Exchange / Freightos'}
+              </span>
+            </div>
+
+            {hasLiveShipping ? (
+              shippingData.map(idx => {
+                const isPos = idx.changePct >= 0
+                return (
+                  <div key={idx.indexId} className="flex items-center gap-2 py-0.5 border-t border-border/20 first:border-0">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <span className="text-[11px] font-medium leading-tight">{idx.name}</span>
+                        <span className="text-[9px] text-muted-foreground bg-border/30 px-1 py-px rounded-sm font-mono">{idx.indexId}</span>
+                        {idx.spikeAlert && (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm text-amber-700 bg-amber-100 dark:bg-amber-950/40 dark:text-amber-400">
+                            SPIKE
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-end gap-2 shrink-0">
+                      <div className={`text-muted-foreground ${isPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                        <Sparkline history={idx.history} />
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[12px] font-bold tabular-nums leading-tight">
+                          {idx.currentValue.toLocaleString()}
+                        </div>
+                        <div className={`text-[10px] tabular-nums font-medium ${isPos ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                          {isPos ? '+' : ''}{idx.changePct.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              [
+                { label: 'Baltic Dry Index', abbr: 'BDI', value: '1,342' },
+                { label: 'Container Freight', abbr: 'FBX', value: '$2,180/FEU' },
+              ].map(idx => (
                 <div key={idx.abbr} className="flex items-center justify-between">
                   <div>
                     <span className="text-[11px] font-medium">{idx.label}</span>
                     <span className="text-[10px] text-muted-foreground ml-1">{idx.abbr}</span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-[12px] font-bold tabular-nums">{idx.value.toFixed(0)}</span>
-                    <span className={`text-[10px] tabular-nums ml-1 ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
-                      {isPos ? '+' : ''}{idx.chg.toFixed(0)}
-                    </span>
-                  </div>
+                  <span className="text-[12px] font-bold tabular-nums">{idx.value}</span>
                 </div>
-              )
-            })}
+              ))
+            )}
           </div>
         </div>
       )}

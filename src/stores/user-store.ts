@@ -2,6 +2,14 @@ import { create } from 'zustand'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
+function syncAlerts(session: Session | null) {
+  if (!session) return
+  // Lazy import to avoid circular dependency
+  import('@/stores/alert-store').then(({ useAlertStore }) => {
+    useAlertStore.getState().syncFromSupabase()
+  }).catch(() => {})
+}
+
 type Tier = 'free' | 'pro' | 'api' | 'enterprise'
 
 const WL_KEY = 'monoth-watchlist'
@@ -69,6 +77,7 @@ export const useUserStore = create<UserStore>((set) => ({
         authenticated: !!session,
         email: session?.user?.email ?? null,
       })
+      syncAlerts(session)
     }).catch(() => {})
 
     try {
@@ -78,6 +87,7 @@ export const useUserStore = create<UserStore>((set) => ({
           authenticated: !!session,
           email: session?.user?.email ?? null,
         })
+        if (_event === 'SIGNED_IN') syncAlerts(session)
       })
     } catch {}
   },

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useCorrelationEvents, useCorrelationMatrix } from '@/hooks/use-correlation-data'
+import { usePolling } from '@/hooks/use-polling'
 
 interface CorrelationEvent {
   id: string
@@ -74,15 +75,15 @@ function rollingCellCls(val: number): string {
   return 'bg-red-600 text-white'
 }
 
-function computeRegime() {
+function computeRegime(assets: string[], corr: Record<string, Record<string, number>>) {
   const pairs: { a: string; b: string; val: number }[] = []
   let sum = 0
   let count = 0
 
-  for (const row of ASSETS) {
-    for (const col of ASSETS) {
+  for (const row of assets) {
+    for (const col of assets) {
       if (row >= col) continue // upper triangle, skip diagonal
-      const val = STATIC_CORRELATIONS[row]?.[col] ?? 0
+      const val = corr[row]?.[col] ?? 0
       pairs.push({ a: row, b: col, val })
       sum += Math.abs(val)
       count++
@@ -132,6 +133,31 @@ export default function CorrelationPanel() {
   const events = useCorrelationEvents()
   const matrix = useCorrelationMatrix()
 
+  const { data: liveCorr } = usePolling<{
+    assets: string[]
+    matrix: number[][]
+    history: { pair: string; w1: number; m1: number; m3: number; m6: number }[]
+    asOf: string
+  }>({
+    fetcher: useCallback(async () => {
+      const res = await fetch('/api/correlation/live')
+      if (!res.ok) throw new Error('Failed')
+      return res.json()
+    }, []),
+    interval: 3_600_000,
+    enabled: tab !== 'events',
+  })
+
+  // Convert live matrix array to Record lookup
+  const liveMatrix: Record<string, Record<string, number>> | null = liveCorr
+    ? Object.fromEntries(
+        liveCorr.assets.map((a, i) => [
+          a,
+          Object.fromEntries(liveCorr.assets.map((b, j) => [b, liveCorr.matrix[i]![j]! as number])),
+        ])
+      )
+    : null
+
   const loading = events.loading && matrix.loading
   const error = events.error ?? matrix.error
 
@@ -147,7 +173,12 @@ export default function CorrelationPanel() {
   const tabCls = (active: boolean) =>
     `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
-  const regime = computeRegime()
+  const activeAssets = liveCorr?.assets ?? (expanded ? ASSETS_EXPANDED : ASSETS)
+  const activeCorr = liveMatrix ?? (expanded ? STATIC_CORRELATIONS_EXPANDED : STATIC_CORRELATIONS)
+  const activeHistory = liveCorr?.history ?? ROLLING_HISTORY
+  const isLive = !!liveCorr
+
+  const regime = computeRegime(activeAssets, activeCorr)
 
   const regimeBadgeCls =
     regime.regime === 'RISK-ON'
@@ -171,28 +202,25 @@ export default function CorrelationPanel() {
           {matrixList.length === 0 ? (
             <div className="overflow-x-auto">
               {(() => {
-                const assets = expanded ? ASSETS_EXPANDED : ASSETS
-                const corr = expanded ? STATIC_CORRELATIONS_EXPANDED : STATIC_CORRELATIONS
                 const cellW = expanded ? 48 : 44
                 const cellH = expanded ? 'h-10' : 'h-8'
-                const fontSize = expanded ? 'text-[10px]' : 'text-[10px]'
                 return (
                   <>
-                    <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(60px, 1fr) repeat(${assets.length}, ${cellW}px)` }}>
+                    <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(60px, 1fr) repeat(${activeAssets.length}, ${cellW}px)` }}>
                       <div className="text-[10px] font-medium uppercase text-muted-foreground pb-1">Indicator</div>
-                      {assets.map((a) => (
+                      {activeAssets.map((a) => (
                         <div key={a} className="text-center text-[10px] font-medium uppercase text-muted-foreground pb-1">{a}</div>
                       ))}
-                      {assets.map((row) => (
+                      {activeAssets.map((row) => (
                         <>
                           <div key={`l-${row}`} className={`font-medium uppercase py-0.5 truncate ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{row}</div>
-                          {assets.map((col) => {
-                            const val = corr[row]?.[col] ?? 0
+                          {activeAssets.map((col) => {
+                            const val = activeCorr[row]?.[col] ?? 0
                             const isDiag = row === col
                             return (
                               <div
                                 key={`${row}:${col}`}
-                                className={`flex items-center justify-center font-semibold tabular-nums rounded-sm ${cellH} ${fontSize} ${correlationColor(val)} ${isDiag ? 'ring-1 ring-foreground/20' : ''}`}
+                                className={`flex items-center justify-center font-semibold tabular-nums rounded-sm ${cellH} text-[10px] ${correlationColor(val)} ${isDiag ? 'ring-1 ring-foreground/20' : ''}`}
                                 style={{ width: cellW }}
                               >
                                 {val.toFixed(2)}
@@ -202,7 +230,9 @@ export default function CorrelationPanel() {
                         </>
                       ))}
                     </div>
-                    <div className="mt-2 text-[10px] text-muted-foreground">Static fallback — live data unavailable</div>
+                    <div className="mt-2 text-[10px] text-muted-foreground">
+                      {isLive ? `Live · 6M Pearson · as of ${liveCorr!.asOf}` : 'Static fallback — live data unavailable'}
+                    </div>
                   </>
                 )
               })()}
@@ -240,27 +270,24 @@ export default function CorrelationPanel() {
       {tab === 'cross' && (
         <div className="overflow-x-auto">
           {(() => {
-            const assets = expanded ? ASSETS_EXPANDED : ASSETS
-            const corr = expanded ? STATIC_CORRELATIONS_EXPANDED : STATIC_CORRELATIONS
             const cellW = expanded ? 48 : 44
             const cellH = expanded ? 'h-10' : 'h-8'
-            const fontSize = expanded ? 'text-[10px]' : 'text-[10px]'
             return (
-          <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(36px, auto) repeat(${assets.length}, ${cellW}px)` }}>
+          <div className="grid gap-px" style={{ gridTemplateColumns: `minmax(36px, auto) repeat(${activeAssets.length}, ${cellW}px)` }}>
             <div className="pb-1" />
-            {assets.map((a) => (
+            {activeAssets.map((a) => (
               <div key={a} className="text-center text-[10px] font-medium uppercase text-muted-foreground pb-1">{a}</div>
             ))}
-            {assets.map((row) => (
+            {activeAssets.map((row) => (
               <>
                 <div key={`l-${row}`} className={`font-medium uppercase flex items-center pr-1 text-muted-foreground ${expanded ? 'text-[11px]' : 'text-[10px]'}`}>{row}</div>
-                {assets.map((col) => {
-                  const val = corr[row]?.[col] ?? 0
+                {activeAssets.map((col) => {
+                  const val = activeCorr[row]?.[col] ?? 0
                   const isDiag = row === col
                   return (
                     <div
                       key={`${row}:${col}`}
-                      className={`flex items-center justify-center font-semibold tabular-nums rounded-sm ${cellH} ${fontSize} ${correlationColor(val)} ${isDiag ? 'ring-1 ring-foreground/20' : ''}`}
+                      className={`flex items-center justify-center font-semibold tabular-nums rounded-sm ${cellH} text-[10px] ${correlationColor(val)} ${isDiag ? 'ring-1 ring-foreground/20' : ''}`}
                       style={{ width: cellW }}
                     >
                       {val.toFixed(2)}
@@ -276,6 +303,9 @@ export default function CorrelationPanel() {
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-emerald-600" /> strong +</span>
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-muted border border-border" /> neutral</span>
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-red-600" /> strong -</span>
+          </div>
+          <div className="mt-1 text-[10px] text-muted-foreground/60">
+            {isLive ? `Live · 6M Pearson · as of ${liveCorr!.asOf}` : 'Reference · long-run estimated correlations'}
           </div>
         </div>
       )}
@@ -371,7 +401,9 @@ export default function CorrelationPanel() {
             </div>
           </div>
 
-          <div className="text-[10px] text-muted-foreground">Based on cross-asset static matrix — 10 unique pairs</div>
+          <div className="text-[10px] text-muted-foreground">
+            {isLive ? `Live · 6M Pearson · ${activeAssets.length * (activeAssets.length - 1) / 2} pairs` : 'Based on cross-asset static matrix — 10 unique pairs'}
+          </div>
         </div>
       )}
 
@@ -386,7 +418,7 @@ export default function CorrelationPanel() {
             <div className="text-center">6M</div>
           </div>
           <div className="space-y-px">
-            {ROLLING_HISTORY.map((row) => (
+            {activeHistory.map((row) => (
               <div key={row.pair} className="grid items-center gap-px" style={{ gridTemplateColumns: 'minmax(64px,1fr) repeat(4, 40px)' }}>
                 <div className="text-[10px] font-semibold">{row.pair}</div>
                 {([row.w1, row.m1, row.m3, row.m6] as number[]).map((val, i) => (
@@ -400,6 +432,9 @@ export default function CorrelationPanel() {
           <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-emerald-600" /> negative (diversifies)</span>
             <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-red-600" /> positive (no hedge)</span>
+          </div>
+          <div className="mt-1 text-[10px] text-muted-foreground/60">
+            {isLive ? `Live · Pearson rolling windows · as of ${liveCorr!.asOf}` : 'Reference · long-run estimated rolling correlations'}
           </div>
         </div>
       )}

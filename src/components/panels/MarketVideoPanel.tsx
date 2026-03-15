@@ -2,13 +2,18 @@ import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 
-type Tab = 'latest' | 'shows' | 'trending' | 'learn'
+type Tab = 'live' | 'latest' | 'shows' | 'trending'
 
+const LIVE_CHANNELS = [
+  { id: 'bloomberg', name: 'Bloomberg TV', channelId: 'UCIALMKvObZNtJ6AmdCLP7Lg', color: 'border-blue-500', desc: '24/7 markets & business', handle: 'BloombergTV' },
+  { id: 'cnbc', name: 'CNBC', channelId: 'UCvJJ_dzjViJCoLf5uKUTwoA', color: 'border-yellow-500', desc: 'Markets, investing & earnings', handle: 'CNBCtelevision' },
+  { id: 'yahoo-finance', name: 'Yahoo Finance', channelId: 'UCEAZeUIeJs0IjQiqTCdVSIg', color: 'border-purple-500', desc: 'Real-time market coverage', handle: 'YahooFinance' },
+  { id: 'fox-business', name: 'Fox Business', channelId: 'UCF9IOB2TExg3QIBupFtBDxg', color: 'border-red-500', desc: 'Business news', handle: 'FoxBusiness' },
+]
+
+// All channels for latest videos
 const CHANNELS = [
-  { id: 'bloomberg', name: 'Bloomberg TV', channelId: 'UCIALMKvObZNtJ6AmdCLP7Lg', color: 'border-blue-500', desc: '24/7 markets & business' },
-  { id: 'cnbc', name: 'CNBC', channelId: 'UCvJJ_dzjViJCoLf5uKUTwoA', color: 'border-yellow-500', desc: 'Markets & investing' },
-  { id: 'yahoo-finance', name: 'Yahoo Finance', channelId: 'UCEAZeUIeJs0IjQiqTCdVSIg', color: 'border-purple-500', desc: 'Real-time coverage' },
-  { id: 'fox-business', name: 'Fox Business', channelId: 'UCF9IOB2TExg3QIBupFtBDxg', color: 'border-red-500', desc: 'Business news' },
+  ...LIVE_CHANNELS,
   { id: 'real-vision', name: 'Real Vision', channelId: 'UCXgqMEMGRMcQNStdYCBgPaA', color: 'border-emerald-500', desc: 'Macro & deep dives' },
   { id: 'tasty-trades', name: 'tastylive', channelId: 'UCv1HRYS9_A9NI1xAiUnJGcA', color: 'border-orange-500', desc: 'Options & trading' },
 ]
@@ -24,48 +29,11 @@ const SHOWS = [
   { id: 8, name: 'Chat With Traders', host: 'Aaron Fifield', topic: 'Trading strategies', freq: 'Weekly', freqOrder: 3 },
 ]
 
-const TRENDING = [
-  { id: 1, title: 'AI stocks surge as Nvidia beats on data center revenue', channel: 'Bloomberg TV', views: '312K views', time: '1h ago', topic: 'Earnings' },
-  { id: 2, title: 'Trump tariffs on China: how markets are pricing the risk', channel: 'CNBC', views: '278K views', time: '2h ago', topic: 'Macro' },
-  { id: 3, title: 'Fed holds rates — Powell signals no cuts until inflation cools', channel: 'Yahoo Finance', views: '201K views', time: '3h ago', topic: 'Macro' },
-  { id: 4, title: 'Bitcoin breaks $100K again: what drives this rally', channel: 'Real Vision', views: '165K views', time: '4h ago', topic: 'Crypto' },
-  { id: 5, title: 'DeepSeek vs OpenAI: what the AI war means for US tech stocks', channel: 'Bloomberg TV', views: '143K views', time: '5h ago', topic: 'Analysis' },
-  { id: 6, title: 'Options expiry this Friday: key levels for S&P 500', channel: 'tastylive', views: '98K views', time: '6h ago', topic: 'Trading' },
-  { id: 7, title: 'Solana ETF filing: next crypto domino to fall?', channel: 'Bankless', views: '87K views', time: '8h ago', topic: 'Crypto' },
-  { id: 8, title: 'Recession watch: yield curve, PMI, and what the data says', channel: 'Odd Lots', views: '74K views', time: '10h ago', topic: 'Macro' },
-  { id: 9, title: 'Energy stocks lagging despite oil spike — buy the dip?', channel: 'Fox Business', views: '52K views', time: '1d ago', topic: 'Commodities' },
-  { id: 10, title: 'Buffett sells more Apple — what Berkshire is positioning for', channel: 'Invest Like the Best', views: '41K views', time: '1d ago', topic: 'Analysis' },
-]
-
-const TRACKS = [
-  { id: 1, name: 'Options Trading 101', videos: 12, difficulty: 'Beginner', progress: 0 },
-  { id: 2, name: 'Technical Analysis', videos: 8, difficulty: 'Intermediate', progress: 25 },
-  { id: 3, name: 'Macro Economics', videos: 10, difficulty: 'Intermediate', progress: 40 },
-  { id: 4, name: 'Crypto & DeFi', videos: 15, difficulty: 'Beginner', progress: 60 },
-  { id: 5, name: 'Portfolio Management', videos: 9, difficulty: 'Advanced', progress: 10 },
-  { id: 6, name: 'Risk Management', videos: 7, difficulty: 'Advanced', progress: 0 },
-]
-
 const freqColors: Record<string, string> = {
   'Daily': 'bg-emerald-500/20 text-emerald-500',
   '3x/week': 'bg-blue-500/20 text-blue-400',
   '2x/week': 'bg-blue-500/15 text-blue-300',
   'Weekly': 'bg-muted text-muted-foreground',
-}
-
-const topicColors: Record<string, string> = {
-  'Macro': 'bg-blue-500/20 text-blue-400',
-  'Earnings': 'bg-yellow-500/20 text-yellow-500',
-  'Crypto': 'bg-purple-500/20 text-purple-400',
-  'Trading': 'bg-orange-500/20 text-orange-400',
-  'Analysis': 'bg-emerald-500/20 text-emerald-500',
-  'Commodities': 'bg-amber-500/20 text-amber-400',
-}
-
-const diffColors: Record<string, string> = {
-  'Beginner': 'bg-emerald-500/20 text-emerald-500',
-  'Intermediate': 'bg-yellow-500/20 text-yellow-500',
-  'Advanced': 'bg-red-500/20 text-red-400',
 }
 
 interface Video {
@@ -84,13 +52,82 @@ function timeAgo(published: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-function ChannelVideos({ channelId, channelName: _channelName, expanded }: { channelId: string; channelName: string; expanded: boolean }) {
+function LivePlayer({ channelId, handle, muted, playing }: { channelId: string; handle: string; muted: boolean; playing: boolean }) {
+  const iframeRef = useState<HTMLIFrameElement | null>(null)
+
+  const liveFetcher = useCallback(
+    () => fetch(`/api/market/youtube-live?handle=${handle}`)
+      .then(r => r.ok ? r.json() as Promise<{ videoId: string | null }> : Promise.resolve({ videoId: null })),
+    [handle]
+  )
+  const rssFetcher = useCallback(
+    () => fetch(`/api/market/youtube-feed?channelId=${channelId}`)
+      .then(r => r.ok ? r.json() as Promise<{ videos: Video[] }> : Promise.resolve({ videos: [] })),
+    [channelId]
+  )
+  const { data: liveData, loading } = usePolling({ fetcher: liveFetcher, interval: 300_000 })
+  const { data: rssData } = usePolling({ fetcher: rssFetcher, interval: 900_000 })
+
+  const videoId = liveData?.videoId ?? rssData?.videos?.find(v => !v.url.includes('/shorts/'))?.id ?? null
+  const isLive = !!liveData?.videoId
+
+  if (loading && !videoId) {
+    return <div className="w-full h-full bg-muted/20 rounded-sm animate-pulse" />
+  }
+
+  if (!videoId) {
+    return (
+      <div className="w-full h-full bg-muted/20 rounded-sm flex items-center justify-center">
+        <a href={`https://www.youtube.com/@${handle}/live`} target="_blank" rel="noopener noreferrer"
+          className="text-[11px] text-blue-400 hover:text-blue-300">Open live stream ↗</a>
+      </div>
+    )
+  }
+
+  const src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muted ? 1 : 0}&controls=0&modestbranding=1&rel=0`
+
+  return (
+    <div className="relative w-full h-full rounded-sm overflow-hidden">
+      {playing ? (
+        <iframe
+          ref={el => { iframeRef[1](el) }}
+          key={`${videoId}-${muted}`}
+          src={src}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      ) : (
+        <div className="w-full h-full bg-black flex items-center justify-center">
+          {videoId && (
+            <img
+              src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+              className="w-full h-full object-cover opacity-40"
+              alt=""
+            />
+          )}
+          <span className="absolute text-white/40 text-[11px]">Paused</span>
+        </div>
+      )}
+      {isLive && playing && (
+        <span className="absolute top-1.5 left-1.5 text-[9px] font-bold text-red-400 flex items-center gap-0.5 bg-black/50 px-1 py-0.5 rounded-sm">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          LIVE
+        </span>
+      )}
+    </div>
+  )
+}
+
+function ChannelVideos({ channelId, expanded }: { channelId: string; expanded: boolean }) {
   const fetcher = useCallback(
-    () => fetch(`/api/market/youtube-feed?channelId=${channelId}`).then((r) => r.json() as Promise<{ videos: Video[] }>),
+    () => fetch(`/api/market/youtube-feed?channelId=${channelId}`).then((r) => {
+      if (!r.ok) throw new Error('feed failed')
+      return r.json() as Promise<{ videos: Video[] }>
+    }),
     [channelId]
   )
   const { data, loading, error } = usePolling({ fetcher, interval: 900_000 })
-
   const limit = expanded ? 3 : 2
 
   if (loading) {
@@ -116,11 +153,9 @@ function ChannelVideos({ channelId, channelName: _channelName, expanded }: { cha
     )
   }
 
-  const videos = data.videos.slice(0, limit)
-
   return (
     <div className="mt-1 space-y-1">
-      {videos.map((v) => (
+      {data.videos.slice(0, limit).map((v) => (
         <div key={v.id}>
           <a
             href={v.url}
@@ -148,23 +183,129 @@ function ChannelVideos({ channelId, channelName: _channelName, expanded }: { cha
   )
 }
 
+function TrendingFeed({ expanded }: { expanded: boolean }) {
+  // Pull latest from Bloomberg + CNBC RSS and merge/sort by date
+  const bloombergFetcher = useCallback(
+    () => fetch('/api/market/youtube-feed?channelId=UCIALMKvObZNtJ6AmdCLP7Lg').then(r => r.ok ? r.json() as Promise<{ videos: Video[] }> : Promise.resolve({ videos: [] })),
+    []
+  )
+  const cnbcFetcher = useCallback(
+    () => fetch('/api/market/youtube-feed?channelId=UCvJJ_dzjViJCoLf5uKUTwoA').then(r => r.ok ? r.json() as Promise<{ videos: Video[] }> : Promise.resolve({ videos: [] })),
+    []
+  )
+  const yahooFetcher = useCallback(
+    () => fetch('/api/market/youtube-feed?channelId=UCEAZeUIeJs0IjQiqTCdVSIg').then(r => r.ok ? r.json() as Promise<{ videos: Video[] }> : Promise.resolve({ videos: [] })),
+    []
+  )
+  const { data: bloomberg } = usePolling({ fetcher: bloombergFetcher, interval: 900_000 })
+  const { data: cnbc } = usePolling({ fetcher: cnbcFetcher, interval: 900_000 })
+  const { data: yahoo } = usePolling({ fetcher: yahooFetcher, interval: 900_000 })
+
+  const all = [
+    ...(bloomberg?.videos ?? []).map(v => ({ ...v, channel: 'Bloomberg TV' })),
+    ...(cnbc?.videos ?? []).map(v => ({ ...v, channel: 'CNBC' })),
+    ...(yahoo?.videos ?? []).map(v => ({ ...v, channel: 'Yahoo Finance' })),
+  ].sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime())
+
+  if (!all.length) {
+    return <div className="text-[10px] text-muted-foreground">Loading trending videos...</div>
+  }
+
+  const limit = expanded ? 15 : 8
+
+  return (
+    <div className="space-y-1.5">
+      {all.slice(0, limit).map((v) => (
+        <div key={v.id} className="border-t border-border/20 pt-1.5 first:border-t-0 first:pt-0">
+          <a
+            href={v.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`text-[10px] font-medium text-foreground hover:text-blue-400 leading-snug block ${expanded ? '' : 'line-clamp-2'}`}
+          >
+            {v.title}
+          </a>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[10px] text-muted-foreground">{v.channel}</span>
+            <span className="text-[10px] text-muted-foreground">{timeAgo(v.published)}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function MarketVideoPanel() {
   const expanded = useIsExpanded()
-  const [tab, setTab] = useState<Tab>('latest')
+  const [tab, setTab] = useState<Tab>('live')
+  const [activeChannel, setActiveChannel] = useState(LIVE_CHANNELS[0]!.id)
+  const [muted, setMuted] = useState(true)
+  const [playing, setPlaying] = useState(true)
 
   const tabCls = (active: boolean) =>
     `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
-  const sortedShows = [...SHOWS].sort((a, b) => a.freqOrder - b.freqOrder)
+  const activeChannelData = LIVE_CHANNELS.find(ch => ch.id === activeChannel) ?? LIVE_CHANNELS[0]!
+
+  const videoControls = tab === 'live' ? (
+    <>
+      <button
+        onClick={() => setPlaying(p => !p)}
+        className="text-[10px] text-muted-foreground hover:text-foreground transition-colors px-0.5"
+        title={playing ? 'Pause' : 'Play'}
+      >
+        {playing ? '⏸' : '▶'}
+      </button>
+      <button
+        onClick={() => setMuted(m => !m)}
+        className="text-[10px] text-muted-foreground hover:text-foreground transition-colors px-0.5"
+        title={muted ? 'Unmute' : 'Mute'}
+      >
+        {muted ? '🔇' : '🔊'}
+      </button>
+    </>
+  ) : null
 
   return (
-    <PanelWrapper title="Market Video">
-      <div className="flex gap-1 mb-2 flex-wrap">
+    <PanelWrapper title="Market Video" noScroll={tab === 'live'} headerActions={videoControls}>
+      <div className="flex gap-1 mb-2 items-center">
+        <button className={tabCls(tab === 'live')} onClick={() => setTab('live')}>Live</button>
         <button className={tabCls(tab === 'latest')} onClick={() => setTab('latest')}>Latest</button>
-        <button className={tabCls(tab === 'shows')} onClick={() => setTab('shows')}>Shows</button>
         <button className={tabCls(tab === 'trending')} onClick={() => setTab('trending')}>Trending</button>
-        <button className={tabCls(tab === 'learn')} onClick={() => setTab('learn')}>Learn</button>
+        <button className={tabCls(tab === 'shows')} onClick={() => setTab('shows')}>Shows</button>
+        {tab === 'live' && (
+          <div className="flex items-center gap-1 ml-auto">
+            <select
+              value={activeChannel}
+              onChange={e => setActiveChannel(e.target.value)}
+              className="text-[10px] bg-muted/40 border border-border/40 rounded-sm px-1.5 py-0.5 text-foreground focus:outline-none focus:border-border/70 cursor-pointer"
+            >
+              {LIVE_CHANNELS.map(ch => (
+                <option key={ch.id} value={ch.id}>{ch.name}</option>
+              ))}
+            </select>
+            <a
+              href={`https://www.youtube.com/@${activeChannelData.handle}/live`}
+              target="_blank" rel="noopener noreferrer"
+              className="text-[10px] text-muted-foreground hover:text-foreground"
+            >↗</a>
+          </div>
+        )}
       </div>
+
+      {tab === 'live' && (
+        <div className="flex flex-col h-full gap-2" style={{ minHeight: 0 }}>
+          <div className="flex-1 min-h-0">
+            <LivePlayer
+              key={activeChannel}
+              channelId={activeChannelData.channelId}
+              handle={activeChannelData.handle}
+              muted={muted}
+              playing={playing}
+            />
+          </div>
+        </div>
+      )}
 
       {tab === 'latest' && (
         <div className="space-y-2">
@@ -172,7 +313,7 @@ export default function MarketVideoPanel() {
             <div key={ch.id} className={`border-l-2 ${ch.color} pl-2 py-1`}>
               <div className="flex items-start justify-between gap-1">
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-medium text-foreground leading-tight">{ch.name}</div>
+                  <div className="text-[10px] font-medium text-foreground">{ch.name}</div>
                   <div className="text-[10px] text-muted-foreground">{ch.desc}</div>
                 </div>
                 <a
@@ -184,67 +325,26 @@ export default function MarketVideoPanel() {
                   Channel
                 </a>
               </div>
-              <ChannelVideos channelId={ch.channelId} channelName={ch.name} expanded={expanded} />
+              <ChannelVideos channelId={ch.channelId} expanded={expanded} />
             </div>
           ))}
         </div>
       )}
 
+      {tab === 'trending' && <TrendingFeed expanded={expanded} />}
+
       {tab === 'shows' && (
         <div className="space-y-1.5">
-          {sortedShows.map((show) => (
+          {[...SHOWS].sort((a, b) => a.freqOrder - b.freqOrder).map((show) => (
             <div key={show.id} className="flex items-start justify-between gap-1">
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-medium text-foreground leading-tight">{show.name}</div>
+                <div className="text-[10px] font-medium text-foreground">{show.name}</div>
                 <div className="text-[10px] text-muted-foreground truncate">{show.host}</div>
                 <div className="text-[10px] text-muted-foreground">{show.topic}</div>
               </div>
               <span className={`text-[9px] font-medium px-1 py-0.5 rounded-sm shrink-0 ${freqColors[show.freq] ?? 'bg-muted text-muted-foreground'}`}>
                 {show.freq}
               </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {tab === 'trending' && (
-        <div className="space-y-1.5">
-          {TRENDING.map((v) => (
-            <div key={v.id} className="border-t border-border/20 pt-1.5 first:border-t-0 first:pt-0">
-              <div className={`text-[10px] font-medium text-foreground leading-snug ${expanded ? '' : 'line-clamp-2'}`}>{v.title}</div>
-              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                <span className={`text-muted-foreground ${expanded ? 'text-[10px] font-medium' : 'text-[10px]'}`}>{v.channel}</span>
-                <span className="text-[10px] text-muted-foreground">{v.views}</span>
-                <span className="text-[10px] text-muted-foreground">{v.time}</span>
-                <span className={`text-[9px] px-1 py-0 rounded-sm ${topicColors[v.topic] ?? 'bg-muted text-muted-foreground'}`}>
-                  {v.topic}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {tab === 'learn' && (
-        <div className="space-y-2">
-          {TRACKS.map((track) => (
-            <div key={track.id}>
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[10px] font-medium text-foreground">{track.name}</span>
-                <span className={`text-[9px] font-medium px-1 py-0 rounded-sm ${diffColors[track.difficulty]}`}>
-                  {track.difficulty}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 rounded-full transition-all"
-                    style={{ width: `${track.progress}%` }}
-                  />
-                </div>
-                <span className="text-[10px] text-muted-foreground shrink-0">{track.videos} videos</span>
-              </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">{track.progress}% complete</div>
             </div>
           ))}
         </div>

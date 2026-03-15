@@ -14,6 +14,12 @@ const ENERGY_NAMES: Record<string, string> = {
 }
 
 const CHART_SYMBOLS = ['USO', 'UNG', 'XLE']
+const COMMODITY_SYMBOLS = ['CL=F', 'BZ=F', 'NG=F']
+const COMMODITY_META: Record<string, { label: string; unit: string }> = {
+  'CL=F': { label: 'WTI Crude', unit: '/bbl' },
+  'BZ=F': { label: 'Brent Crude', unit: '/bbl' },
+  'NG=F': { label: 'Henry Hub', unit: '/MMBtu' },
+}
 
 const ENERGY_MIX = [
   { name: 'Oil', pct: 31, color: '#1f2937' },
@@ -25,14 +31,6 @@ const ENERGY_MIX = [
   { name: 'Solar', pct: 4, color: '#f59e0b' },
   { name: 'Other', pct: 4, color: '#94a3b8' },
 ]
-
-function seededPrice(name: string, base: number, range: number): number {
-  const day = new Date().toISOString().slice(0, 10)
-  let hash = 0
-  for (const ch of name + day) hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0
-  return base + ((Math.abs(hash) % 1000) / 1000 - 0.5) * range * 2
-}
-
 
 export default function EnergyPanel() {
   const expanded = useIsExpanded()
@@ -47,16 +45,23 @@ export default function EnergyPanel() {
     enabled: tab === 'prices',
   })
 
+  const { data: commodityData } = usePolling({
+    fetcher: useCallback(() => fetchQuotes(COMMODITY_SYMBOLS), []),
+    interval: 300_000,
+    enabled: tab === 'mix',
+  })
+
+  const { data: eiaData } = usePolling({
+    fetcher: useCallback(() => fetch('/api/market/energy-prices').then((r) => r.ok ? r.json() : []).catch(() => []), []),
+    interval: 3_600_000,
+    enabled: tab === 'prices',
+  })
+
   useEffect(() => {
     if (tab === 'chart' || expanded) {
       fetchCandles(chartSymbol).then(setChartData).catch(() => {})
     }
   }, [tab, chartSymbol, expanded])
-
-  const wti = seededPrice('WTI', 77, 7)
-  const brent = wti + seededPrice('BrentSpread', 4, 1)
-  const henryHub = seededPrice('HenryHub', 3, 1)
-  const ttf = seededPrice('EUTTF', 32.5, 7.5)
 
   return (
     <PanelWrapper title="Energy" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
@@ -68,6 +73,28 @@ export default function EnergyPanel() {
       </div>
 
       {tab === 'prices' && (
+        <>
+        {eiaData && eiaData.length > 0 && (
+          <div className="mb-2">
+            {eiaData.map((c: { commodity: string; name: string; price: number; unit: string; change: number; date: string }) => {
+              const isPos = c.change >= 0
+              return (
+                <div key={c.commodity} className="flex items-baseline justify-between py-0.5 text-[11px]">
+                  <span className="font-medium">{c.name}</span>
+                  <span className="tabular-nums text-foreground">${c.price.toFixed(2)}/bbl</span>
+                  <span className={`tabular-nums font-medium ${isPos ? 'text-emerald-500' : 'text-red-500'}`}>
+                    {isPos ? '+' : ''}{c.change.toFixed(1)}%
+                  </span>
+                </div>
+              )
+            })}
+            <div className="flex items-center gap-1 mt-1 mb-2">
+              <div className="flex-1 border-t border-border/30" />
+              <span className="text-[9px] text-muted-foreground whitespace-nowrap">via EIA · weekly</span>
+              <div className="flex-1 border-t border-border/30" />
+            </div>
+          </div>
+        )}
         <table className="w-full text-[11px]">
           <thead>
             <tr className="text-muted-foreground">
@@ -98,6 +125,7 @@ export default function EnergyPanel() {
             })}
           </tbody>
         </table>
+        </>
       )}
 
       {tab === 'mix' && (
@@ -122,22 +150,27 @@ export default function EnergyPanel() {
             ))}
           </div>
 
-          <div className="border-t border-border/20 pt-2 grid grid-cols-2 gap-x-4 gap-y-2">
-            {[
-              { label: 'WTI Crude', value: wti, unit: '/bbl' },
-              { label: 'Brent Crude', value: brent, unit: '/bbl' },
-              { label: 'Henry Hub', value: henryHub, unit: '/MMBtu' },
-              { label: 'EU TTF Gas', value: ttf, unit: '/MWh' },
-            ].map(({ label, value, unit }) => (
-              <div key={label}>
-                <div className="text-[10px] text-muted-foreground">{label}</div>
-                <div className="flex items-baseline gap-0.5">
-                  <span className="text-[12px] tabular-nums font-bold text-foreground">${value.toFixed(2)}</span>
-                  <span className="text-[10px] text-muted-foreground">{unit}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          {commodityData && commodityData.length > 0 && (
+            <div className="border-t border-border/20 pt-2 grid grid-cols-2 gap-x-4 gap-y-2">
+              {commodityData.map((c) => {
+                const meta = COMMODITY_META[c.symbol]
+                if (!meta) return null
+                const isPos = (c.changePercent ?? 0) >= 0
+                return (
+                  <div key={c.symbol}>
+                    <div className="text-[10px] text-muted-foreground">{meta.label}</div>
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-[12px] tabular-nums font-bold text-foreground">${c.price.toFixed(2)}</span>
+                      <span className="text-[10px] text-muted-foreground">{meta.unit}</span>
+                    </div>
+                    <div className={`text-[10px] tabular-nums ${isPos ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {isPos ? '+' : ''}{(c.changePercent ?? 0).toFixed(2)}%
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 

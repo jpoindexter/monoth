@@ -76,6 +76,7 @@ export default function CommoditiesPanel() {
   const { data, loading, error, refresh } = usePolling({
     fetcher,
     interval: 300_000,
+    enabled: tab !== 'news' && tab !== 'chart',
   })
 
   const { data: newsData } = useNewsData('commodities')

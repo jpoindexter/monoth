@@ -8,6 +8,7 @@ export function PanelGrid() {
   const { enabledPanels, reorderPanels } = usePanelStore()
   const panels = enabledPanels()
   const spans = useSpanStore((s) => s.spans)
+  const getSpan = useSpanStore((s) => s.getSpan)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const dragId = useRef<string | null>(null)
 
@@ -29,7 +30,7 @@ export function PanelGrid() {
       className="flex-1 overflow-auto"
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
         gridAutoRows: 'auto',
         gridAutoFlow: 'row dense',
         gap: '4px',
@@ -37,7 +38,9 @@ export function PanelGrid() {
       }}
     >
       {panels.map((p) => {
-        const span = spans[p.id] ?? { col: 1, row: 1 }
+        // spans subscription makes this reactive; getSpan applies DEFAULT_SPANS fallback
+        void spans
+        const span = getSpan(p.id)
         return (
           <div
             key={p.id}
@@ -67,7 +70,7 @@ export function PanelGrid() {
             style={{
               gridColumn: span.col > 1 ? `span ${span.col}` : undefined,
               gridRow: span.row > 1 ? `span ${span.row}` : undefined,
-              minHeight: 200 * (span.row ?? 1),
+              minHeight: 180 * (span.row ?? 1),
             }}
           >
             <PanelIdProvider id={p.id}>

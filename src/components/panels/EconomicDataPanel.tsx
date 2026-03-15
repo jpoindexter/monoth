@@ -19,12 +19,6 @@ interface DayGroup {
   events: { time: string; name: string; impact: string; country: string }[]
 }
 
-interface SurpriseEntry {
-  name: string
-  actual: string
-  estimate: string
-  direction: 'beat' | 'miss' | 'inline'
-}
 
 const STATIC_EVENTS: DayGroup[] = [
   {
@@ -50,18 +44,6 @@ const STATIC_EVENTS: DayGroup[] = [
   },
 ]
 
-const SURPRISE_DATA: SurpriseEntry[] = [
-  { name: 'NFP', actual: '275K', estimate: '200K', direction: 'beat' },
-  { name: 'CPI (YoY)', actual: '3.2%', estimate: '3.4%', direction: 'beat' },
-  { name: 'GDP (Q4)', actual: '2.1%', estimate: '2.4%', direction: 'miss' },
-  { name: 'Retail Sales', actual: '-0.8%', estimate: '-0.3%', direction: 'miss' },
-  { name: 'ISM Mfg', actual: '47.8', estimate: '47.5', direction: 'beat' },
-  { name: 'ISM Services', actual: '52.6', estimate: '53.0', direction: 'miss' },
-  { name: 'PPI (MoM)', actual: '0.3%', estimate: '0.3%', direction: 'inline' },
-  { name: 'Jobless Claims', actual: '217K', estimate: '225K', direction: 'beat' },
-  { name: 'Housing Starts', actual: '1.42M', estimate: '1.46M', direction: 'miss' },
-  { name: 'Consumer Sentiment', actual: '79.8', estimate: '78.0', direction: 'beat' },
-]
 
 function groupByDay(events: CalendarEvent[]): DayGroup[] {
   const today = new Date()
@@ -267,64 +249,10 @@ function TrendsTab({ data, expanded }: { data: FredSeries[]; expanded: boolean }
   )
 }
 
-function SurprisesTab() {
-  const beats = SURPRISE_DATA.filter((d) => d.direction === 'beat').length
-  const misses = SURPRISE_DATA.filter((d) => d.direction === 'miss').length
-  const net = beats - misses
-  const bias = net > 0 ? 'HAWKISH' : net < 0 ? 'DOVISH' : 'NEUTRAL'
-  const biasColor = net > 0 ? 'text-red-500' : net < 0 ? 'text-emerald-500' : 'text-muted-foreground'
-
-  return (
-    <div className="space-y-3">
-      {/* Surprise Index card */}
-      <div className="rounded-md border border-border/30 bg-muted/20 px-3 py-2">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Surprise Index</span>
-          <span className={`text-[10px] font-bold uppercase tracking-wider ${biasColor}`}>{bias}</span>
-        </div>
-        <div className="flex items-center gap-3 mt-1">
-          <span className="text-[10px] text-emerald-500 font-medium">{beats} beats</span>
-          <span className="text-[10px] text-muted-foreground">vs</span>
-          <span className="text-[10px] text-red-500 font-medium">{misses} misses</span>
-          <span className="text-[10px] text-muted-foreground/60 ml-auto">net {net > 0 ? '+' : ''}{net}</span>
-        </div>
-      </div>
-
-      {/* Entries */}
-      <div className="space-y-0.5">
-        {SURPRISE_DATA.map((entry) => {
-          const dotCls =
-            entry.direction === 'beat' ? 'bg-emerald-500' :
-            entry.direction === 'miss' ? 'bg-red-500' :
-            'bg-muted-foreground/40'
-          const valCls =
-            entry.direction === 'beat' ? 'text-emerald-500' :
-            entry.direction === 'miss' ? 'text-red-500' :
-            'text-muted-foreground'
-          const label =
-            entry.direction === 'beat' ? 'BEAT' :
-            entry.direction === 'miss' ? 'MISS' :
-            'IN-LINE'
-
-          return (
-            <div key={entry.name} className="flex items-center gap-1.5 border-t border-border/15 pt-1">
-              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotCls}`} />
-              <span className="text-[11px] font-medium text-foreground w-[90px] shrink-0 truncate">{entry.name}</span>
-              <span className="text-[10px] text-muted-foreground tabular-nums flex-1">
-                A: {entry.actual} <span className="text-muted-foreground/50">/ E: {entry.estimate}</span>
-              </span>
-              <span className={`text-[9px] font-bold uppercase px-1 rounded-sm bg-muted ${valCls} shrink-0`}>{label}</span>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
 
 export default function EconomicDataPanel() {
   const expanded = useIsExpanded()
-  const [tab, setTab] = useState<'indicators' | 'calendar' | 'trends' | 'surprises'>('indicators')
+  const [tab, setTab] = useState<'indicators' | 'calendar' | 'trends'>('indicators')
   const { data, loading, error, refresh } = useMacroData()
 
   const { data: calData, loading: calLoading } = usePolling<CalendarEvent[]>({
@@ -355,7 +283,6 @@ export default function EconomicDataPanel() {
         <button className={tabCls(tab === 'indicators')} onClick={() => setTab('indicators')}>Indicators</button>
         <button className={tabCls(tab === 'calendar')} onClick={() => setTab('calendar')}>Calendar</button>
         <button className={tabCls(tab === 'trends')} onClick={() => setTab('trends')}>Trends</button>
-        <button className={tabCls(tab === 'surprises')} onClick={() => setTab('surprises')}>Surprises</button>
       </div>
 
       {tab === 'indicators' && !loading && data != null && !data.length && (
@@ -434,7 +361,7 @@ export default function EconomicDataPanel() {
         </div>
       )}
 
-      {tab === 'surprises' && <SurprisesTab />}
+
     </PanelWrapper>
   )
 }

@@ -21,13 +21,6 @@ const REIT_NAMES: Record<string, string> = {
 const CHART_SYMBOLS = ['VNQ', 'XLRE', 'IYR'] as const
 type ChartSymbol = typeof CHART_SYMBOLS[number]
 
-function seededChange(label: string): number {
-  const day = new Date().toISOString().slice(0, 10)
-  let hash = 0
-  for (const ch of label + day) hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0
-  return ((Math.abs(hash) % 20) - 10) / 100
-}
-
 const HOUSING_METRICS = [
   { label: 'Median Home Price', value: '$420K', raw: 420000, fmt: (v: number) => `$${(v / 1000).toFixed(0)}K` },
   { label: 'Housing Starts', value: '1.40M', raw: 1400000, fmt: (v: number) => `${(v / 1000000).toFixed(2)}M` },
@@ -62,9 +55,9 @@ export default function RealEstatePanel() {
 
   const mortgageRates = tenYear != null
     ? [
-        { label: '30Y Fixed', rate: tenYear + 1.7, change: seededChange('30Y') },
-        { label: '15Y Fixed', rate: tenYear + 1.2, change: seededChange('15Y') },
-        { label: '5/1 ARM',   rate: tenYear + 0.8, change: seededChange('5/1') },
+        { label: '30Y Fixed', rate: tenYear + 1.7 },
+        { label: '15Y Fixed', rate: tenYear + 1.2 },
+        { label: '5/1 ARM',   rate: tenYear + 0.8 },
       ]
     : null
 
@@ -80,8 +73,7 @@ export default function RealEstatePanel() {
   const tabCls = (active: boolean) =>
     `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
-  // Housing metrics with seeded daily changes
-  const monthsSupply = (HOUSING_METRICS[3]?.raw ?? 3.8) + seededChange('Months of Supply') * 5
+  const monthsSupply = HOUSING_METRICS[3]?.raw ?? 3.8
   const temp = marketTemp(monthsSupply)
 
   return (
@@ -136,26 +128,16 @@ export default function RealEstatePanel() {
                 <thead>
                   <tr className="text-muted-foreground">
                     <th className="text-left font-medium pb-1.5">Product</th>
-                    <th className="text-right font-medium pb-1.5">Rate</th>
-                    <th className="text-right font-medium pb-1.5">Chg</th>
+                    <th className="text-right font-medium pb-1.5">Rate (est.)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {mortgageRates?.map(({ label, rate, change }) => {
-                    const up = change > 0.005
-                    const dn = change < -0.005
-                    const arrow = up ? '▲' : dn ? '▼' : '—'
-                    const chgCls = up ? 'text-red-500' : dn ? 'text-emerald-600' : 'text-muted-foreground'
-                    return (
-                      <tr key={label} className="border-t border-border/20">
-                        <td className="py-0.5 font-medium">{label}</td>
-                        <td className="text-right tabular-nums font-medium text-[12px]">{rate.toFixed(2)}%</td>
-                        <td className={`text-right tabular-nums text-[11px] ${chgCls}`}>
-                          {arrow} {change === 0 || (!up && !dn) ? 'flat' : `${up ? '+' : ''}${change.toFixed(2)}`}
-                        </td>
-                      </tr>
-                    )
-                  })}
+                  {mortgageRates?.map(({ label, rate }) => (
+                    <tr key={label} className="border-t border-border/20">
+                      <td className="py-0.5 font-medium">{label}</td>
+                      <td className="text-right tabular-nums font-medium text-[12px]">{rate.toFixed(2)}%</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </>
@@ -173,35 +155,23 @@ export default function RealEstatePanel() {
             <span className="text-[10px] text-muted-foreground">{monthsSupply.toFixed(1)}mo supply</span>
           </div>
 
+          <div className="mb-1.5 px-1.5 py-0.5 rounded-sm bg-border/20 border border-border/30">
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Reference · NAR / Census Bureau</span>
+          </div>
           <table className={`w-full ${expanded ? 'text-[13px]' : 'text-[11px]'}`}>
             <thead>
               <tr className="text-muted-foreground">
                 <th className="text-left font-medium pb-1.5">Metric</th>
                 <th className="text-right font-medium pb-1.5">Value</th>
-                <th className="text-right font-medium pb-1.5">MoM</th>
               </tr>
             </thead>
             <tbody>
-              {HOUSING_METRICS.map(({ label, raw, fmt }) => {
-                const chg = seededChange(label)
-                const up = chg > 0
-                // For supply, up is bad for buyers; for others, up is positive
-                const isSupply = label === 'Months of Supply'
-                const posColor = isSupply ? 'text-red-500' : 'text-emerald-600'
-                const negColor = isSupply ? 'text-emerald-600' : 'text-red-500'
-                const chgCls = Math.abs(chg) < 0.001 ? 'text-muted-foreground' : up ? posColor : negColor
-                const arrow = Math.abs(chg) < 0.001 ? '—' : up ? '▲' : '▼'
-                const displayVal = label === 'Months of Supply' ? (raw + chg * 5).toFixed(1) : fmt(raw)
-                return (
-                  <tr key={label} className="border-t border-border/20">
-                    <td className="py-0.5 text-[10px]">{label}</td>
-                    <td className="text-right tabular-nums font-medium">{displayVal}</td>
-                    <td className={`text-right tabular-nums text-[10px] ${chgCls}`}>
-                      {arrow} {Math.abs(chg) < 0.001 ? 'flat' : `${up ? '+' : ''}${(chg * 100).toFixed(1)}%`}
-                    </td>
-                  </tr>
-                )
-              })}
+              {HOUSING_METRICS.map(({ label, value }) => (
+                <tr key={label} className="border-t border-border/20">
+                  <td className="py-0.5 text-[10px]">{label}</td>
+                  <td className="text-right tabular-nums font-medium">{value}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

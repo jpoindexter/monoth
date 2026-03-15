@@ -16,6 +16,7 @@ interface MarketStore {
   setYields: (data: YieldData[]) => void
   setMacroSignals: (data: MacroSignal[]) => void
   markRefresh: (key: string) => void
+  applyTick: (symbol: string, price: number) => void
 }
 
 export const useMarketStore = create<MarketStore>((set) => ({
@@ -34,4 +35,10 @@ export const useMarketStore = create<MarketStore>((set) => ({
   setMacroSignals: (data) => set({ macroSignals: data }),
   markRefresh: (key) =>
     set((s) => ({ lastRefresh: { ...s.lastRefresh, [key]: Date.now() } })),
+  applyTick: (symbol, price) =>
+    set((s) => ({
+      indices: s.indices.map((d) =>
+        d.symbol === symbol ? { ...d, price, change: price - (d.price - (d.change ?? 0)) } : d
+      ),
+    })),
 }))

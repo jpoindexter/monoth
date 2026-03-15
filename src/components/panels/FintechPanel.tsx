@@ -53,13 +53,12 @@ function growthBarColor(growth: number): string {
   return 'bg-green-200'
 }
 
-function seededValue(name: string, base: number, variance: number): number {
-  const day = new Date().toISOString().slice(0, 10)
-  let hash = 0
-  for (const ch of name + day) hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0
-  return base + ((Math.abs(hash) % 1000) / 1000 - 0.5) * variance * 2
+// Industry reference figures (Nilson Report / World Bank / McKinsey estimates)
+const TXN_VOLUME = {
+  card: '1.2B/day',
+  wallet: '800M/day',
+  crossBorder: '$13.1T',
 }
-
 
 export default function FintechPanel() {
   const expanded = useIsExpanded()
@@ -84,10 +83,6 @@ export default function FintechPanel() {
       fetchCandles(chartSymbol).then(setChartData).catch(() => {})
     }
   }, [tab, chartSymbol])
-
-  const cardTxns = seededValue('card', 1.2, 0.1)
-  const walletTxns = seededValue('wallet', 0.8, 0.08)
-  const crossBorder = seededValue('crossborder', 12, 1.2)
 
   const maxGrowth = Math.max(...TRENDS.map((t) => t.growth))
 
@@ -169,18 +164,20 @@ export default function FintechPanel() {
           </div>
 
           <div className="mt-3 border-t border-border/20 pt-2 space-y-1">
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Daily Transaction Volume</div>
+            <div className="mb-1 px-1.5 py-0.5 rounded-sm bg-border/20 border border-border/30">
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Reference · Nilson / World Bank estimates</span>
+            </div>
             <div className="flex justify-between items-center">
               <span className="text-[11px] text-muted-foreground">Card transactions</span>
-              <span className="text-[12px] font-bold tabular-nums">{cardTxns.toFixed(2)}B/day</span>
+              <span className="text-[12px] font-bold tabular-nums">{TXN_VOLUME.card}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[11px] text-muted-foreground">Digital wallets</span>
-              <span className="text-[12px] font-bold tabular-nums">{walletTxns.toFixed(0)}M/day</span>
+              <span className="text-[12px] font-bold tabular-nums">{TXN_VOLUME.wallet}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[11px] text-muted-foreground">Cross-border (annual)</span>
-              <span className="text-[12px] font-bold tabular-nums">${crossBorder.toFixed(1)}T</span>
+              <span className="text-[12px] font-bold tabular-nums">{TXN_VOLUME.crossBorder}</span>
             </div>
           </div>
         </div>

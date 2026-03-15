@@ -1,6 +1,7 @@
 import type { PanelConfig } from '@/types'
 
 export const PANELS: PanelConfig[] = [
+  { id: 'market-video', name: 'Market Video', tier: 2, enabled: true, defaultWidth: 6, defaultHeight: 4 },
   { id: 'live-markets', name: 'Live Markets', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
   { id: 'headlines', name: 'Headlines', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
   { id: 'forex', name: 'Forex', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },

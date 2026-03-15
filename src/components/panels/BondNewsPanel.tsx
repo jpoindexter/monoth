@@ -30,6 +30,7 @@ export default function BondNewsPanel() {
   const { data: priceData, loading: priceLoading } = usePolling({
     fetcher: useCallback(() => fetchQuotes(BOND_SYMBOLS), []),
     interval: 300_000,
+    enabled: tab !== 'news' && tab !== 'chart',
   })
 
   useEffect(() => {

@@ -28,32 +28,43 @@ interface Stablecoin {
   volume24h: number
 }
 
-const DEFI_PROTOCOLS = [
-  { name: 'Lido',        tvl: 33.0 },
-  { name: 'EigenLayer',  tvl: 15.0 },
-  { name: 'Aave',        tvl: 18.0 },
-  { name: 'Maker',       tvl:  8.5 },
-  { name: 'Uniswap',     tvl:  6.2 },
-  { name: 'Rocket Pool', tvl:  4.1 },
-  { name: 'Compound',    tvl:  3.2 },
-  { name: 'Curve',       tvl:  2.8 },
-]
-const DEFI_MAX_TVL = Math.max(...DEFI_PROTOCOLS.map(p => p.tvl))
-const DEFI_TOTAL   = DEFI_PROTOCOLS.reduce((s, p) => s + p.tvl, 0)
-
-const CHAIN_BREAKDOWN = [
-  { label: 'ETH',   pct: 58, color: 'bg-blue-500' },
-  { label: 'BSC',   pct:  8, color: 'bg-yellow-500' },
-  { label: 'ARB',   pct:  7, color: 'bg-sky-400' },
-  { label: 'SOL',   pct:  6, color: 'bg-purple-500' },
-  { label: 'Other', pct: 21, color: 'bg-zinc-500' },
-]
+const CHAIN_COLORS: Record<string, string> = {
+  Ethereum: 'bg-blue-500', BSC: 'bg-yellow-500', Arbitrum: 'bg-sky-400',
+  Solana: 'bg-purple-500', Polygon: 'bg-violet-500', Avalanche: 'bg-red-500',
+  Optimism: 'bg-red-400', Base: 'bg-blue-400',
+}
 
 export default function CryptoPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<'top15' | 'stables' | 'chart' | 'defi' | 'dominance'>('top15')
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
   const { data, loading, error, refresh } = useCryptoData()
+  const { data: defiData, loading: defiLoading } = usePolling<{
+    protocols: { name: string; tvl: number; change24h: number | null; category: string }[]
+    chains: { name: string; tvl: number; pct: number }[]
+  }>({
+    fetcher: useCallback(async () => {
+      const res = await fetch('/api/crypto/defi')
+      if (!res.ok) throw new Error('Failed')
+      return res.json()
+    }, []),
+    interval: 300_000,
+    enabled: tab === 'defi',
+  })
+
+  const { data: fearGreedData } = usePolling<{
+    fearGreed: { value: number; classification: string; history: { value: number; classification: string; date: string }[] }
+    dominance: { btc: number; eth: number; stable: number; other: number }
+  }>({
+    fetcher: useCallback(async () => {
+      const res = await fetch('/api/crypto/fear-greed')
+      if (!res.ok) throw new Error('Failed')
+      return res.json()
+    }, []),
+    interval: 300_000,
+    enabled: tab === 'dominance',
+  })
+
   const { data: stableData, loading: stableLoading } = usePolling<Stablecoin[]>({
     fetcher: useCallback(async () => {
       const res = await fetch('/api/crypto/stablecoins')
@@ -181,58 +192,72 @@ export default function CryptoPanel() {
           </tbody>
         </table>
       )}
-      {tab === 'defi' && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Total DeFi TVL</span>
-            <span className="text-[11px] font-semibold tabular-nums">${DEFI_TOTAL.toFixed(1)}B</span>
-          </div>
-
-          <div className="space-y-0.5">
-            <div className="flex gap-1 text-[10px] text-muted-foreground mb-1">
-              {CHAIN_BREAKDOWN.map(c => (
-                <span key={c.label} className="flex items-center gap-0.5">
-                  <span className={`inline-block w-1.5 h-1.5 rounded-sm ${c.color}`} />
-                  {c.label} {c.pct}%
-                </span>
-              ))}
-            </div>
-            <div className="flex h-1.5 w-full rounded-sm overflow-hidden">
-              {CHAIN_BREAKDOWN.map(c => (
-                <div key={c.label} className={`${c.color} h-full`} style={{ width: `${c.pct}%` }} />
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-0.5 pt-1">
-            {DEFI_PROTOCOLS.map(p => (
-              <div key={p.name} className="flex items-center gap-2">
-                <span className="text-[10px] w-20 shrink-0 text-foreground">{p.name}</span>
-                <div className="flex-1 h-1 bg-border/30 rounded-sm overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 rounded-sm"
-                    style={{ width: `${(p.tvl / DEFI_MAX_TVL) * 100}%` }}
-                  />
-                </div>
-                <span className="text-[10px] tabular-nums text-muted-foreground w-12 text-right">${p.tvl}B</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {tab === 'defi' && defiLoading && (
+        <div className="py-4 text-center text-[10px] text-muted-foreground">Loading...</div>
       )}
+      {tab === 'defi' && !defiLoading && defiData && (() => {
+        const protocols = defiData.protocols
+        const chains = defiData.chains.slice(0, 5)
+        const maxTvl = Math.max(...protocols.map(p => p.tvl), 1)
+        const totalTvl = protocols.reduce((s, p) => s + p.tvl, 0)
+        return (
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Total DeFi TVL</span>
+              <span className="text-[11px] font-semibold tabular-nums">${(totalTvl / 1e9).toFixed(1)}B</span>
+            </div>
+
+            <div className="space-y-0.5">
+              <div className="flex gap-1 text-[10px] text-muted-foreground mb-1 flex-wrap">
+                {chains.map(c => (
+                  <span key={c.name} className="flex items-center gap-0.5">
+                    <span className={`inline-block w-1.5 h-1.5 rounded-sm ${CHAIN_COLORS[c.name] ?? 'bg-zinc-500'}`} />
+                    {c.name} {c.pct}%
+                  </span>
+                ))}
+              </div>
+              <div className="flex h-1.5 w-full rounded-sm overflow-hidden">
+                {chains.map(c => (
+                  <div key={c.name} className={`${CHAIN_COLORS[c.name] ?? 'bg-zinc-500'} h-full`} style={{ width: `${c.pct}%` }} />
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-0.5 pt-1">
+              {protocols.map(p => (
+                <div key={p.name} className="flex items-center gap-2">
+                  <span className="text-[10px] w-20 shrink-0 text-foreground truncate">{p.name}</span>
+                  <div className="flex-1 h-1 bg-border/30 rounded-sm overflow-hidden">
+                    <div className="h-full bg-blue-500 rounded-sm" style={{ width: `${(p.tvl / maxTvl) * 100}%` }} />
+                  </div>
+                  <span className="text-[10px] tabular-nums text-muted-foreground w-14 text-right">
+                    ${(p.tvl / 1e9).toFixed(1)}B
+                    {p.change24h != null && (
+                      <span className={p.change24h >= 0 ? 'text-emerald-500' : 'text-red-500'}> {p.change24h >= 0 ? '+' : ''}{p.change24h.toFixed(1)}%</span>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {tab === 'dominance' && (() => {
-        const coins = data?.slice(0, 15) ?? []
-        const totalMcap = coins.reduce((s, c) => s + c.marketCap, 0)
-        const btc  = coins.find(c => c.symbol.toLowerCase() === 'btc')
-        const eth  = coins.find(c => c.symbol.toLowerCase() === 'eth')
-        const btcPct  = totalMcap > 0 && btc  ? (btc.marketCap  / totalMcap) * 100 : 0
-        const ethPct  = totalMcap > 0 && eth  ? (eth.marketCap  / totalMcap) * 100 : 0
-        const stablePct = 11.2
-        const otherPct  = Math.max(0, 100 - btcPct - ethPct - stablePct)
+        const dom = fearGreedData?.dominance
+        const fg = fearGreedData?.fearGreed
+        const btcPct    = dom?.btc    ?? 0
+        const ethPct    = dom?.eth    ?? 0
+        const stablePct = dom?.stable ?? 0
+        const otherPct  = dom?.other  ?? 0
 
-        const fgLabel = btcPct > 55 ? 'FEAR' : btcPct < 45 ? 'GREED' : 'NEUTRAL'
-        const fgColor = fgLabel === 'FEAR' ? 'text-red-500' : fgLabel === 'GREED' ? 'text-emerald-500' : 'text-yellow-500'
+        const fgValue = fg?.value ?? null
+        const fgLabel = fg?.classification?.toUpperCase() ?? '—'
+        const fgColor = fgLabel === 'FEAR' || fgLabel === 'EXTREME FEAR'
+          ? 'text-red-500'
+          : fgLabel === 'GREED' || fgLabel === 'EXTREME GREED'
+            ? 'text-emerald-500'
+            : 'text-yellow-500'
 
         const segments = [
           { label: 'BTC',    pct: btcPct,    color: 'bg-orange-500' },
@@ -244,8 +269,10 @@ export default function CryptoPanel() {
         return (
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Fear &amp; Greed Proxy</span>
-              <span className={`text-[11px] font-bold ${fgColor}`}>{fgLabel}</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Fear &amp; Greed Index</span>
+              <span className={`text-[11px] font-bold ${fgColor}`}>
+                {fgValue !== null ? `${fgValue} ` : ''}{fgLabel}
+              </span>
             </div>
 
             <div className="flex h-3 w-full rounded-sm overflow-hidden">
@@ -264,11 +291,6 @@ export default function CryptoPanel() {
                   <span className="text-[10px] tabular-nums text-muted-foreground">{s.pct.toFixed(1)}%</span>
                 </div>
               ))}
-            </div>
-
-            <div className="border-t border-border/20 pt-2 flex justify-between text-[10px] text-muted-foreground">
-              <span>Total MCap (top 15)</span>
-              <span className="tabular-nums">{fmtCap(totalMcap)}</span>
             </div>
 
             <div className="flex items-center gap-1 text-[10px]">
