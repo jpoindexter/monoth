@@ -103,7 +103,7 @@ export default function FundamentalsPanel() {
 
   return (
     <PanelWrapper title="Fundamentals" loading={loading && !data} error={error} onRetry={refresh}>
-      <form onSubmit={handleSubmit} className="flex gap-1 mb-2">
+      <form onSubmit={handleSubmit} className="flex flex-wrap gap-1 mb-2">
         <input
           type="text"
           value={inputVal}

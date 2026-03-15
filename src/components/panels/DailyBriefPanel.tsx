@@ -275,7 +275,7 @@ export default function DailyBriefPanel() {
 
   return (
     <PanelWrapper title="Daily Brief">
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'rules')}     onClick={() => setTab('rules')}>Analysis</button>
         <button className={tabCls(tab === 'scorecard')} onClick={() => setTab('scorecard')}>Scorecard</button>
         <button className={tabCls(tab === 'ai')}        onClick={() => setTab('ai')}>AI Summary</button>

@@ -25,7 +25,11 @@ const ACTIVE_SITUATIONS = [
   { name: 'China-Taiwan', status: 'monitoring', since: '2022-08', severity: 'medium', impact: 'Semiconductor supply, tech stocks' },
   { name: 'Red Sea / Houthi', status: 'active', since: '2023-11', severity: 'medium', impact: 'Shipping costs, supply chain' },
   { name: 'US-China Trade', status: 'escalating', since: '2018-03', severity: 'medium', impact: 'Tech sector, tariffs, rare earths' },
+  { name: 'India-Pakistan', status: 'monitoring', since: '2019-08', severity: 'medium', impact: 'Regional stability, defense stocks' },
+  { name: 'BRICS Expansion', status: 'monitoring', since: '2023-08', severity: 'low', impact: 'Dollar dominance, commodity pricing' },
   { name: 'Iran Nuclear', status: 'monitoring', since: '2015-07', severity: 'low', impact: 'Oil prices, sanctions' },
+  { name: 'Argentina Dollarization', status: 'monitoring', since: '2023-12', severity: 'low', impact: 'EM currency contagion, bond markets' },
+  { name: 'Africa Debt Crisis', status: 'monitoring', since: '2022-01', severity: 'low', impact: 'EM debt, commodity supply chains' },
 ]
 
 const SEVERITY_COLOR: Record<string, string> = {
@@ -43,11 +47,14 @@ const STATUS_STYLE: Record<string, { bg: string; text: string }> = {
 
 const REGIONS = [
   { key: 'Middle East', keywords: ['iran', 'israel', 'gaza', 'hamas', 'hezbollah', 'saudi', 'yemen', 'houthi', 'syria', 'iraq', 'middle east'] },
-  { key: 'China/Taiwan', keywords: ['china', 'taiwan', 'beijing', 'xi jinping', 'south china sea', 'hong kong'] },
-  { key: 'Russia/Ukraine', keywords: ['russia', 'ukraine', 'putin', 'moscow', 'kyiv', 'crimea', 'nato'] },
-  { key: 'Trade/Tariffs', keywords: ['tariff', 'trade war', 'sanctions', 'embargo', 'export control', 'trade deal'] },
-  { key: 'Korea', keywords: ['north korea', 'pyongyang', 'kim jong', 'south korea', 'korean'] },
-  { key: 'Europe', keywords: ['eu', 'european union', 'brexit', 'macron', 'germany', 'france'] },
+  { key: 'China/Taiwan', keywords: ['china', 'taiwan', 'beijing', 'xi jinping', 'south china sea', 'hong kong', 'pboc'] },
+  { key: 'Russia/Ukraine', keywords: ['russia', 'ukraine', 'putin', 'moscow', 'kyiv', 'crimea', 'nato', 'ruble', 'gazprom'] },
+  { key: 'India', keywords: ['india', 'modi', 'new delhi', 'rupee', 'reserve bank of india', 'india china', 'india pakistan'] },
+  { key: 'Europe', keywords: ['eu', 'european union', 'brexit', 'macron', 'germany', 'france', 'ecb', 'nato'] },
+  { key: 'Latin America', keywords: ['brazil', 'mexico', 'argentina', 'colombia', 'chile', 'latin america', 'south america', 'lula', 'bolsonaro'] },
+  { key: 'Africa', keywords: ['africa', 'nigeria', 'south africa', 'kenya', 'ethiopia', 'egypt', 'sub-saharan'] },
+  { key: 'Asia Pacific', keywords: ['japan', 'south korea', 'north korea', 'australia', 'asean', 'vietnam', 'indonesia', 'thailand', 'boj'] },
+  { key: 'Trade/Tariffs', keywords: ['tariff', 'trade war', 'sanctions', 'embargo', 'export control', 'trade deal', 'de-dollarization'] },
 ] as const
 
 function computeRiskScores(headlines: { title: string; published: number }[]) {

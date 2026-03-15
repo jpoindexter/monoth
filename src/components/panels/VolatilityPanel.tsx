@@ -91,7 +91,7 @@ export default function VolatilityPanel() {
 
   return (
     <PanelWrapper title="Volatility" loading={loading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'etfs')} onClick={() => setTab('etfs')}>ETFs</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
         <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>

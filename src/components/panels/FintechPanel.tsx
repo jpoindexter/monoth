@@ -88,7 +88,7 @@ export default function FintechPanel() {
 
   return (
     <PanelWrapper title="Fintech & Payments" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'prices')} onClick={() => setTab('prices')}>Stocks</button>
         <button className={tabCls(tab === 'networks')} onClick={() => setTab('networks')}>Networks</button>
         <button className={tabCls(tab === 'trends')} onClick={() => setTab('trends')}>Trends</button>

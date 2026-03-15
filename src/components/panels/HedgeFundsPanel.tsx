@@ -68,7 +68,7 @@ export default function HedgeFundsPanel() {
 
   return (
     <PanelWrapper title="Hedge Funds & PE" loading={loading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'prices')} onClick={() => setTab('prices')}>Alt ETFs</button>
         <button className={tabCls(tab === 'holdings')} onClick={() => setTab('holdings')}>Inst. Holdings</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>

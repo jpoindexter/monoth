@@ -188,7 +188,7 @@ export default function ExportPanel() {
 
   return (
     <PanelWrapper title="Settings">
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'panels')} onClick={() => setTab('panels')}>Panels</button>
         <button className={tabCls(tab === 'export')} onClick={() => setTab('export')}>Export</button>
       </div>
@@ -201,7 +201,7 @@ export default function ExportPanel() {
               Reset
             </button>
           </div>
-          <div className={`${expanded ? '' : 'max-h-[300px] overflow-y-auto'} -mx-1 px-1`}>
+          <div className="-mx-1 px-1">
             {panels.map((p: PanelConfig) => (
               <label key={p.id} className={`flex items-center gap-1.5 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 px-1 rounded-sm ${expanded ? 'py-1 text-[12px]' : 'py-0.5 text-[10px]'}`}>
                 <input

@@ -323,7 +323,7 @@ export default function SupplyChainPanel() {
 
       {tab === 'chart' && (
         <div>
-          <div className="flex gap-1 mb-2">
+          <div className="flex flex-wrap gap-1 mb-2">
             {CHART_SYMBOLS.map(sym => (
               <button
                 key={sym}

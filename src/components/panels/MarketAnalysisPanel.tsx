@@ -186,7 +186,7 @@ export default function MarketAnalysisPanel() {
 
   return (
     <PanelWrapper title="Market Analysis" loading={newsLoading && evLoading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'events')} onClick={() => setTab('events')}>Surprises</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
         <button className={tabCls(tab === 'sentiment')} onClick={() => setTab('sentiment')}>Sentiment</button>

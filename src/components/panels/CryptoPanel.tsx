@@ -110,7 +110,7 @@ export default function CryptoPanel() {
 
   return (
     <PanelWrapper title="Crypto" loading={loading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'top15')} onClick={() => setTab('top15')}>Top 15</button>
         <button className={tabCls(tab === 'stables')} onClick={() => setTab('stables')}>Stables</button>
         <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>

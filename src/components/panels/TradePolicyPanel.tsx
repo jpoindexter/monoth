@@ -91,7 +91,7 @@ export default function TradePolicyPanel() {
 
   return (
     <PanelWrapper title="Trade Policy" loading={loading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'tariffs')} onClick={() => setTab('tariffs')}>Tariffs</button>
         <button className={tabCls(tab === 'restrictions')} onClick={() => setTab('restrictions')}>Restrictions</button>
         <button className={tabCls(tab === 'flows')} onClick={() => setTab('flows')}>Flows</button>

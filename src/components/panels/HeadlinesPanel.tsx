@@ -183,7 +183,7 @@ export default function HeadlinesPanel() {
       {/* Feed tab: priority sub-tabs */}
       {tab === 'feed' && (
         <>
-          <div className="flex gap-1 mb-2">
+          <div className="flex flex-wrap gap-1 mb-2">
             {PRIORITIES.map((p) => (
               <button key={p} className={tabCls(priority === p)} onClick={() => setPriority(p)}>
                 {p}

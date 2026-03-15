@@ -238,7 +238,7 @@ export default function CorrelationPanel() {
               })()}
             </div>
           ) : (
-            <>
+            <div className="overflow-x-auto">
               <div className="grid gap-px text-[10px]" style={{ gridTemplateColumns: `minmax(60px, 1fr) repeat(${ASSETS.length}, 44px)` }}>
                 <div className="text-muted-foreground font-medium uppercase tracking-wider pb-1">Indicator</div>
                 {ASSETS.map((a) => (
@@ -262,7 +262,7 @@ export default function CorrelationPanel() {
                 <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-emerald-600" /> positive</span>
                 <span className="flex items-center gap-0.5"><span className="inline-block w-2 h-2 rounded-sm bg-red-600" /> negative</span>
               </div>
-            </>
+            </div>
           )}
         </div>
       )}

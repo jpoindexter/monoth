@@ -93,7 +93,7 @@ export default function FixedIncomePanel() {
 
   return (
     <PanelWrapper title="Fixed Income" loading={loading && etfLoading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'yields')} onClick={() => setTab('yields')}>Yields</button>
         <button className={tabCls(tab === 'etfs')} onClick={() => setTab('etfs')}>ETFs</button>
         <button className={tabCls(tab === 'spreads')} onClick={() => setTab('spreads')}>Spreads</button>

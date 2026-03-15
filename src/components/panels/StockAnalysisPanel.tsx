@@ -132,7 +132,7 @@ export default function StockAnalysisPanel() {
 
   return (
     <PanelWrapper title="Stock Analysis" loading={loading && !data} error={error} onRetry={refresh}>
-      <form onSubmit={handleSubmit} className="flex gap-1 mb-2">
+      <form onSubmit={handleSubmit} className="flex flex-wrap gap-1 mb-2">
         <input
           type="text"
           value={inputVal}
@@ -148,7 +148,7 @@ export default function StockAnalysisPanel() {
         </button>
       </form>
 
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'signal')} onClick={() => setTab('signal')}>Signal</button>
         <button className={tabCls(tab === 'technicals')} onClick={() => setTab('technicals')}>Technicals</button>
         <button className={tabCls(tab === 'history')} onClick={() => setTab('history')}>History</button>

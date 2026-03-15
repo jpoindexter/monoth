@@ -120,7 +120,7 @@ export default function CommoditiesPanel() {
 
   return (
     <PanelWrapper title="Commodities" loading={loading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'prices')} onClick={() => setTab('prices')}>Prices</button>
         <button className={tabCls(tab === 'sectors')} onClick={() => setTab('sectors')}>Sectors</button>
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>

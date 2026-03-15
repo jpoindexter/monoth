@@ -64,7 +64,7 @@ export default function BondNewsPanel() {
 
   return (
     <PanelWrapper title="Bond Markets" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'prices')} onClick={() => setTab('prices')}>ETFs</button>
         <button className={tabCls(tab === 'spreads')} onClick={() => setTab('spreads')}>Spreads</button>
         <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>

@@ -65,7 +65,7 @@ export default function EnergyPanel() {
 
   return (
     <PanelWrapper title="Energy" loading={newsLoading && priceLoading} error={error} onRetry={refresh}>
-      <div className="flex gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2">
         <button className={tabCls(tab === 'prices')} onClick={() => setTab('prices')}>Prices</button>
         <button className={tabCls(tab === 'mix')} onClick={() => setTab('mix')}>Mix</button>
         <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
