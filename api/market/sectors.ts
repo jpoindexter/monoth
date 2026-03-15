@@ -28,7 +28,7 @@ const YF_HEADERS = {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const { data, stale } = await cached('sectors', 60_000, async () => {
+    const { data, stale } = await cached('sectors', 120_000, async () => {
       // Primary: worldmonitor (Finnhub + Yahoo, cached 10min server-side)
       try {
         const resp = await wmGet<{ sectors: { symbol: string; name: string; change: number }[] }>(
@@ -63,7 +63,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }))
     })
     if (stale) res.setHeader('X-Cache', 'STALE')
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120')
+    res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300')
     res.json(data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch sector data' })

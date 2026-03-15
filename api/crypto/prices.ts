@@ -23,7 +23,7 @@ interface WmCryptoQuote {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const { data, stale } = await cached('crypto-top50', 60_000, async () => {
+    const { data, stale } = await cached('crypto-top50', 120_000, async () => {
       // Primary: CoinGecko top 50 by market cap (full data: rank, marketCap, volume, sparkline)
       try {
         const r = await fetch(
@@ -70,7 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }))
     })
     if (stale) res.setHeader('X-Cache', 'STALE')
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120')
+    res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300')
     res.json(data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch crypto prices' })

@@ -46,7 +46,7 @@ async function fetchYFFuture(symbol: string, name: string, id: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const data = await cached('futures:all', 60_000, async () => {
+    const data = await cached('futures:all', 120_000, async () => {
       // Primary: worldmonitor handles futures/commodities with Yahoo + relay
       try {
         const symbols = FUTURES.map(f => f.symbol)
@@ -79,7 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof fetchYFFuture>>> => r.status === 'fulfilled')
         .map(r => r.value)
     })
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120')
+    res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300')
     res.json(data.data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch futures' })

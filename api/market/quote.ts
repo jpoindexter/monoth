@@ -36,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const symbols = (req.query.symbols as string)?.split(',').filter(Boolean) ?? []
   if (!symbols.length) return res.status(400).json({ error: 'symbols param required' })
   try {
-    const quotes = await cached(`quote:${symbols.join(',')}`, 30_000, async () => {
+    const quotes = await cached(`quote:${symbols.join(',')}`, 60_000, async () => {
       // Primary: worldmonitor
       try {
         const resp = await wmGet<{ quotes: WmQuote[] }>(
@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Fallback: direct Yahoo Finance
       return Promise.all(symbols.map(s => fetchYFQuote(s)))
     })
-    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=180')
     res.json(quotes.data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch quotes' })

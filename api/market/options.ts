@@ -47,8 +47,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const expiry = req.query.expiry as string | undefined
   const cacheKey = `options:${symbol}:${expiry ?? 'nearest'}`
   try {
-    const result = await cached(cacheKey, 60_000, () => fetchOptions(symbol, expiry))
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120')
+    const result = await cached(cacheKey, 120_000, () => fetchOptions(symbol, expiry))
+    res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300')
     res.json(result.data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch options' })

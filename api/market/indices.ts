@@ -46,7 +46,7 @@ async function fetchYF(symbol: string, name: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const { data, stale } = await cached('indices', 30_000, async () => {
+    const { data, stale } = await cached('indices', 60_000, async () => {
       // Primary: worldmonitor (Finnhub + Yahoo + relay fallback, all cached server-side)
       try {
         const symbols = INDICES.map(i => i.symbol)
@@ -76,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return Promise.all(INDICES.map(({ symbol, name }) => fetchYF(symbol, name)))
     })
     if (stale) res.setHeader('X-Cache', 'STALE')
-    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=180')
     res.json(data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch indices' })

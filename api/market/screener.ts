@@ -54,8 +54,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const screen = ((req.query.screen as string) ?? 'most-active').toLowerCase()
   const yf_id = SCREENS[screen] ?? 'most_actives'
   try {
-    const data = await cached(`screener:${screen}`, 60_000, () => fetchScreen(yf_id))
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120')
+    const data = await cached(`screener:${screen}`, 300_000, () => fetchScreen(yf_id))
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
     res.json(data.data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch screener data' })
