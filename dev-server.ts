@@ -75,8 +75,8 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 let reconnectAttempts = 0
 let wsOpenedAt = 0
 let finnhubGaveUp = false      // set permanently on 429 — no more reconnects ever
-const MAX_RECONNECT_ATTEMPTS = 8
-const STABLE_THRESHOLD = 30_000
+const MAX_RECONNECT_ATTEMPTS = 2
+const STABLE_THRESHOLD = 60_000
 
 function broadcastSSE(event: string, data: unknown) {
   const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
