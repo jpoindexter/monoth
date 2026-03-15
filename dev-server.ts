@@ -62,9 +62,11 @@ async function loadRoutes() {
 }
 
 // --- Finnhub WebSocket → SSE stream ---
+// Finnhub free WS: US stocks only. Crypto needs exchange prefix (BINANCE:BTCUSDT),
+// futures (CL1!) and indexes (DXY) are not supported on the free tier.
 const STREAM_SYMBOLS = [
   'SPY', 'QQQ', 'AAPL', 'MSFT', 'NVDA', 'META', 'GOOGL', 'AMZN', 'TSLA',
-  'BTC-USD', 'ETH-USD', 'GLD', 'SLV', 'CL1!', 'DXY',
+  'GLD', 'SLV',
 ]
 
 const sseClients = new Set<Response>()
@@ -157,8 +159,12 @@ async function start() {
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.flushHeaders()
 
+    const wasEmpty = sseClients.size === 0
     sseClients.add(res)
     console.log(`[stream] SSE client connected (${sseClients.size} total)`)
+
+    // Start Finnhub WS only when first client connects
+    if (wasEmpty) connectFinnhub()
 
     // Send a ping every 20s to keep connection alive
     const ping = setInterval(() => {
@@ -169,6 +175,12 @@ async function start() {
       clearInterval(ping)
       sseClients.delete(res)
       console.log(`[stream] SSE client disconnected (${sseClients.size} remaining)`)
+      // Disconnect Finnhub WS when no clients are listening
+      if (sseClients.size === 0) {
+        if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null }
+        if (finnhubWs) { try { finnhubWs.terminate() } catch {} ; finnhubWs = null }
+        reconnectAttempts = 0
+      }
     })
   })
 
@@ -176,7 +188,7 @@ async function start() {
   app.listen(3000, () => {
     console.log('API server running at http://localhost:3000')
     console.log('Run "npm run dev" in another terminal for the frontend')
-    connectFinnhub()
+    // Finnhub WS now starts on first SSE client connect, not at server startup
   })
 }
 

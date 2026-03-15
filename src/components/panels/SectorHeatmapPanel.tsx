@@ -1,8 +1,7 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
-import { usePolling } from '@/hooks/use-polling'
+import { useMarketStore } from '@/stores'
 import { useNewsData } from '@/hooks/use-news-data'
-import { fetchSectors } from '@/services/api'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { relTime } from '@/lib/panel-utils'
 
@@ -22,8 +21,8 @@ type TabId = 'heatmap' | 'table' | 'news' | 'rotation' | 'performance'
 export default function SectorHeatmapPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<TabId>('heatmap')
-  const fetcher = useCallback(() => fetchSectors(), [])
-  const { data, loading, error, refresh } = usePolling({ fetcher, interval: 60_000, enabled: tab !== 'news' })
+  const rawData = useMarketStore((s) => s.sectorData)
+  const data = rawData.length > 0 ? rawData : null
   const { data: newsData } = useNewsData('analysis')
 
   const sorted = data ? [...data].filter(s => s.changePercent != null).sort((a, b) => b.changePercent - a.changePercent) : null
@@ -65,7 +64,7 @@ export default function SectorHeatmapPanel() {
   })()
 
   return (
-    <PanelWrapper title="Sectors" loading={loading} error={error} onRetry={refresh}>
+    <PanelWrapper title="Sectors" loading={data === null}>
       <div className="flex gap-1 mb-2 flex-wrap">
         <button className={tabCls(tab === 'heatmap')} onClick={() => setTab('heatmap')}>Heatmap</button>
         <button className={tabCls(tab === 'table')} onClick={() => setTab('table')}>Table</button>

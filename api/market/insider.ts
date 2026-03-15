@@ -33,6 +33,19 @@ const CIK_TO_TICKER: Record<string, string> = {
   '0000070858': 'BAC',
 }
 
+async function pLimit<T>(tasks: (() => Promise<T>)[], concurrency: number): Promise<T[]> {
+  const results: T[] = []
+  let i = 0
+  async function worker() {
+    while (i < tasks.length) {
+      const idx = i++
+      results[idx] = await tasks[idx]()
+    }
+  }
+  await Promise.all(Array.from({ length: concurrency }, worker))
+  return results
+}
+
 function extractXmlValue(xml: string, tag: string): string {
   const m = xml.match(new RegExp(`<${tag}[^>]*>([^<]*)</${tag}>`, 'i'))
   return m?.[1]?.trim() ?? ''
@@ -147,20 +160,22 @@ async function fetchCompanyForm4s(cik: string, ticker: string): Promise<InsiderF
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const { data } = await cached('insider:filings:v2', 300_000, async () => {
-      const results = await Promise.allSettled(
-        Object.entries(CIK_TO_TICKER).map(([cik, ticker]) => fetchCompanyForm4s(cik, ticker))
+    const { data } = await cached('insider:filings:v2', 3_600_000, async () => {
+      const entries = Object.entries(CIK_TO_TICKER)
+      const settled = await pLimit(
+        entries.map(([cik, ticker]) => () => fetchCompanyForm4s(cik, ticker).catch(() => [] as InsiderFiling[])),
+        3
       )
       const all: InsiderFiling[] = []
-      for (const r of results) {
-        if (r.status === 'fulfilled') all.push(...r.value)
+      for (const filings of settled) {
+        all.push(...filings)
       }
       return all
         .filter(f => f.filerName)
         .sort((a, b) => b.filedDate.localeCompare(a.filedDate))
         .slice(0, 30)
     })
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
+    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=7200')
     res.json(data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch insider filings' })

@@ -1,10 +1,8 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { GaugeChart } from '@/components/charts/GaugeChart'
 import { useMarketStore } from '@/stores'
-import { usePolling } from '@/hooks/use-polling'
 import { useMacroData } from '@/hooks/use-macro-data'
-import { fetchSectors } from '@/services/api'
 import type { MarketDataPoint, ForexRate, CryptoAsset } from '@/types'
 
 interface Mover {
@@ -410,8 +408,7 @@ export default function MarketRadarPanel() {
   const forex = useMarketStore((s) => s.forex)
   const crypto = useMarketStore((s) => s.crypto)
 
-  const sectorFetcher = useCallback(() => fetchSectors(), [])
-  const { data: sectors } = usePolling({ fetcher: sectorFetcher, interval: 60_000 })
+  const sectors = useMarketStore((s) => s.sectorData)
   const { data: fredData } = useMacroData()
 
   useEffect(() => {

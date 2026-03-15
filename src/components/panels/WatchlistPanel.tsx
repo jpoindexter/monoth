@@ -87,7 +87,7 @@ export default function WatchlistPanel() {
   const fetcher = useCallback(() => fetchQuotes(watchlist), [watchlist])
   const { data, loading, error, refresh } = usePolling({
     fetcher,
-    interval: 30_000,
+    interval: 60_000,
     enabled: watchlist.length > 0,
   })
 

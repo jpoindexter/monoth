@@ -53,7 +53,7 @@ async function fetchHistory(symbol: string): Promise<RatingEntry[]> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const { data } = await cached('analyst:ratings', 600_000, async () => {
+    const { data } = await cached('analyst:ratings', 21_600_000, async () => {
       const results = await Promise.allSettled(SYMBOLS.map(fetchHistory))
       const all: RatingEntry[] = []
       for (const r of results) {
@@ -61,7 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       return all.sort((a, b) => b.date.localeCompare(a.date))
     })
-    res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=1200')
+    res.setHeader('Cache-Control', 's-maxage=21600, stale-while-revalidate=43200')
     res.json(data)
   } catch {
     res.status(500).json({ error: 'Failed to fetch analyst ratings' })

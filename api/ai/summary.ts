@@ -12,14 +12,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { data, stale } = await cached('ai:market-summary', 1800_000, async () => {
+      // In production (Vercel serverless) there is no localhost, so fetch external sources directly.
       const [newsRes, cryptoRes] = await Promise.allSettled([
-        fetch(`http://localhost:${process.env.PORT ?? 3000}/api/news/rss?category=markets`),
-        fetch(`http://localhost:${process.env.PORT ?? 3000}/api/crypto/prices`),
+        fetch('https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC,^DJI,^IXIC&region=US&lang=en-US', { signal: AbortSignal.timeout(5_000) }),
+        fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,xrp,dogecoin&order=market_cap_desc&sparkline=false', { signal: AbortSignal.timeout(5_000) }),
       ])
 
-      const headlines = newsRes.status === 'fulfilled' && newsRes.value.ok
-        ? (await newsRes.value.json().catch(() => [])).slice(0, 10).map((n: any) => n.title)
-        : []
+      let headlines: string[] = []
+      if (newsRes.status === 'fulfilled' && newsRes.value.ok) {
+        const xml = await newsRes.value.text().catch(() => '')
+        const matches = [...xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g)]
+        headlines = matches.slice(0, 10).map((m) => m[1] ?? '')
+      }
+
       const crypto = cryptoRes.status === 'fulfilled' && cryptoRes.value.ok
         ? (await cryptoRes.value.json().catch(() => [])).slice(0, 5)
         : []

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { useCryptoData } from '@/hooks/use-crypto-data'
+import { useMarketStore } from '@/stores/market-store'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 import { LightweightChart } from '@/components/charts/LightweightChart'
@@ -46,7 +46,12 @@ export default function CryptoPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<'top15' | 'stables' | 'chart' | 'defi' | 'dominance'>('top15')
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
-  const { data, loading, error, refresh } = useCryptoData()
+  // Crypto data is already fetched and stored by StatsBar via useCryptoData().
+  // Read from the store directly to avoid a duplicate polling instance.
+  const data = useMarketStore((s) => s.crypto)
+  const loading = data.length === 0
+  const error = null
+  const refresh = () => {}
   const { data: defiData, loading: defiLoading } = usePolling<{
     protocols: { name: string; tvl: number; change24h: number | null; category: string }[]
     chains: { name: string; tvl: number; pct: number }[]

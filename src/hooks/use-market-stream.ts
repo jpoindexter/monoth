@@ -17,8 +17,10 @@ export function useMarketStream() {
 
   useEffect(() => {
     function connect() {
-      // Only attempt in dev (port 5173 served by Vite proxying to :3000)
-      // or when the stream endpoint exists
+      // Stream endpoint only exists in dev; bail out in production to avoid
+      // a permanent connect → 404 → retry loop.
+      if (import.meta.env.PROD) return
+
       const es = new EventSource('/api/stream/quotes')
       esRef.current = es
 

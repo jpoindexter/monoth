@@ -4,7 +4,6 @@ import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { useMarketStore } from '@/stores/market-store'
-import { fetchSectors } from '@/services/api'
 import { relTime } from '@/lib/panel-utils'
 
 interface CorrelationEvent {
@@ -136,11 +135,7 @@ export default function MarketAnalysisPanel() {
     enabled: tab === 'events',
   })
 
-  const { data: sectorData } = usePolling<{ symbol: string; name: string; price: number; change: number; changePercent: number }[]>({
-    fetcher: useCallback(() => fetchSectors(), []),
-    interval: 120_000,
-    enabled: tab === 'sentiment',
-  })
+  const sectorData = useMarketStore((s) => s.sectorData)
 
   const indices = useMarketStore((s) => s.indices)
 
