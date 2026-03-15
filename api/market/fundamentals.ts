@@ -1,33 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-
-const YF_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Accept': '*/*',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Referer': 'https://finance.yahoo.com/',
-  'Origin': 'https://finance.yahoo.com',
-}
-
-interface CrumbResult { crumb: string; cookie: string }
-
-async function getCrumb(): Promise<CrumbResult> {
-  const cookieRes = await fetch('https://fc.yahoo.com', { headers: YF_HEADERS })
-  const cookie = cookieRes.headers.get('set-cookie') ?? ''
-  const crumbRes = await fetch('https://query2.finance.yahoo.com/v1/test/getcrumb', {
-    headers: { ...YF_HEADERS, Cookie: cookie },
-  })
-  if (!crumbRes.ok) throw new Error(`crumb ${crumbRes.status}`)
-  const crumb = await crumbRes.text()
-  return { crumb, cookie }
-}
+import { yfGet } from '../_yf.js'
 
 async function fetchYF(symbol: string) {
-  const { crumb, cookie } = await cached('yf:crumb', 1_800_000, getCrumb).then(r => r.data)
   const modules = 'defaultKeyStatistics,financialData,summaryDetail,summaryProfile'
-  const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}&crumb=${encodeURIComponent(crumb)}`
-  const r = await fetch(url, { headers: { ...YF_HEADERS, Cookie: cookie } })
+  const r = await yfGet(`https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}`)
   if (!r.ok) throw new Error(`YF ${r.status}`)
   const json = await r.json()
   const result = json.quoteSummary?.result?.[0]

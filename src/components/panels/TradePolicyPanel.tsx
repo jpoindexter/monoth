@@ -100,6 +100,7 @@ export default function TradePolicyPanel() {
 
       {tab === 'tariffs' && (
         <div className="space-y-0">
+          <div className="mb-1.5 text-[10px] text-neutral-500">Reference data · Updated manually</div>
           {expanded && (
             <div className="grid grid-cols-[auto_2rem_auto_3rem_auto] gap-x-2 pb-1 border-b border-border/30 mb-0.5">
               <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Pair</span>
@@ -140,6 +141,7 @@ export default function TradePolicyPanel() {
 
       {tab === 'restrictions' && (
         <div className="space-y-0">
+          <div className="mb-1.5 text-[10px] text-neutral-500">Reference data · Updated manually</div>
           {RESTRICTIONS.map((r) => {
             const badge = STATUS_STYLE[r.status] ?? { bg: '#888', text: '#fff' }
             return (

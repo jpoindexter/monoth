@@ -37,7 +37,7 @@ function fmtDate(d: string) {
 
 export default function InsiderTradingPanel() {
   const expanded = useIsExpanded()
-  const [tab, setTab] = useState<Tab>('recent')
+  const [tab, setTab] = useState<Tab>('buys')
 
   const { data, loading, error, refresh } = usePolling<InsiderFiling[]>({
     fetcher: async () => {

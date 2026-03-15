@@ -215,16 +215,78 @@ interface LeadingIndicator {
   badgeLabel: string
 }
 
-const LEADING_INDICATORS: LeadingIndicator[] = [
-  { name: 'Yield Curve (2Y-10Y)', reading: '-0.18%', signal: 'inverted', badgeLabel: 'INVERTED' },
-  { name: 'ISM Manufacturing', reading: '48.4', signal: 'contracting', badgeLabel: 'CONTRACTING' },
-  { name: 'Building Permits', reading: '1.46M', signal: 'falling', badgeLabel: 'FALLING' },
-  { name: 'Consumer Confidence', reading: '98.3', signal: 'falling', badgeLabel: 'FALLING' },
-  { name: 'Initial Claims (4wk avg)', reading: '227K', signal: 'rising', badgeLabel: 'RISING' },
-  { name: 'M2 Money Supply', reading: '+3.2% YoY', signal: 'expanding', badgeLabel: 'EXPANDING' },
-  { name: 'Copper/Gold Ratio', reading: '0.0031', signal: 'falling', badgeLabel: 'DEFENSIVE' },
-  { name: 'TIPS Breakevens (5Y)', reading: '2.41%', signal: 'rising', badgeLabel: 'RISING' },
-]
+function buildIndicators(fredData: FredSeries[]): LeadingIndicator[] {
+  const get = (id: string) => fredData.find(d => d.seriesId === id)
+  const dgs2 = get('DGS2')
+  const dgs10 = get('DGS10')
+  const cpi = get('CPI')
+  const unrate = get('UNRATE')
+  const fedfunds = get('FEDFUNDS')
+
+  const indicators: LeadingIndicator[] = []
+
+  if (dgs2 && dgs10) {
+    const spread = dgs10.value - dgs2.value
+    indicators.push({
+      name: 'Yield Curve (2s10s)',
+      reading: `${spread >= 0 ? '+' : ''}${spread.toFixed(2)}%`,
+      signal: spread < 0 ? 'inverted' : spread < 0.25 ? 'flat' : 'steep',
+      badgeLabel: spread < 0 ? 'INVERTED' : spread < 0.25 ? 'FLAT' : 'STEEP',
+    })
+  }
+
+  if (dgs10) {
+    const v = dgs10.value
+    indicators.push({
+      name: '10Y Treasury Yield',
+      reading: `${v.toFixed(2)}%`,
+      signal: v > 4.5 ? 'rising' : v < 3.5 ? 'falling' : 'flat',
+      badgeLabel: v > 4.5 ? 'ELEVATED' : v < 3.5 ? 'LOW' : 'NEUTRAL',
+    })
+  }
+
+  if (dgs2) {
+    const v = dgs2.value
+    indicators.push({
+      name: '2Y Treasury Yield',
+      reading: `${v.toFixed(2)}%`,
+      signal: v > 4.5 ? 'rising' : v < 3.5 ? 'falling' : 'flat',
+      badgeLabel: v > 4.5 ? 'ELEVATED' : v < 3.5 ? 'LOW' : 'NEUTRAL',
+    })
+  }
+
+  if (fedfunds) {
+    const v = fedfunds.value
+    indicators.push({
+      name: 'Fed Funds Rate',
+      reading: `${v.toFixed(2)}%`,
+      signal: v > 4 ? 'contracting' : v < 2 ? 'expanding' : 'flat',
+      badgeLabel: v > 4 ? 'RESTRICTIVE' : v < 2 ? 'ACCOMMODATIVE' : 'NEUTRAL',
+    })
+  }
+
+  if (cpi) {
+    const v = cpi.value
+    indicators.push({
+      name: 'CPI Inflation',
+      reading: `${v.toFixed(1)}%`,
+      signal: v > 3 ? 'rising' : v < 2 ? 'falling' : 'flat',
+      badgeLabel: v > 3 ? 'ABOVE TARGET' : v < 2 ? 'BELOW TARGET' : 'ON TARGET',
+    })
+  }
+
+  if (unrate) {
+    const v = unrate.value
+    indicators.push({
+      name: 'Unemployment Rate',
+      reading: `${v.toFixed(1)}%`,
+      signal: v > 5 ? 'rising' : v < 4 ? 'falling' : 'flat',
+      badgeLabel: v > 5 ? 'ELEVATED' : v < 4 ? 'LOW' : 'NEUTRAL',
+    })
+  }
+
+  return indicators
+}
 
 const SIGNAL_COLORS: Record<IndicatorSignal, string> = {
   expanding: 'text-emerald-500',
@@ -256,7 +318,7 @@ function computeLei(indicators: LeadingIndicator[]): { composite: LeiComposite; 
     if (positive.includes(ind.signal)) bullish++
     else if (ind.signal !== 'flat') bearish++
   }
-  const score = Math.round((bullish / indicators.length) * 100)
+  const score = indicators.length === 0 ? 50 : Math.round((bullish / indicators.length) * 100)
   const composite: LeiComposite = score >= 60 ? 'EXPANSION' : score <= 40 ? 'CONTRACTION' : 'MIXED'
   return { composite, score }
 }
@@ -267,9 +329,11 @@ const LEI_COMPOSITE_COLORS: Record<LeiComposite, string> = {
   CONTRACTION: '#ef4444',
 }
 
-function IndicatorsTab() {
+function IndicatorsTab({ fredData }: { fredData: FredSeries[] }) {
   const expanded = useIsExpanded()
-  const { composite, score } = computeLei(LEADING_INDICATORS)
+  const indicators = buildIndicators(fredData)
+  const hasData = indicators.length > 0
+  const { composite, score } = computeLei(hasData ? indicators : [])
   const color = LEI_COMPOSITE_COLORS[composite]
 
   return (
@@ -280,16 +344,24 @@ function IndicatorsTab() {
       >
         <div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">LEI Composite</div>
-          <div className={`font-bold tracking-wider ${expanded ? 'text-xl' : 'text-base'}`} style={{ color }}>{composite}</div>
+          <div className={`font-bold tracking-wider ${expanded ? 'text-xl' : 'text-base'}`} style={{ color }}>
+            {hasData ? composite : 'Calculating...'}
+          </div>
         </div>
         <div className="text-right">
           <div className="text-[10px] text-muted-foreground">Score</div>
-          <div className={`font-bold tabular-nums ${expanded ? 'text-2xl' : 'text-lg'}`} style={{ color }}>{score}</div>
+          <div className={`font-bold tabular-nums ${expanded ? 'text-2xl' : 'text-lg'}`} style={{ color }}>
+            {hasData ? score : '—'}
+          </div>
         </div>
       </div>
 
+      {!hasData && (
+        <div className="text-[10px] text-muted-foreground text-center py-2">Loading FRED data...</div>
+      )}
+
       <div className="space-y-1">
-        {LEADING_INDICATORS.map((ind) => (
+        {indicators.map((ind) => (
           <div key={ind.name} className={`flex items-center justify-between px-1.5 rounded-sm ${SIGNAL_BG[ind.signal]} ${expanded ? 'py-1.5' : 'py-1'}`}>
             <div className="min-w-0">
               <div className={`font-medium text-foreground leading-tight ${expanded ? 'text-[12px]' : 'text-[10px]'}`}>{ind.name}</div>
@@ -348,33 +420,61 @@ const CYCLE_PHASES: Record<CyclePhase, PhaseConfig> = {
   },
 }
 
-const CURRENT_PHASE: CyclePhase = 'early-contraction'
-
 const PHASE_ORDER: CyclePhase[] = ['early-expansion', 'late-expansion', 'early-contraction', 'late-contraction']
 
-function CycleTab() {
-  const current = CYCLE_PHASES[CURRENT_PHASE]
+function computePhase(fredData: FredSeries[]): CyclePhase | null {
+  const get = (id: string) => fredData.find(d => d.seriesId === id)
+  const dgs2 = get('DGS2')
+  const dgs10 = get('DGS10')
+  const unrate = get('UNRATE')
+  const fedfunds = get('FEDFUNDS')
+
+  if (!dgs2 && !dgs10 && !unrate && !fedfunds) return null
+
+  const spread = dgs2 && dgs10 ? dgs10.value - dgs2.value : null
+  const unrateHigh = unrate ? unrate.value > 5 : false
+  const fedCutting = fedfunds ? fedfunds.value < 3 : false
+
+  if (spread !== null && spread < 0 && unrateHigh) return 'late-contraction'
+  if (spread !== null && spread < 0) return 'early-contraction'
+  if (fedCutting) return 'early-expansion'
+  if (spread !== null && spread > 0 && !unrateHigh) return 'late-expansion'
+  return 'early-contraction'
+}
+
+function CycleTab({ fredData }: { fredData: FredSeries[] }) {
+  const phase = computePhase(fredData)
+  const current = phase ? CYCLE_PHASES[phase] : null
 
   return (
     <div className="space-y-3">
       <div
         className="rounded-md px-3 py-2 text-center"
-        style={{ backgroundColor: current.bgColor, border: `1px solid ${current.borderColor}` }}
+        style={current
+          ? { backgroundColor: current.bgColor, border: `1px solid ${current.borderColor}` }
+          : { backgroundColor: '#ffffff08', border: '1px solid #ffffff15' }
+        }
       >
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Current Phase</div>
-        <div className="text-base font-bold tracking-wide" style={{ color: current.color }}>{current.label}</div>
-        <div className="text-[10px] text-muted-foreground mt-0.5">
-          Favors: <span style={{ color: current.color }}>{current.assets.join(', ')}</span>
-        </div>
+        {current ? (
+          <>
+            <div className="text-base font-bold tracking-wide" style={{ color: current.color }}>{current.label}</div>
+            <div className="text-[10px] text-muted-foreground mt-0.5">
+              Favors: <span style={{ color: current.color }}>{current.assets.join(', ')}</span>
+            </div>
+          </>
+        ) : (
+          <div className="text-base font-bold tracking-wide text-muted-foreground">Calculating...</div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-1.5">
-        {PHASE_ORDER.map((phase) => {
-          const cfg = CYCLE_PHASES[phase]
-          const isActive = phase === CURRENT_PHASE
+        {PHASE_ORDER.map((p) => {
+          const cfg = CYCLE_PHASES[p]
+          const isActive = p === phase
           return (
             <div
-              key={phase}
+              key={p}
               className="rounded-sm px-2 py-1.5 transition-all"
               style={{
                 backgroundColor: isActive ? cfg.bgColor : 'transparent',
@@ -413,11 +513,11 @@ function CycleTab() {
       <div className="pt-1 border-t border-border/20">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Cycle Position</div>
         <div className="relative h-3 rounded-full bg-border/20 overflow-hidden">
-          {PHASE_ORDER.map((phase, i) => {
-            const cfg = CYCLE_PHASES[phase]
+          {PHASE_ORDER.map((p, i) => {
+            const cfg = CYCLE_PHASES[p]
             return (
               <div
-                key={phase}
+                key={p}
                 className="absolute top-0 h-full"
                 style={{
                   left: `${i * 25}%`,
@@ -428,14 +528,16 @@ function CycleTab() {
               />
             )
           })}
-          <div
-            className="absolute top-0 h-full w-1 rounded-full -translate-x-0.5 transition-all"
-            style={{
-              left: `${(PHASE_ORDER.indexOf(CURRENT_PHASE) * 25) + 12.5}%`,
-              backgroundColor: current.color,
-              boxShadow: `0 0 6px ${current.color}`,
-            }}
-          />
+          {phase && current && (
+            <div
+              className="absolute top-0 h-full w-1 rounded-full -translate-x-0.5 transition-all"
+              style={{
+                left: `${(PHASE_ORDER.indexOf(phase) * 25) + 12.5}%`,
+                backgroundColor: current.color,
+                boxShadow: `0 0 6px ${current.color}`,
+              }}
+            />
+          )}
         </div>
         <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
           <span>Early Exp.</span>
@@ -533,9 +635,9 @@ export default function MacroSignalsPanel() {
         </div>
       )}
 
-      {tab === 'indicators' && <IndicatorsTab />}
+      {tab === 'indicators' && <IndicatorsTab fredData={fredData ?? []} />}
 
-      {tab === 'cycle' && <CycleTab />}
+      {tab === 'cycle' && <CycleTab fredData={fredData ?? []} />}
     </PanelWrapper>
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
@@ -70,20 +70,30 @@ function deriveSentiment(indices: ReturnType<typeof useMarketStore.getState>['in
   ]
 }
 
-// --- Static data for Technicals tab ---
-const SPY_PRICE = 528
-const DMA_50 = 520
-const DMA_200 = 495
-const RSI = 58
-const MACD_POSITIVE = true
+// --- Technicals tab ---
+interface TechState {
+  spyPrice: number | null
+  dma50: number | null
+  dma200: number | null
+  loading: boolean
+}
+
+function sma(closes: number[], period: number): number | null {
+  if (closes.length < period) return null
+  const slice = closes.slice(closes.length - period)
+  return slice.reduce((a, b) => a + b, 0) / period
+}
+
+// Static fallback levels — displayed only if candle data is available to provide context
 const SUPPORT_LEVELS = [510, 500, 490]
 const RESISTANCE_LEVELS = [535, 545, 560]
 
-function deriveTechnicalOutlook(): Signal {
-  const aboveBoth = SPY_PRICE > DMA_50 && SPY_PRICE > DMA_200
-  const belowBoth = SPY_PRICE < DMA_50 && SPY_PRICE < DMA_200
-  if (aboveBoth && RSI >= 50 && RSI <= 70) return 'bullish'
-  if (belowBoth && RSI < 40) return 'bearish'
+function deriveTechnicalOutlook(spyPrice: number | null, dma50: number | null, dma200: number | null): Signal {
+  if (spyPrice === null || dma50 === null || dma200 === null) return 'neutral'
+  const aboveBoth = spyPrice > dma50 && spyPrice > dma200
+  const belowBoth = spyPrice < dma50 && spyPrice < dma200
+  if (aboveBoth) return 'bullish'
+  if (belowBoth) return 'bearish'
   return 'neutral'
 }
 
@@ -133,6 +143,25 @@ export default function MarketAnalysisPanel() {
   })
 
   const indices = useMarketStore((s) => s.indices)
+
+  const [tech, setTech] = useState<TechState>({ spyPrice: null, dma50: null, dma200: null, loading: false })
+
+  useEffect(() => {
+    if (tab !== 'technicals') return
+    if (tech.spyPrice !== null) return
+    setTech((s) => ({ ...s, loading: true }))
+    fetch('/api/market/candles?symbol=SPY')
+      .then((r) => r.json())
+      .then((candles: { close: number }[]) => {
+        if (!Array.isArray(candles) || !candles.length) return
+        const closes = candles.map((c) => c.close)
+        const spyPrice = closes[closes.length - 1]
+        const dma50 = sma(closes, 50)
+        const dma200 = sma(closes, 200)
+        setTech({ spyPrice, dma50, dma200, loading: false })
+      })
+      .catch(() => setTech((s) => ({ ...s, loading: false })))
+  }, [tab])
 
   const sentimentSources = useMemo(() => deriveSentiment(indices), [indices])
 
@@ -275,84 +304,73 @@ export default function MarketAnalysisPanel() {
       )}
 
       {tab === 'technicals' && (() => {
-        const outlook = deriveTechnicalOutlook()
-        const rsiPct = RSI
-        const rsiColor = RSI > 70 ? 'bg-red-500' : RSI < 30 ? 'bg-emerald-500' : 'bg-blue-500'
-        const rsiLabel = RSI > 70 ? 'Overbought' : RSI < 30 ? 'Oversold' : 'Neutral'
+        const { spyPrice, dma50, dma200, loading: techLoading } = tech
+        const outlook = deriveTechnicalOutlook(spyPrice, dma50, dma200)
+        if (techLoading) {
+          return <p className="text-[10px] text-muted-foreground">Computing technicals...</p>
+        }
         return (
           <div className="space-y-3">
             {/* Moving Averages */}
             <div className="space-y-1.5">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Moving Averages</span>
-              {[{ label: '50 DMA', level: DMA_50 }, { label: '200 DMA', level: DMA_200 }].map(({ label, level }) => {
-                const above = SPY_PRICE > level
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Moving Averages · SPY</span>
+              {spyPrice !== null && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground w-16">Price</span>
+                  <span className="text-[10px] tabular-nums font-semibold text-foreground">${spyPrice.toFixed(2)}</span>
+                  <span />
+                </div>
+              )}
+              {[{ label: '50 DMA', level: dma50 }, { label: '200 DMA', level: dma200 }].map(({ label, level }) => {
+                if (level === null || spyPrice === null) {
+                  return (
+                    <div key={label} className="flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground w-16">{label}</span>
+                      <span className="text-[10px] text-muted-foreground">—</span>
+                      <span />
+                    </div>
+                  )
+                }
+                const above = spyPrice > level
                 return (
                   <div key={label} className="flex items-center justify-between">
                     <span className="text-[10px] text-muted-foreground w-16">{label}</span>
-                    <span className="text-[10px] tabular-nums font-medium">${level}</span>
+                    <span className="text-[10px] tabular-nums font-medium">${level.toFixed(2)}</span>
                     <span className={`text-[10px] font-bold px-1.5 py-px rounded-sm ${above ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
-                      SPY {above ? `+$${(SPY_PRICE - level).toFixed(0)}` : `-$${(level - SPY_PRICE).toFixed(0)}`}
+                      SPY {above ? `+$${(spyPrice - level).toFixed(0)}` : `-$${(level - spyPrice).toFixed(0)}`}
                     </span>
                   </div>
                 )
               })}
             </div>
 
-            {/* RSI Gauge */}
-            <div className="space-y-1 pt-2 border-t border-border/30">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">RSI (14)</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] tabular-nums font-medium">{RSI}</span>
-                  <span className={`text-[10px] text-muted-foreground`}>{rsiLabel}</span>
+            {/* Levels */}
+            {spyPrice !== null && (
+              <div className="pt-2 border-t border-border/30 grid grid-cols-2 gap-x-3 gap-y-1">
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-emerald-600 block mb-1">Support</span>
+                  {SUPPORT_LEVELS.map((lvl) => (
+                    <div key={lvl} className="flex items-center justify-between">
+                      <div className="h-1 flex-1 mr-2 rounded-full bg-emerald-500/20">
+                        <div className="h-1 rounded-full bg-emerald-500" style={{ width: `${(lvl / spyPrice) * 100}%` }} />
+                      </div>
+                      <span className="text-[10px] tabular-nums font-medium">${lvl}</span>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-red-500 block mb-1">Resistance</span>
+                  {RESISTANCE_LEVELS.map((lvl) => (
+                    <div key={lvl} className="flex items-center justify-between">
+                      <div className="h-1 flex-1 mr-2 rounded-full bg-red-500/20">
+                        <div className="h-1 rounded-full bg-red-500" style={{ width: `${(spyPrice / lvl) * 100}%` }} />
+                      </div>
+                      <span className="text-[10px] tabular-nums font-medium">${lvl}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="relative h-2 w-full rounded-full bg-border/30">
-                {/* zone markers */}
-                <div className="absolute inset-y-0 left-[30%] w-px bg-border/60" />
-                <div className="absolute inset-y-0 left-[70%] w-px bg-border/60" />
-                <div className={`h-2 rounded-full ${rsiColor} transition-all`} style={{ width: `${rsiPct}%` }} />
-              </div>
-              <div className="flex justify-between text-[9px] text-muted-foreground">
-                <span>Oversold 30</span>
-                <span>Neutral</span>
-                <span>70 Overbought</span>
-              </div>
-            </div>
-
-            {/* MACD */}
-            <div className="flex items-center justify-between pt-2 border-t border-border/30">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">MACD</span>
-              <span className={`text-[10px] font-bold px-1.5 py-px rounded-sm ${MACD_POSITIVE ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-500'}`}>
-                {MACD_POSITIVE ? 'POSITIVE CROSSOVER' : 'NEGATIVE CROSSOVER'}
-              </span>
-            </div>
-
-            {/* Levels */}
-            <div className="pt-2 border-t border-border/30 grid grid-cols-2 gap-x-3 gap-y-1">
-              <div>
-                <span className="text-[10px] uppercase tracking-wider text-emerald-600 block mb-1">Support</span>
-                {SUPPORT_LEVELS.map((lvl) => (
-                  <div key={lvl} className="flex items-center justify-between">
-                    <div className="h-1 flex-1 mr-2 rounded-full bg-emerald-500/20">
-                      <div className="h-1 rounded-full bg-emerald-500" style={{ width: `${(lvl / SPY_PRICE) * 100}%` }} />
-                    </div>
-                    <span className="text-[10px] tabular-nums font-medium">${lvl}</span>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <span className="text-[10px] uppercase tracking-wider text-red-500 block mb-1">Resistance</span>
-                {RESISTANCE_LEVELS.map((lvl) => (
-                  <div key={lvl} className="flex items-center justify-between">
-                    <div className="h-1 flex-1 mr-2 rounded-full bg-red-500/20">
-                      <div className="h-1 rounded-full bg-red-500" style={{ width: `${(SPY_PRICE / lvl) * 100}%` }} />
-                    </div>
-                    <span className="text-[10px] tabular-nums font-medium">${lvl}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
 
             {/* Technical Outlook */}
             <div className="flex items-center justify-between pt-2 border-t border-border/30">

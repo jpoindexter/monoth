@@ -32,6 +32,14 @@ function fmtShares(n: number): string {
   return String(n)
 }
 
+function fmtValue(n: number): string {
+  if (n >= 1e12) return `$${(n / 1e12).toFixed(1)}T`
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(0)}K`
+  return `$${n}`
+}
+
 export default function HedgeFundsPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'holdings' | 'news'>('news')
@@ -126,6 +134,9 @@ export default function HedgeFundsPanel() {
                       <span className="text-[10px] text-muted-foreground truncate">{h.organization}</span>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-[10px] tabular-nums">{fmtShares(h.shares)}</span>
+                        {h.value > 0 && (
+                          <span className="text-[10px] tabular-nums text-muted-foreground">{fmtValue(h.value)}</span>
+                        )}
                         <span className="text-[10px] text-muted-foreground tabular-nums">{(h.pctHeld * 100).toFixed(2)}%</span>
                       </div>
                     </div>

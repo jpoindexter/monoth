@@ -48,10 +48,16 @@ export default function AnalystRatingsPanel() {
   const tabCls = (active: boolean) =>
     `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
-  const upgrades = data?.filter((e) => e.action === 'up' || e.action === 'init') ?? []
-  const downgrades = data?.filter((e) => e.action === 'down') ?? []
-  const rows = tab === 'upgrades' ? upgrades : tab === 'downgrades' ? downgrades : data ?? []
+  const sorted = data ? [...data].sort((a, b) => b.date.localeCompare(a.date)) : []
+  const upgrades = sorted.filter((e) => e.action === 'up' || e.action === 'init')
+  const downgrades = sorted.filter((e) => e.action === 'down')
+  const rows = tab === 'upgrades' ? upgrades : tab === 'downgrades' ? downgrades : sorted
   const visible = expanded ? rows : rows.slice(0, 12)
+
+  const buyCount = sorted.filter((e) => gradeColor(e.toGrade) === 'text-emerald-500').length
+  const holdCount = sorted.filter((e) => gradeColor(e.toGrade) === 'text-muted-foreground').length
+  const sellCount = sorted.filter((e) => gradeColor(e.toGrade) === 'text-red-500').length
+  const totalCount = buyCount + holdCount + sellCount
 
   return (
     <PanelWrapper title="Analyst Ratings" loading={loading} error={error} onRetry={refresh}>
@@ -64,6 +70,19 @@ export default function AnalystRatingsPanel() {
         </button>
         <button className={tabCls(tab === 'all')} onClick={() => setTab('all')}>All</button>
       </div>
+
+      {totalCount > 0 && (
+        <div className="flex items-center gap-2 mb-2 text-[10px]">
+          <span className="text-emerald-500 tabular-nums font-medium">{buyCount} Buy</span>
+          <span className="text-muted-foreground/40">/</span>
+          <span className="text-muted-foreground tabular-nums">{holdCount} Hold</span>
+          <span className="text-muted-foreground/40">/</span>
+          <span className="text-red-500 tabular-nums font-medium">{sellCount} Sell</span>
+          {totalCount > 0 && (
+            <span className="text-muted-foreground/50 ml-auto tabular-nums">{Math.round((buyCount / totalCount) * 100)}% buy</span>
+          )}
+        </div>
+      )}
 
       {!loading && visible.length === 0 && (
         <div className="py-4 text-center text-[10px] text-muted-foreground">

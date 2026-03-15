@@ -170,6 +170,7 @@ export default function EarningsCalendarPanel() {
       date: String(r.reportDate ?? r.date ?? ''),
       hour: (['bmo', 'amc', 'dmh'].includes(String(r.hour)) ? r.hour : 'amc') as Hour,
       epsEstimate: r.epsEstimate != null ? Number(r.epsEstimate) : null,
+      // epsActual is always null — API does not fetch reported actuals yet; update fetcher when endpoint supports it
       epsActual: r.epsActual != null ? Number(r.epsActual) : null,
       revenueEstimate: r.revenueEstimate != null ? Number(r.revenueEstimate) : null,
       revenueActual: r.revenueActual != null ? Number(r.revenueActual) : null,

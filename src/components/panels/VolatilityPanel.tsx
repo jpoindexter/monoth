@@ -64,6 +64,7 @@ export default function VolatilityPanel() {
   })
   const vixLow52 = vixRange?.low52 ?? 11.5
   const vixHigh52 = vixRange?.high52 ?? 35.2
+  const vixAvg = vixRange?.avg ?? null
 
   useEffect(() => {
     if (tab === 'chart') {
@@ -156,6 +157,7 @@ export default function VolatilityPanel() {
 
       {tab === 'surface' && (
         <div className="space-y-3">
+          <p className="text-xs text-yellow-400/70 italic">Model output based on VIX spot. Not live options IV.</p>
           {/* Vol surface heatmap */}
           <div>
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">IV Surface · skew model anchored to VIX spot</div>
@@ -214,6 +216,11 @@ export default function VolatilityPanel() {
                 <span className="text-[10px] font-semibold tabular-nums">{vixSpot.toFixed(1)} ({pct}th pct)</span>
                 <span className="text-[10px] text-muted-foreground tabular-nums">{vixHigh52}</span>
               </div>
+              {vixAvg !== null && (
+                <div className="text-[10px] text-muted-foreground mt-0.5 text-center">
+                  52-wk avg <span className="tabular-nums font-medium text-foreground">{vixAvg.toFixed(1)}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -36,10 +36,11 @@ function saveOrder(panels: PanelConfig[]) {
 
 function initPanels(): PanelConfig[] {
   // One-time migration: layout presets previously force-disabled panels — restore all
-  if (!localStorage.getItem('monoth-panels-reset-v1')) {
+  if (!localStorage.getItem('monoth-panels-reset-v2')) {
+    localStorage.removeItem('monoth-panels-reset-v1')
     localStorage.removeItem(LS_KEY)
     localStorage.removeItem(LS_ORDER_KEY)
-    localStorage.setItem('monoth-panels-reset-v1', '1')
+    localStorage.setItem('monoth-panels-reset-v2', '1')
     return [...PANELS]
   }
 

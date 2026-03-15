@@ -1,13 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
+import { yfGet, YF_HEADERS } from '../_yf.js'
 
 const FALLBACK_SYMBOLS = [
   'AAPL', 'MSFT', 'NVDA', 'META', 'GOOGL', 'AMZN', 'TSLA', 'JPM', 'V', 'BRK-B',
   'JNJ', 'WMT', 'BAC', 'XOM', 'UNH', 'GS', 'NFLX', 'COST', 'AVGO', 'AMD',
 ]
-
-const YF_HEADERS = { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' }
 
 interface EarningsEntry {
   symbol: string
@@ -29,9 +28,8 @@ function earningsHour(ts: number | undefined, tsEnd: number | undefined): string
 }
 
 async function fetchScreener(): Promise<EarningsEntry[]> {
-  const r = await fetch(
-    'https://query2.finance.yahoo.com/v1/finance/screener/predefined/saved?formatted=false&scrIds=upcoming_earnings&start=0&count=50',
-    { headers: YF_HEADERS }
+  const r = await yfGet(
+    'https://query2.finance.yahoo.com/v1/finance/screener/predefined/saved?formatted=false&scrIds=upcoming_earnings&start=0&count=50'
   )
   if (!r.ok) throw new Error(`Yahoo screener error: ${r.status}`)
   const json = await r.json()
@@ -57,9 +55,8 @@ async function fetchScreener(): Promise<EarningsEntry[]> {
 async function fetchPerSymbol(): Promise<EarningsEntry[]> {
   const results = await Promise.allSettled(
     FALLBACK_SYMBOLS.map(async (sym) => {
-      const r = await fetch(
-        `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=calendarEvents`,
-        { headers: YF_HEADERS }
+      const r = await yfGet(
+        `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=calendarEvents`
       )
       if (!r.ok) return null
       const json = await r.json()

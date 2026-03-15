@@ -1,12 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-
-const YF_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-  'Accept': '*/*',
-  'Accept-Language': 'en-US,en;q=0.9',
-}
+import { yfGet } from '../_yf.js'
 
 // Top symbols to pull rating history for
 const SYMBOLS = [
@@ -25,8 +20,7 @@ interface RatingEntry {
 }
 
 async function fetchHistory(symbol: string): Promise<RatingEntry[]> {
-  const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=upgradeDowngradeHistory`
-  const r = await fetch(url, { headers: YF_HEADERS })
+  const r = await yfGet(`https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=upgradeDowngradeHistory`)
   if (!r.ok) return []
   const json = await r.json()
   const history: Record<string, unknown>[] = json?.quoteSummary?.result?.[0]?.upgradeDowngradeHistory?.history ?? []

@@ -216,3 +216,6 @@
 .flash-down {
   animation: flash-down 0.8s ease-out forwards;
 }
+
+/* Financial data tables: equal-width digit spacing */
+.tabular { font-variant-numeric: tabular-nums; }
