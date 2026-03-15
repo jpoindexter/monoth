@@ -12,18 +12,15 @@ interface Prediction {
 }
 
 
-type Category = 'All' | 'Politics' | 'Finance' | 'Crypto' | 'Sports' | 'Tech'
+type Category = 'All' | 'Finance' | 'Crypto'
 type TopTab = 'Markets' | 'Trending' | 'Stats'
 
 const CATEGORY_KEYWORDS: Record<Exclude<Category, 'All'>, string[]> = {
-  Politics: ['election', 'president', 'congress', 'senate', 'vote', 'trump', 'biden', 'party', 'governor'],
-  Finance: ['market', 'stock', 'fed', 'rate', 'gdp', 'recession', 'inflation', 's&p', 'dow', 'nasdaq'],
-  Crypto: ['bitcoin', 'ethereum', 'crypto', 'token', 'defi', 'nft', 'blockchain'],
-  Sports: ['nba', 'nfl', 'mlb', 'f1', 'champion', 'world cup', 'tournament', 'playoff'],
-  Tech: ['ai', 'apple', 'google', 'meta', 'microsoft', 'spacex', 'launch', 'chip'],
+  Finance: ['market', 'stock', 'fed', 'rate', 'gdp', 'recession', 'inflation', 's&p', 'dow', 'nasdaq', 'bond', 'yield', 'dollar', 'euro', 'interest', 'cpi', 'jobs', 'unemployment', 'treasury'],
+  Crypto: ['bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'token', 'defi', 'blockchain', 'solana', 'sol', 'xrp', 'ripple', 'coinbase', 'binance', 'altcoin'],
 }
 
-const STAT_CATEGORIES: Exclude<Category, 'All'>[] = ['Politics', 'Finance', 'Crypto', 'Sports', 'Tech']
+const MONEY_KEYWORDS = [...CATEGORY_KEYWORDS.Finance, ...CATEGORY_KEYWORDS.Crypto]
 
 function getCategory(title: string): Exclude<Category, 'All'> | null {
   const lower = title.toLowerCase()
@@ -31,6 +28,11 @@ function getCategory(title: string): Exclude<Category, 'All'> | null {
     if (keywords.some((kw) => lower.includes(kw))) return cat as Exclude<Category, 'All'>
   }
   return null
+}
+
+function isMoneyMarket(title: string): boolean {
+  const lower = title.toLowerCase()
+  return MONEY_KEYWORDS.some((kw) => lower.includes(kw))
 }
 
 function fmtVol(n: number | string): string {
@@ -57,7 +59,7 @@ function getMomentum(yesPct: number): { label: string; cls: string } {
   return { label: 'Contested', cls: 'text-yellow-400 font-bold' }
 }
 
-const CATEGORY_TABS: Category[] = ['All', 'Politics', 'Finance', 'Crypto', 'Sports', 'Tech']
+const CATEGORY_TABS: Category[] = ['All', 'Finance', 'Crypto']
 const TOP_TABS: TopTab[] = ['Markets', 'Trending', 'Stats']
 
 export default function PredictionsPanel() {
@@ -73,41 +75,40 @@ export default function PredictionsPanel() {
 
   const { data, loading, error, refresh } = usePolling({ fetcher, interval: 300_000 })
 
-  const categorized = (data ?? []).map((p) => ({ ...p, volume: Number(p.volume) || 0, category: getCategory(p.title) }))
+  // Only show Finance + Crypto markets — no sports, politics, entertainment
+  const moneyMarkets = (data ?? [])
+    .map((p) => ({ ...p, volume: Number(p.volume) || 0, category: getCategory(p.title) }))
+    .filter((p) => isMoneyMarket(p.title))
 
   const counts: Record<Category, number> = {
-    All: categorized.length,
-    Politics: categorized.filter((p) => p.category === 'Politics').length,
-    Finance: categorized.filter((p) => p.category === 'Finance').length,
-    Crypto: categorized.filter((p) => p.category === 'Crypto').length,
-    Sports: categorized.filter((p) => p.category === 'Sports').length,
-    Tech: categorized.filter((p) => p.category === 'Tech').length,
+    All: moneyMarkets.length,
+    Finance: moneyMarkets.filter((p) => p.category === 'Finance').length,
+    Crypto: moneyMarkets.filter((p) => p.category === 'Crypto').length,
   }
 
-  const filtered = activeCategory === 'All' ? categorized : categorized.filter((p) => p.category === activeCategory)
+  const filtered = activeCategory === 'All' ? moneyMarkets : moneyMarkets.filter((p) => p.category === activeCategory)
   const maxVolume = filtered.reduce((m, p) => Math.max(m, p.volume), 1)
-  const totalVolume = (data ?? []).reduce((s, p) => s + p.volume, 0)
+  const totalVolume = moneyMarkets.reduce((s, p) => s + p.volume, 0)
 
-  const topFive = [...(data ?? [])].sort((a, b) => b.volume - a.volume).slice(0, expanded ? undefined : 5)
+  const topFive = [...moneyMarkets].sort((a, b) => b.volume - a.volume).slice(0, expanded ? undefined : 5)
   const topFiveMaxVol = topFive.reduce((m, p) => Math.max(m, p.volume), 1)
 
-  const avgYesPct =
-    data && data.length > 0
-      ? data.reduce((s, p) => s + p.yesPct, 0) / data.length
-      : 0
+  const avgYesPct = moneyMarkets.length > 0
+    ? moneyMarkets.reduce((s, p) => s + p.yesPct, 0) / moneyMarkets.length
+    : 0
 
-  const avgSpread =
-    data && data.length > 0
-      ? data.reduce((s, p) => s + Math.abs(p.yesPct - p.noPct), 0) / data.length
-      : 0
+  const avgSpread = moneyMarkets.length > 0
+    ? moneyMarkets.reduce((s, p) => s + Math.abs(p.yesPct - p.noPct), 0) / moneyMarkets.length
+    : 0
 
   const conviction =
     avgSpread > 30 ? { label: 'HIGH', cls: 'text-emerald-500' }
     : avgSpread > 15 ? { label: 'MODERATE', cls: 'text-yellow-400' }
     : { label: 'LOW', cls: 'text-red-400' }
 
+  const STAT_CATEGORIES: Exclude<Category, 'All'>[] = ['Finance', 'Crypto']
   const volumeByCategory = STAT_CATEGORIES.reduce<Record<string, number>>((acc, cat) => {
-    acc[cat] = categorized.filter((p) => p.category === cat).reduce((s, p) => s + p.volume, 0)
+    acc[cat] = moneyMarkets.filter((p) => p.category === cat).reduce((s, p) => s + p.volume, 0)
     return acc
   }, {})
   const maxCatVolume = Math.max(...Object.values(volumeByCategory), 1)

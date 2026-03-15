@@ -19,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { data, stale } = await cached('polymarket', 300_000, async () => {
-      const url = 'https://gamma-api.polymarket.com/markets?limit=20&active=true&closed=false&order=volume&ascending=false'
+      const url = 'https://gamma-api.polymarket.com/markets?limit=50&active=true&closed=false&order=volume&ascending=false'
       const r = await fetch(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
@@ -48,8 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             endDate: m.endDate,
           }
         })
-        .filter((m) => Number(m.volume) > 100)
-        .slice(0, 15)
+        .filter((m) => Number(m.volume) > 1000)
     })
 
     if (stale) res.setHeader('X-Cache', 'STALE')
