@@ -4,7 +4,6 @@ import { useMarketData } from '@/hooks/use-market-data'
 import { useCryptoData } from '@/hooks/use-crypto-data'
 import { useSectorData } from '@/hooks/use-sector-data'
 import { useMarketStore } from '@/stores'
-import { useMarketStream } from '@/hooks/use-market-stream'
 
 interface StatItem {
   label: string
@@ -43,7 +42,6 @@ export function StatsBar() {
   useMarketData()
   useCryptoData()
   useSectorData()
-  useMarketStream()
 
   const indices = useMarketStore((s) => s.indices)
   const crypto = useMarketStore((s) => s.crypto)
