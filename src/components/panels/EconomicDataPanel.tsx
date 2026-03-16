@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useMacroData } from '@/hooks/use-macro-data'
 import { usePolling } from '@/hooks/use-polling'
+import { tabCls } from '@/lib/panel-utils'
 import type { FredSeries } from '@/services/api/macro'
 
 interface CalendarEvent {
@@ -199,7 +200,6 @@ function TrendsTab({ data, expanded }: { data: FredSeries[]; expanded: boolean }
 
   return (
     <div className="space-y-3">
-      {/* Health Score card */}
       <div className="rounded-md border border-border/30 bg-muted/20 px-3 py-2">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Economic Health</span>
@@ -213,7 +213,6 @@ function TrendsTab({ data, expanded }: { data: FredSeries[]; expanded: boolean }
         </div>
       </div>
 
-      {/* Per-indicator bars */}
       <div className="space-y-2">
         {data.map((s) => {
           const range = getRange(s)
@@ -228,13 +227,11 @@ function TrendsTab({ data, expanded }: { data: FredSeries[]; expanded: boolean }
                   <span className={`tabular-nums text-foreground ${expanded ? 'text-[13px] font-bold' : 'text-[11px]'}`}>{s.value.toFixed(2)}</span>
                 </div>
               </div>
-              {/* horizontal range bar */}
               <div className="relative h-1 rounded-full bg-border/40 overflow-visible">
                 <div
                   className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-foreground border border-background"
                   style={{ left: `calc(${pos}% - 3px)` }}
                 />
-                {/* midpoint marker */}
                 <div className="absolute left-1/2 top-0 w-px h-full bg-border/60" />
               </div>
               <div className="flex justify-between mt-0.5">
@@ -270,9 +267,6 @@ export default function EconomicDataPanel() {
       setTab('calendar')
     }
   }, [loading, data, tab])
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const calEvents: DayGroup[] =
     calData && calData.length > 0 ? groupByDay(calData) : STATIC_EVENTS

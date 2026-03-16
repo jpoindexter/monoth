@@ -49,9 +49,7 @@ export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
     const currentIds = new Set(data.map((item) => item.id))
     const newIds = [...currentIds].filter((id) => !prevIdsRef.current.has(id))
     if (newIds.length > 0 && prevIdsRef.current.size > 0) {
-      // new items arrived, don't mark them seen yet
     } else if (prevIdsRef.current.size === 0) {
-      // initial load, mark all as seen
       setSeenIds(new Set(data.map((item) => item.id)))
     }
     prevIdsRef.current = currentIds
@@ -100,7 +98,7 @@ export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setSeenIds((prev) => new Set([...prev, item.id]))}
-              className="flex items-start gap-2 py-1.5 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors"
+              className="flex items-start gap-2 py-1.5 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors"
             >
               {isUnread && (
                 <span className="w-1 h-1 rounded-full bg-blue-500 shrink-0 mt-1.5" />

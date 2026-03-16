@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 
 type Tab = 'most-shorted' | 'squeeze' | 'changes'
 
@@ -79,8 +80,8 @@ const MOCK: ShortInterestData = {
 
 function squeezeColor(score: number) {
   if (score >= 8) return 'text-red-400'
-  if (score >= 6) return 'text-orange-400'
-  if (score >= 4) return 'text-yellow-400'
+  if (score >= 6) return 'text-amber-400'
+  if (score >= 4) return 'text-amber-300'
   return 'text-emerald-400'
 }
 
@@ -93,11 +94,6 @@ export default function ShortInterestPanel() {
     interval: 60_000,
   })
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
-  const hdrCls = 'text-[10px] uppercase tracking-wider text-muted-foreground'
-
   return (
     <PanelWrapper title="Short Interest" loading={loading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2 flex-wrap">
@@ -109,25 +105,25 @@ export default function ShortInterestPanel() {
       {tab === 'most-shorted' && data && (
         <div className="space-y-0">
           <div className="flex items-center gap-1 pb-1">
-            <span className={`${hdrCls} w-[38px]`}>Sym</span>
-            {expanded && <span className={`${hdrCls} flex-1`}>Name</span>}
-            <span className={`${hdrCls} w-[42px] text-right`}>Si%</span>
-            <span className={`${hdrCls} w-[38px] text-right`}>Shrs</span>
-            <span className={`${hdrCls} w-[30px] text-right`}>DTC</span>
-            <span className={`${hdrCls} w-[38px] text-right`}>Borrow</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[38px]">Sym</span>
+            {expanded && <span className="text-[10px] uppercase tracking-wider text-muted-foreground flex-1">Name</span>}
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[42px] text-right">Si%</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[38px] text-right">Shrs</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[30px] text-right">DTC</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[38px] text-right">Borrow</span>
           </div>
           {(expanded ? data.mostShorted : data.mostShorted.slice(0, 10)).map((r, i) => (
             <div key={i} className="flex items-center gap-1 border-t border-border/15 pt-1">
               <span className="text-[11px] font-bold w-[38px] shrink-0">{r.symbol}</span>
               {expanded && <span className="text-[10px] text-muted-foreground flex-1 min-w-0 truncate">{r.name}</span>}
-              <span className={`text-[10px] tabular-nums font-medium w-[42px] text-right shrink-0 ${r.shortPct > 30 ? 'text-red-400' : r.shortPct > 20 ? 'text-orange-400' : 'text-foreground'}`}>
+              <span className={`text-[10px] tabular-nums font-medium w-[42px] text-right shrink-0 ${r.shortPct > 30 ? 'text-red-400' : r.shortPct > 20 ? 'text-amber-400' : 'text-foreground'}`}>
                 {r.shortPct.toFixed(1)}%
               </span>
               <span className="text-[10px] tabular-nums text-muted-foreground w-[38px] text-right shrink-0">
                 {r.shortShares.toFixed(1)}M
               </span>
               <span className="text-[10px] tabular-nums w-[30px] text-right shrink-0">{r.daysToCover.toFixed(1)}</span>
-              <span className={`text-[10px] tabular-nums w-[38px] text-right shrink-0 ${r.borrowRate > 15 ? 'text-red-400' : r.borrowRate > 5 ? 'text-orange-400' : 'text-muted-foreground'}`}>
+              <span className={`text-[10px] tabular-nums w-[38px] text-right shrink-0 ${r.borrowRate > 15 ? 'text-red-400' : r.borrowRate > 5 ? 'text-amber-400' : 'text-muted-foreground'}`}>
                 {r.borrowRate.toFixed(1)}%
               </span>
             </div>
@@ -145,11 +141,11 @@ export default function ShortInterestPanel() {
           </div>
           <div className="space-y-0">
             <div className="flex items-center gap-1 pb-1">
-              <span className={`${hdrCls} w-[38px]`}>Sym</span>
-              <span className={`${hdrCls} w-[36px] text-right`}>SI%</span>
-              <span className={`${hdrCls} w-[44px] text-right`}>SI 7d</span>
-              <span className={`${hdrCls} w-[44px] text-right`}>Px 7d</span>
-              <span className={`${hdrCls} w-[32px] text-right`}>Score</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[38px]">Sym</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[36px] text-right">SI%</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[44px] text-right">SI 7d</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[44px] text-right">Px 7d</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[32px] text-right">Score</span>
             </div>
             {data.squeeze.map((r, i) => (
               <div key={i} className="flex items-center gap-1 border-t border-border/15 pt-1">
@@ -175,11 +171,11 @@ export default function ShortInterestPanel() {
       {tab === 'changes' && data && (
         <div className="space-y-0">
           <div className="flex items-center gap-1 pb-1">
-            <span className={`${hdrCls} w-[38px]`}>Sym</span>
-            <span className={`${hdrCls} w-[38px] text-right`}>Prev%</span>
-            <span className={`${hdrCls} w-[38px] text-right`}>Curr%</span>
-            <span className={`${hdrCls} w-[38px] text-right`}>Chg</span>
-            <span className={`${hdrCls} flex-1`}>Dir</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[38px]">Sym</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[38px] text-right">Prev%</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[38px] text-right">Curr%</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-[38px] text-right">Chg</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground flex-1">Dir</span>
           </div>
           {data.changes.map((r, i) => (
             <div key={i} className="flex items-center gap-1 border-t border-border/15 pt-1">
@@ -193,7 +189,7 @@ export default function ShortInterestPanel() {
               <span className={`text-[10px] tabular-nums font-medium w-[38px] text-right shrink-0 ${r.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                 {r.change > 0 ? '+' : ''}{r.change.toFixed(1)}%
               </span>
-              <span className={`text-[9px] font-medium px-1 py-0.5 rounded-sm uppercase tracking-wide flex-1 w-fit ${r.direction === 'Increasing' ? 'text-red-400' : 'text-emerald-400'}`}>
+              <span className={`text-[9px] font-medium px-1 py-0.5 rounded-sm uppercase tracking-wide ${r.direction === 'Increasing' ? 'text-red-400' : 'text-emerald-400'}`}>
                 {r.direction === 'Increasing' ? '↑' : '↓'} {r.direction}
               </span>
             </div>
@@ -201,7 +197,7 @@ export default function ShortInterestPanel() {
         </div>
       )}
 
-      <div className="mt-2 pt-1.5 border-t border-border/15 flex items-center justify-between">
+      <div className="mt-2 pt-1.5 border-t border-border/15">
         <span className="text-[9px] text-muted-foreground/50">Data: FINRA / twice monthly · Live data coming soon</span>
       </div>
     </PanelWrapper>

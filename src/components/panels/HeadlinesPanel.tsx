@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 function extractDomain(url: string): string {
   try {
@@ -61,7 +61,6 @@ function sentimentLabel(gauge: number): { label: string; color: string } {
   return { label: 'GREED', color: 'text-emerald-400' }
 }
 
-// gauge color gradient: red 0 -> yellow 50 -> green 100
 function gaugeColor(pct: number): string {
   if (pct < 35) return 'bg-red-500'
   if (pct < 55) return 'bg-yellow-500'
@@ -73,9 +72,6 @@ export default function HeadlinesPanel() {
   const [priority, setPriority] = useState<Priority>('All')
   const [tab, setTab] = useState<MainTab>('feed')
   const { data, loading, error, refresh } = useNewsData('markets')
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const sourceColorMap = useMemo(() => {
     const map = new Map<string, string>()
@@ -119,26 +115,22 @@ export default function HeadlinesPanel() {
     [data]
   )
 
-  // Sentiment tab data
   const sentimentData = useMemo(() => {
     if (!data || data.length === 0) return null
     const scored = data.map((item) => ({ item, score: scoreSentiment(item.title) }))
     const pos = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score).slice(0, 3)
     const neg = scored.filter((s) => s.score < 0).sort((a, b) => a.score - b.score).slice(0, 3)
 
-    // gauge: map net sentiment to 0-100
     const totalPos = scored.reduce((acc, s) => acc + Math.max(0, s.score), 0)
     const totalNeg = scored.reduce((acc, s) => acc + Math.max(0, -s.score), 0)
     const total = totalPos + totalNeg
     const gauge = total === 0 ? 50 : Math.round((totalPos / total) * 100)
 
-    // headline velocity: headlines in last hour / 1
     const lastHourCount = data.filter((item) => Date.now() - item.published < 3_600_000).length
 
     return { pos, neg, gauge, lastHourCount }
   }, [data])
 
-  // Sources tab data
   const sourcesData = useMemo(() => {
     if (!data || data.length === 0) return null
     const counts = new Map<string, number>()
@@ -148,7 +140,6 @@ export default function HeadlinesPanel() {
     }
     const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])
     const max = sorted[0]?.[1] ?? 1
-    // Shannon entropy diversity score (normalized 0-100)
     const total = data.length
     const entropy = sorted.reduce((acc, [, cnt]) => {
       const p = cnt / total
@@ -161,7 +152,6 @@ export default function HeadlinesPanel() {
 
   return (
     <PanelWrapper title="Headlines" loading={loading} error={error} onRetry={refresh}>
-      {/* Top nav row */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex gap-1">
           <button className={tabCls(tab === 'feed')} onClick={() => setTab('feed')}>Feed</button>
@@ -180,7 +170,6 @@ export default function HeadlinesPanel() {
         </div>
       </div>
 
-      {/* Feed tab: priority sub-tabs */}
       {tab === 'feed' && (
         <>
           <div className="flex flex-wrap gap-1 mb-2">
@@ -210,7 +199,7 @@ export default function HeadlinesPanel() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={[
-                        'flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors',
+                        'flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors',
                         isBreaking ? 'border-l-2 border-red-500 pl-1.5' : '',
                         isImportant ? 'border-l-2 border-amber-500 pl-1.5' : '',
                       ].join(' ')}
@@ -254,14 +243,12 @@ export default function HeadlinesPanel() {
         </>
       )}
 
-      {/* Sentiment tab */}
       {tab === 'sentiment' && (
         <div className="space-y-3">
           {!sentimentData ? (
             <p className="text-[10px] text-muted-foreground">No data</p>
           ) : (
             <>
-              {/* Gauge */}
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Sentiment Gauge</span>
@@ -282,7 +269,6 @@ export default function HeadlinesPanel() {
                 </div>
               </div>
 
-              {/* Velocity */}
               <div className="flex items-center justify-between border border-border/30 rounded-sm px-2 py-1">
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Headline Velocity</span>
                 <span className="text-[10px] font-bold text-foreground">
@@ -290,7 +276,6 @@ export default function HeadlinesPanel() {
                 </span>
               </div>
 
-              {/* Top positive */}
               {sentimentData.pos.length > 0 && (
                 <div>
                   <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold mb-1">Most Positive</div>
@@ -311,7 +296,6 @@ export default function HeadlinesPanel() {
                 </div>
               )}
 
-              {/* Top negative */}
               {sentimentData.neg.length > 0 && (
                 <div>
                   <div className="text-[10px] uppercase tracking-wider text-red-400 font-bold mb-1">Most Negative</div>
@@ -336,14 +320,12 @@ export default function HeadlinesPanel() {
         </div>
       )}
 
-      {/* Sources tab */}
       {tab === 'sources' && (
         <div className="space-y-3">
           {!sourcesData ? (
             <p className="text-[10px] text-muted-foreground">No data</p>
           ) : (
             <>
-              {/* Diversity score */}
               <div className="flex items-center justify-between border border-border/30 rounded-sm px-2 py-1">
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Source Diversity Score</span>
                 <span className="text-[10px] font-bold text-foreground">
@@ -351,7 +333,6 @@ export default function HeadlinesPanel() {
                 </span>
               </div>
 
-              {/* Source bars */}
               <div className="space-y-1.5">
                 {sourcesData.sorted.map(([domain, count]) => (
                   <div key={domain}>

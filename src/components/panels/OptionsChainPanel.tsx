@@ -64,7 +64,6 @@ function ChainRow({
 
   return (
     <tr className={`border-t text-[10px] tabular-nums ${isAtMoney ? 'border-yellow-500/50' : 'border-border/20'}`}>
-      {/* Call side */}
       <td className={`py-0.5 pl-0.5 ${callItm ? 'text-emerald-400 bg-emerald-500/8' : 'text-muted-foreground'}`}>
         {call ? fmtPrice(call.bid) : '—'}
       </td>
@@ -74,12 +73,10 @@ function ChainRow({
       <td className={`py-0.5 text-muted-foreground ${callItm ? 'bg-emerald-500/8' : ''}`}>{call ? fmtK(call.openInterest) : '—'}</td>
       {expanded && <td className={`py-0.5 text-muted-foreground ${callItm ? 'bg-emerald-500/8' : ''}`}>{call ? fmtIV(call.impliedVolatility) : '—'}</td>}
 
-      {/* Strike */}
       <td className={`py-0.5 px-1.5 text-center font-semibold ${isAtMoney ? 'text-yellow-400' : 'text-foreground/70'}`}>
         {strike}
       </td>
 
-      {/* Put side */}
       {expanded && <td className={`py-0.5 text-muted-foreground ${putItm ? 'bg-red-500/8' : ''}`}>{put ? fmtIV(put.impliedVolatility) : '—'}</td>}
       <td className={`py-0.5 text-muted-foreground ${putItm ? 'bg-red-500/8' : ''}`}>{put ? fmtK(put.openInterest) : '—'}</td>
       <td className={`py-0.5 text-muted-foreground ${putItm ? 'bg-red-500/8' : ''}`}>{put ? fmtK(put.volume) : '—'}</td>
@@ -131,7 +128,6 @@ export default function OptionsChainPanel() {
   return (
     <PanelWrapper title="Options Chain" onRetry={refresh}>
       <div className="flex flex-col gap-2 h-full">
-        {/* Controls */}
         <div className="flex items-center gap-2 flex-wrap">
           <form onSubmit={handleSubmit} className="flex gap-1">
             <input
@@ -162,7 +158,6 @@ export default function OptionsChainPanel() {
           )}
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-1 border-b border-border/20">
           <button className={tabCls(tab === 'chain')} onClick={() => setTab('chain')}>Chain</button>
           <button className={tabCls(tab === 'calls')} onClick={() => setTab('calls')}>Calls</button>
@@ -178,12 +173,10 @@ export default function OptionsChainPanel() {
               <table className="w-full min-w-[520px] border-collapse">
                 <thead>
                   <tr>
-                    {/* Calls header */}
                     <th colSpan={expanded ? 6 : 5} className="text-center text-[9px] font-semibold text-emerald-500/80 pb-1 border-b border-emerald-500/20">
                       CALLS
                     </th>
                     <th className="pb-1" />
-                    {/* Puts header */}
                     <th colSpan={expanded ? 6 : 5} className="text-center text-[9px] font-semibold text-red-500/80 pb-1 border-b border-red-500/20">
                       PUTS
                     </th>

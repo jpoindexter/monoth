@@ -4,6 +4,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
+import { tabCls } from '@/lib/panel-utils'
 
 interface Mover {
   symbol: string
@@ -219,9 +220,6 @@ export default function LiveMarketsPanel() {
       fetchCandles(chartSymbol).then(setChartData).catch(() => {})
     }
   }, [tab, chartSymbol, expanded])
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const moversList = tab === 'gainers' ? moversData?.gainers
     : tab === 'losers' ? moversData?.losers

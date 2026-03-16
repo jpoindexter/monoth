@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 
 interface InsiderFiling {
   ticker: string
@@ -47,9 +48,6 @@ export default function InsiderTradingPanel() {
     },
     interval: 300_000,
   })
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const isBuyType = (t: string) => t === 'Buy' || t === 'P' || t === 'A'
   const isSellType = (t: string) => t === 'Sell' || t === 'S' || t === 'D'

@@ -28,8 +28,6 @@ interface ShippingRate {
   source: string
 }
 
-// Static rates — updated periodically via backend in production; here we display
-// the last known snapshot with clear labeling
 const SHIPPING_RATES: ShippingRate[] = [
   { route: 'Baltic Dry Index', rate: '1,423', unit: 'pts', change7d: -2.1, source: 'BDI' },
   { route: 'Shanghai → LA', rate: '$2,850', unit: '/FEU', change7d: -4.3, source: 'FBX' },
@@ -207,7 +205,7 @@ export default function ShippingFreightPanel() {
                   {d.status.toUpperCase()}
                 </span>
               </div>
-              <p className="text-[10px] text-amber-400/80 mb-0.5">{d.impact}</p>
+              <p className="text-[10px] text-amber-400 mb-0.5">{d.impact}</p>
               {expanded && (
                 <p className="text-[10px] text-muted-foreground leading-snug">{d.detail}</p>
               )}
@@ -224,7 +222,7 @@ export default function ShippingFreightPanel() {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-white/[0.03] -mx-1 px-1 rounded-sm transition-colors"
+              className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors"
             >
               <span className={`text-[11px] font-medium leading-snug text-foreground flex-1 ${expanded ? '' : 'line-clamp-2'}`}>
                 {item.title}

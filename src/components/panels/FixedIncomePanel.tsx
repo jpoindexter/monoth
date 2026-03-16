@@ -5,6 +5,7 @@ import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { fetchFredData } from '@/services/api/macro'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
+import { tabCls } from '@/lib/panel-utils'
 
 const YIELD_SERIES = {
   DGS2: '2Y',
@@ -87,9 +88,6 @@ export default function FixedIncomePanel() {
   const spread210 = curveY2 != null && curveY10 != null ? curveY10 - curveY2 : null
   const isInverted = spread210 != null && spread210 < 0
   const curveColor = isInverted ? '#ef4444' : '#059669'
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Fixed Income" loading={loading && etfLoading} error={error} onRetry={refresh}>
@@ -200,7 +198,7 @@ export default function FixedIncomePanel() {
                 <div>
                   <span className="text-[11px] font-medium">{s.label}</span>
                   <span className={`ml-2 text-[10px] font-medium uppercase tracking-wider ${
-                    s.signal === 'Inverted' ? 'text-red-500' : s.signal === 'Flat' ? 'text-yellow-500' : 'text-emerald-600'
+                    s.signal === 'Inverted' ? 'text-red-500' : s.signal === 'Flat' ? 'text-amber-500' : 'text-emerald-600'
                   }`}>{s.signal}</span>
                 </div>
                 <span className={`text-[11px] tabular-nums font-medium ${isNeg ? 'text-red-500' : 'text-emerald-600'}`}>
@@ -317,7 +315,7 @@ export default function FixedIncomePanel() {
             </div>
             <div className="mt-2 pt-2 border-t border-border/20">
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Live TIPS yields via FRED. RESTRICTIVE above 2%, NEUTRAL 0-2%, ACCOMMODATIVE below 0%.
+                RESTRICTIVE above 2%, NEUTRAL 0-2%, ACCOMMODATIVE below 0%.
               </p>
             </div>
           </div>

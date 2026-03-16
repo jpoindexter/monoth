@@ -39,12 +39,10 @@ const TRENDS = [
   { name: 'Crypto Payments', label: 'Crypto Payments', size: '$45B volume', growth: 40 },
 ]
 
-// Composite innovation index: weighted avg of growth rates, normalized to 0-100
 const INNOVATION_INDEX = Math.round(
   TRENDS.reduce((sum, t) => sum + t.growth, 0) / TRENDS.length / 0.5
 )
 
-// Map growth % to a green shade: lower growth = muted, higher = saturated
 function growthBarColor(growth: number): string {
   if (growth >= 35) return 'bg-emerald-500'
   if (growth >= 28) return 'bg-emerald-400'
@@ -53,7 +51,6 @@ function growthBarColor(growth: number): string {
   return 'bg-green-200'
 }
 
-// Industry reference figures (Nilson Report / World Bank / McKinsey estimates)
 const TXN_VOLUME = {
   card: '1.2B/day',
   wallet: '800M/day',
@@ -248,7 +245,7 @@ export default function FintechPanel() {
             const cls = classifyHeadline(item.title)
             return (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
+                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
                     <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"

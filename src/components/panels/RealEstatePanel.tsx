@@ -7,7 +7,7 @@ import { useMacroData } from '@/hooks/use-macro-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 const REIT_SYMBOLS = ['VNQ', 'XLRE', 'IYR', 'SCHH', 'RWR']
 const REIT_NAMES: Record<string, string> = {
@@ -69,9 +69,6 @@ export default function RealEstatePanel() {
       .catch(() => setCandles([]))
       .finally(() => setCandlesLoading(false))
   }, [tab, chartSymbol])
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const monthsSupply = HOUSING_METRICS[3]?.raw ?? 3.8
   const temp = marketTemp(monthsSupply)
@@ -147,7 +144,6 @@ export default function RealEstatePanel() {
 
       {tab === 'housing' && (
         <div>
-          {/* Market Temp gauge */}
           <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-sm border border-border/30"
             style={{ borderLeftColor: temp.color, borderLeftWidth: 3 }}>
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Market Temp</span>
@@ -202,7 +198,7 @@ export default function RealEstatePanel() {
             const cls = classifyHeadline(item.title)
             return (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
+                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
                     <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"

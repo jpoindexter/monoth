@@ -73,7 +73,6 @@ function CommodityRow({ commodity, quote, showRange }: RowProps) {
   const isPos = changePct >= 0
   const clr = changeColor(changePct)
 
-  // Placeholder 52w range from ±15% of current (no 52w data from this endpoint)
   const low52 = price ? price * 0.85 : 0
   const high52 = price ? price * 1.15 : 0
   const barPct = price ? fmt52w(price, low52, high52) : 50

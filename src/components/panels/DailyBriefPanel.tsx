@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useMarketStore } from '@/stores'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 import type { MarketDataPoint, CryptoAsset, ForexRate, YieldData } from '@/types'
 
 interface BriefSection {
@@ -140,14 +141,14 @@ function signalCls(sig: SignalLevel) {
     case 'BULL':    return 'bg-emerald-500/10 text-emerald-600'
     case 'BEARISH': return 'bg-red-500/20 text-red-500'
     case 'BEAR':    return 'bg-red-500/10 text-red-400'
-    default:        return 'bg-yellow-500/10 text-yellow-500'
+    default:        return 'bg-amber-500/10 text-amber-500'
   }
 }
 
 function vixLabel(vix: number): { label: string; cls: string } {
   if (vix < 15)  return { label: 'LOW',      cls: 'bg-emerald-500/20 text-emerald-500' }
-  if (vix < 20)  return { label: 'NORMAL',   cls: 'bg-yellow-500/10 text-yellow-500' }
-  if (vix < 30)  return { label: 'ELEVATED', cls: 'bg-orange-500/10 text-orange-400' }
+  if (vix < 20)  return { label: 'NORMAL',   cls: 'bg-amber-500/10 text-amber-500' }
+  if (vix < 30)  return { label: 'ELEVATED', cls: 'bg-amber-500/10 text-amber-400' }
   return               { label: 'HIGH',      cls: 'bg-red-500/20 text-red-500' }
 }
 
@@ -270,9 +271,6 @@ export default function DailyBriefPanel() {
 
   const hasData = indices.length > 0 || crypto.length > 0 || forex.length > 0
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
   return (
     <PanelWrapper title="Daily Brief">
       <div className="flex flex-wrap gap-1 mb-2">
@@ -294,7 +292,7 @@ export default function DailyBriefPanel() {
                 <span className={`font-bold uppercase tracking-wider px-1 py-px rounded-sm ${expanded ? 'text-[10px]' : 'text-[9px]'} ${
                   section.sentiment === 'bullish' ? 'bg-emerald-500/10 text-emerald-600' :
                   section.sentiment === 'bearish' ? 'bg-red-500/10 text-red-500' :
-                  'bg-yellow-500/10 text-yellow-600'
+                  'bg-amber-500/10 text-amber-600'
                 }`}>
                   {section.sentiment}
                 </span>

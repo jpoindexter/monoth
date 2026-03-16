@@ -3,6 +3,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { GaugeChart } from '@/components/charts/GaugeChart'
 import { useMarketStore } from '@/stores'
 import { useMacroData } from '@/hooks/use-macro-data'
+import { tabCls } from '@/lib/panel-utils'
 import type { MarketDataPoint, ForexRate, CryptoAsset } from '@/types'
 
 interface Mover {
@@ -251,7 +252,7 @@ function compositeSignal(signals: Signal[]): { label: string; color: string } {
   if (score >= 2) return { label: 'BUY', color: 'text-emerald-500' }
   if (score <= -4) return { label: 'STRONG SELL', color: 'text-red-400' }
   if (score <= -2) return { label: 'SELL', color: 'text-red-500' }
-  return { label: 'NEUTRAL', color: 'text-yellow-500' }
+  return { label: 'NEUTRAL', color: 'text-amber-500' }
 }
 
 function signalBadgeCls(direction: Signal['direction']) {
@@ -346,7 +347,7 @@ function deriveAlerts(
 
 function severityCls(s: Alert['severity']) {
   if (s === 'CRITICAL') return 'bg-red-500/15 text-red-400 border border-red-500/30'
-  if (s === 'WARNING') return 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
+  if (s === 'WARNING') return 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
   return 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
 }
 
@@ -426,9 +427,6 @@ export default function MarketRadarPanel() {
     { value: rateSensitivity(fredData), label: 'Rate Sensitivity' },
     { value: commodityPressure(indices, commodities), label: 'Commodity Pressure' },
   ]
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Market Radar">

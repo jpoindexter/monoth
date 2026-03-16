@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useCorrelationEvents, useCorrelationMatrix } from '@/hooks/use-correlation-data'
 import { usePolling } from '@/hooks/use-polling'
+import { tabCls } from '@/lib/panel-utils'
 
 interface CorrelationEvent {
   id: string
@@ -169,9 +170,6 @@ export default function CorrelationPanel() {
   for (const entry of matrixList) {
     lookup.set(`${entry.indicator}:${entry.symbol}`, entry.beatDirection)
   }
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const activeAssets = liveCorr?.assets ?? (expanded ? ASSETS_EXPANDED : ASSETS)
   const activeCorr = liveMatrix ?? (expanded ? STATIC_CORRELATIONS_EXPANDED : STATIC_CORRELATIONS)
@@ -346,7 +344,6 @@ export default function CorrelationPanel() {
 
       {tab === 'regime' && (
         <div className="space-y-3">
-          {/* Regime badge */}
           <div className="flex items-center justify-between">
             <span className={`text-[11px] font-bold tracking-widest px-2 py-0.5 rounded-sm ${regimeBadgeCls}`}>
               {regime.regime}
@@ -354,7 +351,6 @@ export default function CorrelationPanel() {
             <span className="text-[10px] text-muted-foreground">avg |corr| = <span className="text-foreground font-semibold tabular-nums">{regime.avg.toFixed(3)}</span></span>
           </div>
 
-          {/* Avg correlation bar */}
           <div>
             <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
               <span>0.0 — independent</span>
@@ -368,7 +364,6 @@ export default function CorrelationPanel() {
             </div>
           </div>
 
-          {/* Extremes */}
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-sm bg-muted/40 p-1.5">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Highest pair</div>
@@ -386,7 +381,6 @@ export default function CorrelationPanel() {
             </div>
           </div>
 
-          {/* Diversification score */}
           <div className="rounded-sm bg-muted/40 p-1.5">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Diversification Score</div>
             <div className="flex items-end gap-2">

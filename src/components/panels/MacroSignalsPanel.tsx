@@ -3,6 +3,7 @@ import { usePolling } from '@/hooks/use-polling'
 import { useMacroData } from '@/hooks/use-macro-data'
 import { useMarketStore } from '@/stores/market-store'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 import type { MarketDataPoint, ForexRate } from '@/types'
 import type { FredSeries } from '@/services/api/macro'
 
@@ -17,13 +18,13 @@ interface MacroSignal {
 const STATUS_COLORS = {
   bullish: 'text-emerald-600',
   bearish: 'text-red-500',
-  neutral: 'text-yellow-500',
+  neutral: 'text-amber-500',
 }
 
 const STATUS_BG = {
   bullish: 'bg-emerald-500/10',
   bearish: 'bg-red-500/10',
-  neutral: 'bg-yellow-500/10',
+  neutral: 'bg-amber-500/10',
 }
 
 function GaugeChart({ value, label }: { value: number; label: string }) {
@@ -130,7 +131,7 @@ function RegimeTab({ indices, fredData }: { indices: MarketDataPoint[]; fredData
         </div>
         <div className="flex justify-between text-[10px]">
           <span className="text-muted-foreground">VIX Level</span>
-          <span className={r.vixLevel > 25 ? 'text-red-500' : r.vixLevel < 15 ? 'text-emerald-500' : 'text-yellow-500'}>
+          <span className={r.vixLevel > 25 ? 'text-red-500' : r.vixLevel < 15 ? 'text-emerald-500' : 'text-amber-500'}>
             {r.vixLevel.toFixed(1)}
           </span>
         </div>
@@ -166,7 +167,7 @@ function JpyIndicator({ forex }: { forex: ForexRate[] }) {
       <div className="flex items-center justify-between">
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">JPY Liquidity Proxy</span>
         {isCarryUnwind && (
-          <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-sm bg-orange-500/20 text-orange-400 tracking-wider">
+          <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-sm bg-amber-500/20 text-amber-400 tracking-wider">
             CARRY UNWIND
           </span>
         )}
@@ -295,7 +296,7 @@ const SIGNAL_COLORS: Record<IndicatorSignal, string> = {
   contracting: 'text-red-500',
   falling: 'text-red-500',
   inverted: 'text-red-500',
-  flat: 'text-yellow-500',
+  flat: 'text-amber-500',
 }
 
 const SIGNAL_BG: Record<IndicatorSignal, string> = {
@@ -305,7 +306,7 @@ const SIGNAL_BG: Record<IndicatorSignal, string> = {
   contracting: 'bg-red-500/10',
   falling: 'bg-red-500/10',
   inverted: 'bg-red-500/10',
-  flat: 'bg-yellow-500/10',
+  flat: 'bg-amber-500/10',
 }
 
 type LeiComposite = 'EXPANSION' | 'MIXED' | 'CONTRACTION'
@@ -574,9 +575,6 @@ export default function MacroSignalsPanel() {
   const bullCount = data?.filter((s) => s.status === 'bullish').length ?? 0
   const bearCount = data?.filter((s) => s.status === 'bearish').length ?? 0
   const total = data?.length ?? 0
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Macro Signals" loading={loading} error={error} onRetry={refresh}>

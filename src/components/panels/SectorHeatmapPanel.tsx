@@ -3,7 +3,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useMarketStore } from '@/stores'
 import { useNewsData } from '@/hooks/use-news-data'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 function getBlockStyle(changePercent: number): React.CSSProperties {
   const magnitude = Math.min(Math.abs(changePercent) / 3, 1)
@@ -29,9 +29,6 @@ export default function SectorHeatmapPanel() {
   const byMagnitude = data ? [...data].filter(s => s.changePercent != null).sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)) : null
   const best = sorted?.[0]
   const worst = sorted?.[sorted.length - 1]
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   // Rotation tab derived data
   const rotationData = (() => {
@@ -139,7 +136,7 @@ export default function SectorHeatmapPanel() {
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors"
+                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   {cls && (
@@ -167,7 +164,6 @@ export default function SectorHeatmapPanel() {
         <div className="flex flex-col gap-1.5">
           <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Sector Rotation Cycle</div>
           <div className="grid grid-cols-2 gap-1" style={{ minHeight: '160px' }}>
-            {/* Top-left: Improving */}
             <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-blue-500/5">
               <div className="text-[9px] font-bold uppercase tracking-wider text-blue-400 mb-0.5">Improving</div>
               <div className="text-[9px] text-muted-foreground mb-1">Negative but recovering</div>
@@ -181,7 +177,6 @@ export default function SectorHeatmapPanel() {
                 <span className="text-[10px] text-muted-foreground italic">None</span>
               )}
             </div>
-            {/* Top-right: Leading */}
             <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-emerald-500/5">
               <div className="text-[9px] font-bold uppercase tracking-wider text-emerald-500 mb-0.5">Leading</div>
               <div className="text-[9px] text-muted-foreground mb-1">Positive and strong</div>
@@ -195,7 +190,6 @@ export default function SectorHeatmapPanel() {
                 <span className="text-[10px] text-muted-foreground italic">None</span>
               )}
             </div>
-            {/* Bottom-left: Lagging */}
             <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-red-500/5">
               <div className="text-[9px] font-bold uppercase tracking-wider text-red-500 mb-0.5">Lagging</div>
               <div className="text-[9px] text-muted-foreground mb-1">Negative and weak</div>
@@ -209,7 +203,6 @@ export default function SectorHeatmapPanel() {
                 <span className="text-[10px] text-muted-foreground italic">None</span>
               )}
             </div>
-            {/* Bottom-right: Weakening */}
             <div className="border border-border/30 rounded p-1.5 flex flex-col gap-0.5 bg-yellow-500/5">
               <div className="text-[9px] font-bold uppercase tracking-wider text-yellow-500 mb-0.5">Weakening</div>
               <div className="text-[9px] text-muted-foreground mb-1">Positive but fading</div>

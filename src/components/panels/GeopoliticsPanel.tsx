@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 function formatSince(since: string): string {
   const parts = since.split('-')
@@ -108,9 +108,6 @@ export default function GeopoliticsPanel() {
   const riskLabel = avgRisk > 8 ? 'CRITICAL' : avgRisk > 6 ? 'HIGH' : avgRisk > 4 ? 'ELEVATED' : avgRisk > 2 ? 'MODERATE' : 'LOW'
   const riskColor = avgRisk > 8 ? '#ef4444' : avgRisk > 6 ? '#f97316' : avgRisk > 4 ? '#f59e0b' : avgRisk > 2 ? '#eab308' : '#22c55e'
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
   return (
     <PanelWrapper title="Geopolitics" loading={loading} error={error} onRetry={refresh}>
       <div className="flex items-center justify-between mb-2">
@@ -175,7 +172,7 @@ export default function GeopoliticsPanel() {
             const cls = classifyHeadline(item.title)
             return (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
+                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
                     <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"

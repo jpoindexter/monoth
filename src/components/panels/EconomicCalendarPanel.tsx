@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 
 type Impact = 'high' | 'medium' | 'low'
 
@@ -227,19 +228,19 @@ function buildMockEvents(): EconEvent[] {
 
 const IMPACT_COLOR: Record<Impact, string> = {
   high: 'text-red-500',
-  medium: 'text-yellow-500',
+  medium: 'text-amber-500',
   low: 'text-muted-foreground',
 }
 
 const IMPACT_BG: Record<Impact, string> = {
   high: 'bg-red-500/10',
-  medium: 'bg-yellow-500/10',
+  medium: 'bg-amber-500/10',
   low: 'bg-foreground/5',
 }
 
 const IMPACT_DOT: Record<Impact, string> = {
   high: 'bg-red-500',
-  medium: 'bg-yellow-500',
+  medium: 'bg-amber-500',
   low: 'bg-muted-foreground/40',
 }
 
@@ -286,7 +287,7 @@ function CountdownBadge({ date, time, released }: { date: string; time: string; 
   const val = useCountdown(date, time)
   if (released) return null
   return (
-    <span className="text-[10px] font-mono text-yellow-400 bg-yellow-500/10 px-1.5 py-0.5 rounded-sm">
+    <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-sm">
       {val}
     </span>
   )
@@ -463,9 +464,6 @@ export default function EconomicCalendarPanel() {
 
   const todayCount = events.filter(e => isToday(e.date)).length
   const highCount = events.filter(e => e.impact === 'high' && isWithinDays(e.date, 14)).length
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Economic Calendar" loading={loading} error={error && !data ? error : null} onRetry={refresh}>

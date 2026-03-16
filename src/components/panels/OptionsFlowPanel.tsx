@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 
 type Sentiment = 'bullish' | 'bearish' | 'neutral'
 type Tab = 'flow' | 'sweeps' | 'putcall'
@@ -107,11 +108,72 @@ function SentimentBadge({ s }: { s: Sentiment }) {
   const cls =
     s === 'bullish' ? 'bg-emerald-500/15 text-emerald-400' :
     s === 'bearish' ? 'bg-red-500/15 text-red-400' :
-    'bg-zinc-500/15 text-zinc-400'
+    'bg-muted text-muted-foreground'
   return (
     <span className={`text-[9px] font-medium px-1 py-0.5 rounded-sm uppercase tracking-wide ${cls}`}>
       {s}
     </span>
+  )
+}
+
+const hdrCls = 'text-[10px] uppercase tracking-wider text-muted-foreground'
+
+interface FlowTableProps {
+  rows: (FlowRow | SweepRow)[]
+  showAggressor?: boolean
+  expanded: boolean
+}
+
+function FlowTable({ rows, showAggressor, expanded }: FlowTableProps) {
+  const displayRows = !showAggressor && !expanded ? rows.slice(0, 10) : rows
+  return (
+    <div className="space-y-0">
+      <div className="flex items-center gap-1 pb-1">
+        <span className={`${hdrCls} w-[38px]`}>Ticker</span>
+        <span className={`${hdrCls} w-[28px]`}>Exp</span>
+        <span className={`${hdrCls} w-[34px]`}>Strike</span>
+        <span className={`${hdrCls} w-[16px] text-center`}>T</span>
+        <span className={`${hdrCls} w-[36px] text-right`}>Size</span>
+        <span className={`${hdrCls} w-[44px] text-right`}>Prem</span>
+        {!showAggressor && <span className={`${hdrCls} w-[32px] text-right`}>OI</span>}
+        {showAggressor
+          ? <span className={`${hdrCls} flex-1`}>Aggr</span>
+          : expanded && <span className={`${hdrCls} flex-1`}>Sent</span>
+        }
+      </div>
+      {displayRows.map((r, i) => (
+        <div key={i} className="flex items-center gap-1 border-t border-border/15 pt-1">
+          <span className="text-[11px] font-bold w-[38px] shrink-0">{r.ticker}</span>
+          <span className="text-[10px] text-muted-foreground w-[28px] shrink-0">{r.exp}</span>
+          <span className="text-[10px] w-[34px] shrink-0">{r.strike}</span>
+          <span className={`text-[10px] font-bold w-[16px] text-center shrink-0 ${r.type === 'C' ? 'text-emerald-500' : 'text-red-500'}`}>
+            {r.type}
+          </span>
+          <span className="text-[10px] tabular-nums w-[36px] text-right shrink-0">{fmtSize(r.size)}</span>
+          <span className="text-[10px] tabular-nums font-medium w-[44px] text-right shrink-0">{fmtPremium(r.premium)}</span>
+          {!showAggressor && (
+            <span className="text-[10px] tabular-nums text-muted-foreground w-[32px] text-right shrink-0">
+              {fmtOI((r as FlowRow).oi)}
+            </span>
+          )}
+          {showAggressor
+            ? (
+              <span className={`text-[10px] font-medium flex-1 ${(r as SweepRow).aggressor === 'Buy' ? 'text-emerald-400' : 'text-red-400'}`}>
+                {(r as SweepRow).aggressor}
+              </span>
+            )
+            : expanded && (
+              <div className="flex-1 min-w-0 ml-1">
+                <SentimentBadge s={(r as FlowRow).sentiment} />
+              </div>
+            )
+          }
+        </div>
+      ))}
+      {!showAggressor && !expanded && rows.length > 10 && (
+        <div className="text-[10px] text-muted-foreground pt-1">{rows.length - 10} more — expand panel</div>
+      )}
+    </div>
   )
 }
 
@@ -124,11 +186,6 @@ export default function OptionsFlowPanel() {
     interval: 60_000,
   })
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
-  const hdrCls = 'text-[10px] uppercase tracking-wider text-muted-foreground'
-
   return (
     <PanelWrapper title="Options Flow" loading={loading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2 flex-wrap">
@@ -138,72 +195,19 @@ export default function OptionsFlowPanel() {
       </div>
 
       {tab === 'flow' && data && (
-        <div className="space-y-0">
-          <div className="flex items-center gap-1 pb-1">
-            <span className={`${hdrCls} w-[38px]`}>Ticker</span>
-            <span className={`${hdrCls} w-[28px]`}>Exp</span>
-            <span className={`${hdrCls} w-[34px]`}>Strike</span>
-            <span className={`${hdrCls} w-[16px] text-center`}>T</span>
-            <span className={`${hdrCls} w-[36px] text-right`}>Size</span>
-            <span className={`${hdrCls} w-[44px] text-right`}>Prem</span>
-            <span className={`${hdrCls} w-[32px] text-right`}>OI</span>
-            {expanded && <span className={`${hdrCls} flex-1`}>Sent</span>}
-          </div>
-          {(expanded ? data.flow : data.flow.slice(0, 10)).map((r, i) => (
-            <div key={i} className="flex items-center gap-1 border-t border-border/15 pt-1">
-              <span className="text-[11px] font-bold w-[38px] shrink-0">{r.ticker}</span>
-              <span className="text-[10px] text-muted-foreground w-[28px] shrink-0">{r.exp}</span>
-              <span className="text-[10px] w-[34px] shrink-0">{r.strike}</span>
-              <span className={`text-[10px] font-bold w-[16px] text-center shrink-0 ${r.type === 'C' ? 'text-emerald-500' : 'text-red-500'}`}>
-                {r.type}
-              </span>
-              <span className="text-[10px] tabular-nums w-[36px] text-right shrink-0">{fmtSize(r.size)}</span>
-              <span className="text-[10px] tabular-nums font-medium w-[44px] text-right shrink-0">{fmtPremium(r.premium)}</span>
-              <span className="text-[10px] tabular-nums text-muted-foreground w-[32px] text-right shrink-0">{fmtOI(r.oi)}</span>
-              {expanded && <div className="flex-1 min-w-0 ml-1"><SentimentBadge s={r.sentiment} /></div>}
-            </div>
-          ))}
-          {!expanded && data.flow.length > 10 && (
-            <div className="text-[10px] text-muted-foreground pt-1">{data.flow.length - 10} more — expand panel</div>
-          )}
-        </div>
+        <FlowTable rows={data.flow} expanded={expanded} />
       )}
 
       {tab === 'sweeps' && data && (
-        <div className="space-y-0">
-          <div className="flex items-center gap-1 pb-1">
-            <span className={`${hdrCls} w-[38px]`}>Ticker</span>
-            <span className={`${hdrCls} w-[28px]`}>Exp</span>
-            <span className={`${hdrCls} w-[34px]`}>Strike</span>
-            <span className={`${hdrCls} w-[16px] text-center`}>T</span>
-            <span className={`${hdrCls} w-[36px] text-right`}>Size</span>
-            <span className={`${hdrCls} w-[44px] text-right`}>Prem</span>
-            <span className={`${hdrCls} flex-1`}>Aggr</span>
-          </div>
-          {data.sweeps.map((r, i) => (
-            <div key={i} className="flex items-center gap-1 border-t border-border/15 pt-1">
-              <span className="text-[11px] font-bold w-[38px] shrink-0">{r.ticker}</span>
-              <span className="text-[10px] text-muted-foreground w-[28px] shrink-0">{r.exp}</span>
-              <span className="text-[10px] w-[34px] shrink-0">{r.strike}</span>
-              <span className={`text-[10px] font-bold w-[16px] text-center shrink-0 ${r.type === 'C' ? 'text-emerald-500' : 'text-red-500'}`}>
-                {r.type}
-              </span>
-              <span className="text-[10px] tabular-nums w-[36px] text-right shrink-0">{fmtSize(r.size)}</span>
-              <span className="text-[10px] tabular-nums font-medium w-[44px] text-right shrink-0">{fmtPremium(r.premium)}</span>
-              <span className={`text-[10px] font-medium flex-1 ${r.aggressor === 'Buy' ? 'text-emerald-400' : 'text-red-400'}`}>
-                {r.aggressor}
-              </span>
-            </div>
-          ))}
-        </div>
+        <FlowTable rows={data.sweeps} showAggressor expanded={expanded} />
       )}
 
       {tab === 'putcall' && data && (
         <div>
-          <div className="flex items-center gap-3 mb-3 p-2 rounded-sm bg-border/10">
+          <div className="flex items-center gap-3 mb-3 p-2 rounded-sm bg-muted/30">
             <div>
               <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-0.5">Overall P/C Ratio</div>
-              <div className={`text-2xl font-bold tabular-nums ${data.putcall.overall < 0.7 ? 'text-emerald-400' : data.putcall.overall > 1 ? 'text-red-400' : 'text-foreground'}`}>
+              <div className={`text-[20px] font-bold tabular-nums ${data.putcall.overall < 0.7 ? 'text-emerald-400' : data.putcall.overall > 1 ? 'text-red-400' : 'text-foreground'}`}>
                 {data.putcall.overall.toFixed(2)}
               </div>
               <div className="text-[9px] text-muted-foreground mt-0.5">

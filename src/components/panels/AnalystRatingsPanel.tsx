@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabCls } from '@/lib/panel-utils'
 
 interface RatingEntry {
   ticker: string
@@ -44,9 +45,6 @@ export default function AnalystRatingsPanel() {
     },
     interval: 600_000,
   })
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const sorted = data ? [...data].sort((a, b) => b.date.localeCompare(a.date)) : []
   const upgrades = sorted.filter((e) => e.action === 'up' || e.action === 'init')

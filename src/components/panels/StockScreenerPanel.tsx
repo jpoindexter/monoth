@@ -69,14 +69,12 @@ export default function StockScreenerPanel() {
 
   return (
     <PanelWrapper title="Stock Screener" loading={loading && !data} error={error} onRetry={refresh}>
-      {/* Screen selector */}
       <div className="flex flex-wrap gap-0.5 mb-2">
         {SCREENS.map(s => (
           <button key={s.id} className={tabCls(screen === s.id)} onClick={() => setScreen(s.id)}>{s.label}</button>
         ))}
       </div>
 
-      {/* Sort controls */}
       <div className="flex gap-1 mb-1.5">
         <span className="text-[9px] text-muted-foreground self-center">Sort:</span>
         {(['changePercent', 'volume', 'marketCap', 'peRatio'] as const).map(col => (

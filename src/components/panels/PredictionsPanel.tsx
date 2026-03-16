@@ -56,7 +56,7 @@ function TrendingBadge({ volume }: { volume: number }) {
 function getMomentum(yesPct: number): { label: string; cls: string } {
   if (yesPct > 60) return { label: 'Strong Yes', cls: 'text-emerald-500 font-bold' }
   if (yesPct < 40) return { label: 'Strong No', cls: 'text-red-400 font-bold' }
-  return { label: 'Contested', cls: 'text-yellow-400 font-bold' }
+  return { label: 'Contested', cls: 'text-amber-400 font-bold' }
 }
 
 const CATEGORY_TABS: Category[] = ['All', 'Finance', 'Crypto']
@@ -103,7 +103,7 @@ export default function PredictionsPanel() {
 
   const conviction =
     avgSpread > 30 ? { label: 'HIGH', cls: 'text-emerald-500' }
-    : avgSpread > 15 ? { label: 'MODERATE', cls: 'text-yellow-400' }
+    : avgSpread > 15 ? { label: 'MODERATE', cls: 'text-amber-400' }
     : { label: 'LOW', cls: 'text-red-400' }
 
   const STAT_CATEGORIES: Exclude<Category, 'All'>[] = ['Finance', 'Crypto']

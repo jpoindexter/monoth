@@ -4,6 +4,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { Sparkline } from '@/components/charts/Sparkline'
+import { tabCls } from '@/lib/panel-utils'
 
 function fmtCap(num: number): string {
   if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T'
@@ -46,8 +47,6 @@ export default function CryptoPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<'top15' | 'stables' | 'chart' | 'defi' | 'dominance'>('top15')
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([])
-  // Crypto data is already fetched and stored by StatsBar via useCryptoData().
-  // Read from the store directly to avoid a duplicate polling instance.
   const data = useMarketStore((s) => s.crypto)
   const loading = data.length === 0
   const error = null
@@ -104,9 +103,6 @@ export default function CryptoPanel() {
         .catch(() => {})
     }
   }, [tab])
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Crypto" loading={loading} error={error} onRetry={refresh}>
@@ -312,10 +308,10 @@ export default function CryptoPanel() {
 
             <div className="flex items-center gap-1 text-[10px]">
               <span className="text-muted-foreground">BTC dominance</span>
-              <span className={`font-medium ${btcPct > 50 ? 'text-orange-500' : 'text-muted-foreground'}`}>
+              <span className={`font-medium ${btcPct > 50 ? 'text-amber-500' : 'text-muted-foreground'}`}>
                 {btcPct.toFixed(1)}%
               </span>
-              <span className={btcPct > 50 ? 'text-orange-500' : 'text-muted-foreground'}>
+              <span className={btcPct > 50 ? 'text-amber-500' : 'text-muted-foreground'}>
                 {btcPct > 50 ? '▲' : '▼'}
               </span>
             </div>

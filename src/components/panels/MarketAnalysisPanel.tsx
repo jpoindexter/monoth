@@ -4,7 +4,7 @@ import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { useMarketStore } from '@/stores/market-store'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 interface CorrelationEvent {
   event: string
@@ -69,7 +69,6 @@ function deriveSentiment(indices: ReturnType<typeof useMarketStore.getState>['in
   ]
 }
 
-// --- Technicals tab ---
 interface TechState {
   spyPrice: number | null
   dma50: number | null
@@ -83,7 +82,6 @@ function sma(closes: number[], period: number): number | null {
   return slice.reduce((a, b) => a + b, 0) / period
 }
 
-// Static fallback levels — displayed only if candle data is available to provide context
 const SUPPORT_LEVELS = [510, 500, 490]
 const RESISTANCE_LEVELS = [535, 545, 560]
 
@@ -96,7 +94,6 @@ function deriveTechnicalOutlook(spyPrice: number | null, dma50: number | null, d
   return 'neutral'
 }
 
-// --- Static data for Flows tab ---
 interface FlowItem {
   name: string
   flow: number // in billions
@@ -181,9 +178,6 @@ export default function MarketAnalysisPanel() {
     return { cyclicalAvg, defensiveAvg, spread }
   }, [sectorData])
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
   return (
     <PanelWrapper title="Market Analysis" loading={newsLoading && evLoading} error={error} onRetry={refresh}>
       <div className="flex flex-wrap gap-1 mb-2">
@@ -227,7 +221,7 @@ export default function MarketAnalysisPanel() {
             const cls = classifyHeadline(item.title)
             return (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
+                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
                     <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
@@ -306,7 +300,6 @@ export default function MarketAnalysisPanel() {
         }
         return (
           <div className="space-y-3">
-            {/* Moving Averages */}
             <div className="space-y-1.5">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Moving Averages · SPY</span>
               {spyPrice !== null && (
@@ -339,7 +332,6 @@ export default function MarketAnalysisPanel() {
               })}
             </div>
 
-            {/* Levels */}
             {spyPrice !== null && (
               <div className="pt-2 border-t border-border/30 grid grid-cols-2 gap-x-3 gap-y-1">
                 <div>
@@ -367,7 +359,6 @@ export default function MarketAnalysisPanel() {
               </div>
             )}
 
-            {/* Technical Outlook */}
             <div className="flex items-center justify-between pt-2 border-t border-border/30">
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Technical Outlook</span>
               <span className={`text-[13px] font-bold ${SIGNAL_TEXT[outlook]}`}>{outlook.toUpperCase()}</span>
@@ -407,7 +398,6 @@ export default function MarketAnalysisPanel() {
               })}
             </div>
 
-            {/* Risk Appetite */}
             <div className="pt-2 border-t border-border/30 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Risk Appetite</span>

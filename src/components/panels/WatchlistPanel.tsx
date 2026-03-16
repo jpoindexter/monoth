@@ -9,6 +9,7 @@ import { LightweightChart } from '@/components/charts/LightweightChart'
 import { DonutChart, PALETTE } from '@/components/charts/DonutChart'
 import { X } from 'lucide-react'
 import { useAlertStore } from '@/stores/alert-store'
+import { tabCls } from '@/lib/panel-utils'
 
 const SHARES_KEY = 'monoth-portfolio-shares'
 
@@ -58,7 +59,6 @@ export default function WatchlistPanel() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const syncedRef = useRef(false)
 
-  // Load portfolio from Supabase on sign-in (once)
   useEffect(() => {
     if (!authenticated || syncedRef.current) return
     syncedRef.current = true
@@ -109,7 +109,6 @@ export default function WatchlistPanel() {
     }
     setShares(next)
     saveShares(next)
-    // Sync to Supabase when authenticated
     if (authenticated) {
       supabase.auth.getUser().then(async ({ data }) => {
         const userId = data.user?.id
@@ -152,9 +151,6 @@ export default function WatchlistPanel() {
     return sum + (point ? point.change * qty : 0)
   }, 0)
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
   return (
     <PanelWrapper title="Watchlist" loading={loading && watchlist.length > 0} error={error} onRetry={refresh}>
       <div className="mb-2 flex gap-1 items-center">
@@ -196,7 +192,7 @@ export default function WatchlistPanel() {
                 <>
                   <tr
                     key={sym}
-                    className={`border-t border-border/20 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${hasTriggered ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}
+                    className={`border-t border-border/20 cursor-pointer hover:bg-muted/30 ${hasTriggered ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}
                     onClick={() => toggleExpanded(sym)}
                   >
                     <td className="py-0.5 font-medium">

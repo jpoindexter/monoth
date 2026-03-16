@@ -45,8 +45,6 @@ export default function BondNewsPanel() {
   const lqdChg = priceMap['LQD']?.changePercent ?? 0
   const hygChg = priceMap['HYG']?.changePercent ?? 0
 
-  // Spread estimates in basis points derived from relative ETF performance vs AGG
-  // Each 0.1% underperformance vs benchmark ~ 10bp spread widening (rough proxy)
   const igDelta = lqdChg - aggChg
   const hyDelta = hygChg - aggChg
   const igSpread = Math.round(250 + igDelta * -100)
@@ -177,7 +175,7 @@ export default function BondNewsPanel() {
             const cls = classifyHeadline(item.title)
             return (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
+                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors">
                 <div className="flex-1 min-w-0">
                   {cls && (
                     <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"

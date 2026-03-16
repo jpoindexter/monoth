@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 const TARIFFS = [
   { pair: 'US → China', rate: 145, sector: 'Most Goods', status: 'Active', impact: 'Supply chain disruption, consumer prices' },
@@ -83,9 +83,6 @@ export default function TradePolicyPanel() {
   const [tab, setTab] = useState<'tariffs' | 'restrictions' | 'flows' | 'news'>('tariffs')
   const { data: newsData, loading, error, refresh } = useNewsData('regulation')
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
   const tariffRows = expanded ? TARIFFS : TARIFFS.slice(0, 5)
   const newsItems = expanded ? newsData : newsData?.slice(0, 8)
 
@@ -116,7 +113,7 @@ export default function TradePolicyPanel() {
               <div key={t.pair} className="py-1 border-b border-border/20 last:border-0">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-semibold text-foreground w-28 shrink-0">{t.pair}</span>
-                  <span className={`font-bold tabular-nums shrink-0 ${t.rate >= 100 ? 'text-red-500 text-[11px]' : t.rate >= 25 ? 'text-amber-500 text-[10px]' : 'text-yellow-400 text-[10px]'}`}>
+                  <span className={`font-bold tabular-nums shrink-0 ${t.rate >= 100 ? 'text-red-500 text-[11px]' : t.rate >= 25 ? 'text-amber-500 text-[10px]' : 'text-amber-400 text-[10px]'}`}>
                     {t.rate}%
                   </span>
                   <span className="text-[10px] text-muted-foreground shrink-0">{t.sector}</span>
@@ -203,7 +200,7 @@ export default function TradePolicyPanel() {
         <div className="space-y-0">
           {newsItems?.map((item) => (
             <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
+              className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors">
               <div className="flex-1 min-w-0">
                 <span className={`font-medium leading-snug text-foreground ${expanded ? 'text-[13px]' : 'text-[11px] line-clamp-2'}`}>{item.title}</span>
                 {item.source && (

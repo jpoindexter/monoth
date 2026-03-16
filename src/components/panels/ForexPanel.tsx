@@ -4,6 +4,7 @@ import { useForexData } from '@/hooks/use-forex-data'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { useMarketStore } from '@/stores/market-store'
+import { tabCls } from '@/lib/panel-utils'
 
 const MAJOR_CURRENCIES = ['EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD']
 const EM_CURRENCIES = ['CNY', 'INR', 'BRL', 'MXN', 'ZAR', 'TRY', 'KRW', 'THB']
@@ -92,14 +93,12 @@ export default function ForexPanel() {
       const quote = parts[1] ?? ''
       if (!STRENGTH_CURRENCIES.includes(quote)) continue
 
-      // USD/XXX positive = USD stronger
       const usdEntry = sums['USD']
       if (usdEntry) {
         usdEntry.total += rate.changePercent
         usdEntry.count += 1
       }
 
-      // quote currency: strong when pair falls
       const quoteEntry = sums[quote]
       if (quoteEntry) {
         quoteEntry.total += -rate.changePercent
@@ -125,15 +124,11 @@ export default function ForexPanel() {
   const getRateForPair = (base: string, quote: string): number | null => {
     if (base === quote) return 1
     if (!data) return null
-    // both are USD/XXX pairs, cross = (1/USD_base) * USD_quote
     const baseRate = base === 'USD' ? 1 : data.find(r => r.pair === `USD/${base}`)?.rate ?? null
     const quoteRate = quote === 'USD' ? 1 : data.find(r => r.pair === `USD/${quote}`)?.rate ?? null
     if (baseRate === null || quoteRate === null) return null
     return quoteRate / baseRate
   }
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Forex" loading={loading} error={error} onRetry={refresh}>

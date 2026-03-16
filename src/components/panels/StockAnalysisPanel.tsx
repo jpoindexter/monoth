@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 import { LightweightChart } from '@/components/charts/LightweightChart'
+import { tabCls } from '@/lib/panel-utils'
 
 interface Candle {
   time: string
@@ -45,7 +46,7 @@ function getSignal(rsi: number, price: number, ma20: number): Signal {
 function signalColor(signal: Signal): string {
   if (signal === 'STRONG BUY') return 'text-emerald-500'
   if (signal === 'BUY') return 'text-emerald-400'
-  if (signal === 'HOLD') return 'text-yellow-500'
+  if (signal === 'HOLD') return 'text-amber-500'
   if (signal === 'SELL') return 'text-red-400'
   return 'text-red-500'
 }
@@ -53,14 +54,14 @@ function signalColor(signal: Signal): string {
 function signalBg(signal: Signal): string {
   if (signal === 'STRONG BUY') return 'bg-emerald-500/10 border border-emerald-500/30'
   if (signal === 'BUY') return 'bg-emerald-400/10 border border-emerald-400/30'
-  if (signal === 'HOLD') return 'bg-yellow-500/10 border border-yellow-500/30'
+  if (signal === 'HOLD') return 'bg-amber-500/10 border border-amber-500/30'
   if (signal === 'SELL') return 'bg-red-400/10 border border-red-400/30'
   return 'bg-red-500/10 border border-red-500/30'
 }
 
 function rsiColor(rsi: number): string {
   if (rsi < 40) return 'text-emerald-500'
-  if (rsi <= 60) return 'text-yellow-500'
+  if (rsi <= 60) return 'text-amber-500'
   return 'text-red-500'
 }
 
@@ -85,9 +86,6 @@ export default function StockAnalysisPanel() {
     fetcher,
     interval: 300_000,
   })
-
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

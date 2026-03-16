@@ -3,7 +3,7 @@ import { usePolling } from '@/hooks/use-polling'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 function fmtCap(num: number): string {
   if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T'
@@ -14,7 +14,7 @@ function fmtCap(num: number): string {
 
 function pegColor(deviation: number): string {
   if (deviation < 0.001) return 'text-emerald-600'
-  if (deviation < 0.005) return 'text-yellow-500'
+  if (deviation < 0.005) return 'text-amber-500'
   return 'text-red-600'
 }
 
@@ -39,7 +39,6 @@ const DOMINANCE_COLORS: Record<string, string> = {
 
 const KNOWN_ORDER = ['USDT', 'USDC', 'DAI', 'FDUSD', 'USDE']
 
-// Reserve composition data
 interface ReserveSegment {
   type: 'tbills' | 'cash' | 'crypto' | 'rwa' | 'other'
   pct: number
@@ -111,7 +110,7 @@ function reserveQualityScore(entry: ReserveEntry): number {
 
 function qualityLabel(score: number): { label: string; cls: string } {
   if (score >= 80) return { label: 'AAA', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' }
-  if (score >= 50) return { label: 'BBB', cls: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' }
+  if (score >= 50) return { label: 'BBB', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' }
   return { label: 'C', cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' }
 }
 
@@ -178,7 +177,6 @@ function ReservesTab() {
   )
 }
 
-// Yield data
 type RiskLevel = 'LOW' | 'MED' | 'HIGH'
 
 interface YieldEntry {
@@ -199,7 +197,7 @@ const YIELDS: YieldEntry[] = [
 
 const RISK_CLS: Record<RiskLevel, string> = {
   LOW: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
-  MED: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400',
+  MED: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
   HIGH: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
 }
 
@@ -245,7 +243,7 @@ function PegMonitor({ data, expanded }: { data: Stablecoin[]; expanded: boolean 
     avgDev < 0.0005
       ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
       : avgDev < 0.002
-      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
+      ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
       : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
 
   return (
@@ -375,9 +373,6 @@ export default function StablecoinsPanel() {
     }
   }, [loading, data, tab])
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
   return (
     <PanelWrapper title="Stablecoins" loading={loading} error={error} onRetry={refresh}>
       <div className="flex flex-wrap gap-1 mb-2">
@@ -457,7 +452,7 @@ export default function StablecoinsPanel() {
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors"
+                className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   {cls && (

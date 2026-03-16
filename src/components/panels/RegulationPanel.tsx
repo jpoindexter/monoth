@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabCls } from '@/lib/panel-utils'
 
 const CATEGORIES = [
   { key: 'SEC', keywords: ['sec ', 'securities', 'gensler', 'enforcement', 'filing', 'registration'], icon: 'S' },
@@ -228,9 +228,6 @@ export default function RegulationPanel() {
     )
   }, [data, filter])
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
-
   return (
     <PanelWrapper title="Regulation" loading={loading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2 flex-wrap">
@@ -246,7 +243,7 @@ export default function RegulationPanel() {
             <button
               key={cat.key}
               onClick={() => { setFilter(cat.key); setTab('news') }}
-              className="w-full flex items-center gap-2 py-1.5 px-1.5 rounded-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors text-left"
+              className="w-full flex items-center gap-2 py-1.5 px-1.5 rounded-sm hover:bg-muted/30 transition-colors text-left"
             >
               <div className="w-5 h-5 rounded-sm bg-foreground/5 flex items-center justify-center text-[10px] font-bold text-foreground/60">
                 {cat.icon}
@@ -288,7 +285,7 @@ export default function RegulationPanel() {
               const cls = classifyHeadline(item.title)
               return (
                 <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 -mx-1 px-1 rounded-sm transition-colors">
+                  className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors">
                   <div className="flex-1 min-w-0">
                     {cls && (
                       <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm mr-1 align-middle"
