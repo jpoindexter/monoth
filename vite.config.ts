@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3002',
         changeOrigin: true,
         // Don't log stack traces for ECONNREFUSED — API server may still be starting
         configure: (proxy) => {

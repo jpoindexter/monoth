@@ -1,42 +1,22 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import YahooFinance from 'yahoo-finance2'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
 
-const YF_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-  'Accept': '*/*',
-  'Accept-Language': 'en-US,en;q=0.9',
-}
-
-interface YFContract {
-  strike: number
-  lastPrice: number
-  bid: number
-  ask: number
-  volume: number
-  openInterest: number
-  impliedVolatility: number
-  inTheMoney: boolean
-  expiration: number
-  contractSymbol: string
-}
+// Single shared instance — handles crumb/cookie lifecycle internally
+const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
 
 async function fetchOptions(symbol: string, expiry?: string) {
-  let url = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(symbol)}`
-  if (expiry) url += `?date=${expiry}`
-  const r = await fetch(url, { headers: YF_HEADERS })
-  if (!r.ok) throw new Error(`Yahoo Finance error: ${r.status}`)
-  const json = await r.json()
-  const result = json?.optionChain?.result?.[0]
-  if (!result) throw new Error('No options data')
-  const opts = result.options?.[0] ?? {}
+  const queryOpts = expiry ? { date: new Date(Number(expiry) * 1000) } : {}
+  const result = await yf.options(symbol, queryOpts)
+  const chain = result.options?.[0] ?? {}
   return {
-    symbol: result.underlyingSymbol as string,
-    underlyingPrice: result.quote?.regularMarketPrice as number,
-    expirationDates: (result.expirationDates ?? []) as number[],
-    expiry: opts.expirationDate as number | undefined,
-    calls: (opts.calls ?? []) as YFContract[],
-    puts: (opts.puts ?? []) as YFContract[],
+    symbol: result.underlyingSymbol,
+    underlyingPrice: result.quote?.regularMarketPrice,
+    expirationDates: (result.expirationDates ?? []).map((d: Date) => Math.floor(new Date(d).getTime() / 1000)),
+    expiry: chain.expirationDate ? Math.floor(new Date(chain.expirationDate).getTime() / 1000) : undefined,
+    calls: chain.calls ?? [],
+    puts: chain.puts ?? [],
   }
 }
 
@@ -51,6 +31,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300')
     res.json(result.data)
   } catch {
-    res.status(500).json({ error: 'Failed to fetch options' })
+    res.status(500).json({ error: `Failed to fetch options for ${symbol}` })
   }
 }

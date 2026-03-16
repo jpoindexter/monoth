@@ -35,15 +35,17 @@ function findRoutes(dir: string): string[] {
   return files
 }
 
+const routeMap = new Map<string, (req: express.Request, res: express.Response) => void>()
+
 async function loadRoutes() {
   const files = findRoutes(apiDir)
 
   for (const file of files) {
-    const rel = relative(apiDir, file).replace(/\.ts$/, '')
+    const rel = relative(apiDir, file).replace(/\.ts$/, '').replace(/\\/g, '/')
     const route = `/api/${rel}`
     let mod
     try {
-      mod = await import(file)
+      mod = await import(`file://${file}`)
     } catch (e) {
       console.log(`  ${route} (SKIPPED: ${e instanceof Error ? e.message.split('\n')[0] : 'import error'})`)
       continue
@@ -51,12 +53,20 @@ async function loadRoutes() {
     const handler = mod.default
 
     if (typeof handler === 'function') {
-      app.all(route, (req, res) => {
-        handler(req, res)
-      })
+      routeMap.set(route, handler)
       console.log(`  ${route}`)
     }
   }
+
+  // Manual dispatch — bypasses Express 5 path-to-regexp changes
+  app.use((req, res, next) => {
+    const handler = routeMap.get(req.path)
+    if (handler) {
+      handler(req, res)
+    } else {
+      next()
+    }
+  })
 }
 
 async function start() {
@@ -64,10 +74,17 @@ async function start() {
   await loadRoutes()
 
   console.log('')
-  app.listen(3000, () => {
-    console.log('API server running at http://localhost:3000')
+  const server = app.listen(3002, () => {
+    console.log('API server running at http://localhost:3002')
     console.log('Run "npm run dev" in another terminal for the frontend')
   })
+
+  const shutdown = () => {
+    server.close(() => process.exit(0))
+    setTimeout(() => process.exit(0), 1000).unref()
+  }
+  process.on('SIGINT', shutdown)
+  process.on('SIGTERM', shutdown)
 }
 
 start()
