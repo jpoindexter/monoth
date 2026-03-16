@@ -301,7 +301,7 @@ export default function CommoditiesPanel() {
         <div className="flex flex-col">
           {newsData?.map((item) => (
             <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-zinc-50 -mx-1 px-1 rounded-sm transition-colors">
+              className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0 hover:bg-muted/30 -mx-1 px-1 rounded-sm transition-colors">
               <span className={`text-[11px] font-medium leading-snug text-foreground flex-1 ${expanded ? '' : 'line-clamp-2'}`}>{item.title}</span>
               <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">{relTime(item.published)}</span>
             </a>
