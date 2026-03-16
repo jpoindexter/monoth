@@ -20,6 +20,10 @@ export type PanelId =
   | 'shipping-freight'
   | 'options-flow'
   | 'short-interest'
+  | 'yield-curve' | 'credit-spreads' | 'm2-liquidity' | 'congress-trades' | 'fed-watch'
+  | 'pre-market' | 'social-sentiment' | 'dividend-calendar'
+  | 'futures-strip' | 'institutional-holdings' | 'dark-pool'
+  | 'currency-heatmap' | 'tech-analysis'
 
 export type PanelTier = 1 | 2 | 3
 

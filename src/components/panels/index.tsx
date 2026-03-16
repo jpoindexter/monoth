@@ -51,6 +51,19 @@ const panels: Record<string, React.LazyExoticComponent<() => React.JSX.Element>>
   'shipping-freight': lazy(() => import('./ShippingFreightPanel')),
   'options-flow': lazy(() => import('./OptionsFlowPanel')),
   'short-interest': lazy(() => import('./ShortInterestPanel')),
+  'yield-curve': lazy(() => import('./YieldCurvePanel')),
+  'credit-spreads': lazy(() => import('./CreditSpreadsPanel')),
+  'm2-liquidity': lazy(() => import('./M2LiquidityPanel')),
+  'congress-trades': lazy(() => import('./CongressTradesPanel')),
+  'fed-watch': lazy(() => import('./FedWatchPanel')),
+  'pre-market': lazy(() => import('./PreMarketPanel')),
+  'social-sentiment': lazy(() => import('./SocialSentimentPanel')),
+  'dividend-calendar': lazy(() => import('./DividendCalendarPanel')),
+  'futures-strip': lazy(() => import('./FuturesStripPanel')),
+  'institutional-holdings': lazy(() => import('./InstitutionalHoldingsPanel')),
+  'dark-pool': lazy(() => import('./DarkPoolPanel')),
+  'currency-heatmap': lazy(() => import('./CurrencyHeatmapPanel')),
+  'tech-analysis': lazy(() => import('./TechAnalysisPanel')),
 }
 
 interface PanelRendererProps {
