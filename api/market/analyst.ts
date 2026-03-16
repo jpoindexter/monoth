@@ -1,13 +1,29 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import YahooFinance from 'yahoo-finance2'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-import { yfGet } from '../_yf.js'
 
-// Top symbols to pull rating history for
+const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
+
+async function pLimit<T>(tasks: (() => Promise<T>)[], concurrency: number): Promise<T[]> {
+  const results: T[] = []
+  let i = 0
+  async function worker() {
+    while (i < tasks.length) {
+      const idx = i++
+      results[idx] = await tasks[idx]()
+    }
+  }
+  await Promise.all(Array.from({ length: concurrency }, worker))
+  return results
+}
+
 const SYMBOLS = [
   'AAPL', 'MSFT', 'NVDA', 'META', 'GOOGL', 'AMZN', 'TSLA',
-  'JPM', 'V', 'BAC', 'XOM', 'JNJ', 'WMT', 'UNH', 'AMD',
-  'NFLX', 'DIS', 'COIN', 'SHOP', 'PLTR',
+  'JPM', 'V', 'MA', 'BAC', 'GS', 'XOM', 'CVX', 'JNJ', 'WMT',
+  'UNH', 'AMD', 'NFLX', 'DIS', 'COIN', 'SHOP', 'PLTR', 'AVGO',
+  'COST', 'ORCL', 'CSCO', 'ADBE', 'CRM', 'INTC', 'MU', 'QCOM',
+  'PYPL', 'UBER', 'RIVN', 'BABA', 'TSM', 'ARM', 'SNOW', 'PANW',
 ]
 
 interface RatingEntry {
@@ -16,24 +32,17 @@ interface RatingEntry {
   fromGrade: string
   toGrade: string
   action: 'up' | 'down' | 'init' | 'reit'
-  date: string // YYYY-MM-DD
+  date: string
 }
 
 async function fetchHistory(symbol: string): Promise<RatingEntry[]> {
-  const r = await yfGet(`https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=upgradeDowngradeHistory`)
-  if (!r.ok) return []
-  const json = await r.json()
-  const history: Record<string, unknown>[] = json?.quoteSummary?.result?.[0]?.upgradeDowngradeHistory?.history ?? []
+  const result = await yf.quoteSummary(symbol, { modules: ['upgradeDowngradeHistory'] })
+  const history = result.upgradeDowngradeHistory?.history ?? []
+  const cutoff = Date.now() - 90 * 86_400_000
 
   return history
-    .filter((h) => {
-      // Only last 30 days
-      const epochMs = Number(h.epochGradeDate) * 1000
-      return Date.now() - epochMs < 30 * 86_400_000
-    })
+    .filter((h) => h.epochGradeDate && new Date(h.epochGradeDate).getTime() > cutoff)
     .map((h) => {
-      const from = String(h.fromGrade ?? '')
-      const to = String(h.toGrade ?? '')
       const actionStr = String(h.action ?? '').toLowerCase()
       let action: RatingEntry['action'] = 'reit'
       if (actionStr.includes('up')) action = 'up'
@@ -42,10 +51,10 @@ async function fetchHistory(symbol: string): Promise<RatingEntry[]> {
       return {
         ticker: symbol,
         firm: String(h.firm ?? ''),
-        fromGrade: from,
-        toGrade: to,
+        fromGrade: String(h.fromGrade ?? ''),
+        toGrade: String(h.toGrade ?? ''),
         action,
-        date: new Date(Number(h.epochGradeDate) * 1000).toISOString().slice(0, 10),
+        date: new Date(h.epochGradeDate!).toISOString().slice(0, 10),
       }
     })
 }
@@ -53,12 +62,13 @@ async function fetchHistory(symbol: string): Promise<RatingEntry[]> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const { data } = await cached('analyst:ratings', 21_600_000, async () => {
-      const results = await Promise.allSettled(SYMBOLS.map(fetchHistory))
-      const all: RatingEntry[] = []
-      for (const r of results) {
-        if (r.status === 'fulfilled') all.push(...r.value)
-      }
+    const { data } = await cached('analyst:ratings:v2', 21_600_000, async () => {
+      // Concurrency 3 to avoid rate limits — 40 symbols at 3 at a time
+      const batches = await pLimit(
+        SYMBOLS.map(sym => () => fetchHistory(sym).catch(() => [] as RatingEntry[])),
+        3
+      )
+      const all = batches.flat()
       return all.sort((a, b) => b.date.localeCompare(a.date))
     })
     res.setHeader('Cache-Control', 's-maxage=21600, stale-while-revalidate=43200')

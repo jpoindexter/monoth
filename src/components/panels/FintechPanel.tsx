@@ -8,10 +8,10 @@ import { LightweightChart } from '@/components/charts/LightweightChart'
 import { classifyHeadline, THREAT_COLORS, CATEGORY_LABELS } from '@/lib/news-classifier'
 import { relTime, tabCls } from '@/lib/panel-utils'
 
-const FINTECH_SYMBOLS = ['ARKF', 'FINX', 'AFRM', 'SQ', 'PYPL', 'COIN']
+const FINTECH_SYMBOLS = ['ARKF', 'FINX', 'AFRM', 'XYZ', 'PYPL', 'COIN']
 const FINTECH_NAMES: Record<string, string> = {
   ARKF: 'ARK Fintech', FINX: 'Global Fintech', AFRM: 'Affirm Holdings',
-  SQ: 'Block Inc', PYPL: 'PayPal', COIN: 'Coinbase',
+  XYZ: 'Block Inc', PYPL: 'PayPal', COIN: 'Coinbase',
 }
 
 const PAYMENT_SYMBOLS = ['V', 'MA', 'PYPL', 'SQ', 'ADYEN.AS']

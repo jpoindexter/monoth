@@ -1,11 +1,29 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import YahooFinance from 'yahoo-finance2'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-import { yfGet, YF_HEADERS } from '../_yf.js'
 
-const FALLBACK_SYMBOLS = [
-  'AAPL', 'MSFT', 'NVDA', 'META', 'GOOGL', 'AMZN', 'TSLA', 'JPM', 'V', 'BRK-B',
+const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
+
+async function pLimit<T>(tasks: (() => Promise<T>)[], concurrency: number): Promise<T[]> {
+  const results: T[] = []
+  let i = 0
+  async function worker() {
+    while (i < tasks.length) {
+      const idx = i++
+      results[idx] = await tasks[idx]()
+    }
+  }
+  await Promise.all(Array.from({ length: concurrency }, worker))
+  return results
+}
+
+const SYMBOLS = [
+  'AAPL', 'MSFT', 'NVDA', 'META', 'GOOGL', 'AMZN', 'TSLA', 'JPM', 'V', 'MA',
   'JNJ', 'WMT', 'BAC', 'XOM', 'UNH', 'GS', 'NFLX', 'COST', 'AVGO', 'AMD',
+  'ORCL', 'CSCO', 'ADBE', 'CRM', 'INTC', 'MU', 'QCOM', 'PYPL', 'UBER', 'DIS',
+  'KO', 'PEP', 'MCD', 'SBUX', 'NKE', 'HD', 'LOW', 'TGT', 'AMGN', 'LLY',
+  'PFE', 'ABBV', 'TMO', 'DHR', 'COIN', 'PLTR', 'SNOW', 'PANW', 'ARM', 'TSM',
 ]
 
 interface EarningsEntry {
@@ -18,68 +36,38 @@ interface EarningsEntry {
   hour: string
 }
 
-function earningsHour(ts: number | undefined, tsEnd: number | undefined): string {
-  if (!ts) return 'dmh'
-  const h = new Date(ts * 1000).getUTCHours()
-  // YF uses start/end timestamps; start < 14 UTC (pre-market) = bmo, end > 20 UTC = amc
+function earningsHour(dates: Date[]): string {
+  if (!dates.length) return 'dmh'
+  const h = dates[0].getUTCHours()
   if (h < 14) return 'bmo'
-  if (tsEnd && new Date(tsEnd * 1000).getUTCHours() >= 20) return 'amc'
+  if (dates[1] && dates[1].getUTCHours() >= 20) return 'amc'
   return 'dmh'
 }
 
-async function fetchScreener(): Promise<EarningsEntry[]> {
-  const r = await yfGet(
-    'https://query2.finance.yahoo.com/v1/finance/screener/predefined/saved?formatted=false&scrIds=upcoming_earnings&start=0&count=50'
-  )
-  if (!r.ok) throw new Error(`Yahoo screener error: ${r.status}`)
-  const json = await r.json()
-  const rows: Record<string, unknown>[] = json?.finance?.result?.[0]?.quotes ?? []
-  if (!rows.length) throw new Error('empty screener')
-  return rows.map((q) => {
-    const tsStart = q.earningsTimestampStart != null ? Number(q.earningsTimestampStart) : undefined
-    const tsEnd = q.earningsTimestampEnd != null ? Number(q.earningsTimestampEnd) : undefined
+async function fetchOne(sym: string): Promise<EarningsEntry | null> {
+  try {
+    const result = await yf.quoteSummary(sym, { modules: ['calendarEvents'] })
+    const cal = result.calendarEvents
+    if (!cal?.earnings?.earningsDate?.length) return null
+    const dates = cal.earnings.earningsDate as Date[]
     return {
-      symbol: String(q.symbol ?? ''),
-      reportDate: String(tsStart
-        ? new Date(tsStart * 1000).toISOString().slice(0, 10)
-        : q.reportDate ?? ''),
-      epsEstimate: q.epsForward != null ? Number(q.epsForward) : null,
+      symbol: sym,
+      reportDate: dates[0].toISOString().slice(0, 10),
+      epsEstimate: null,
       epsActual: null,
       revenueEstimate: null,
       revenueActual: null,
-      hour: earningsHour(tsStart, tsEnd),
+      hour: earningsHour(dates),
     }
-  })
+  } catch {
+    return null
+  }
 }
 
 async function fetchPerSymbol(): Promise<EarningsEntry[]> {
-  const results = await Promise.allSettled(
-    FALLBACK_SYMBOLS.map(async (sym) => {
-      const r = await yfGet(
-        `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=calendarEvents`
-      )
-      if (!r.ok) return null
-      const json = await r.json()
-      const cal = json?.quoteSummary?.result?.[0]?.calendarEvents
-      if (!cal) return null
-      const dates: number[] = cal.earnings?.earningsDate ?? []
-      if (!dates.length) return null
-      const ts = dates[0]
-      const reportDate = new Date(ts * 1000).toISOString().slice(0, 10)
-      return {
-        symbol: sym,
-        reportDate,
-        epsEstimate: cal.earnings?.epsEstimate?.raw ?? null,
-        epsActual: null,
-        revenueEstimate: cal.earnings?.revenueEstimate?.raw ?? null,
-        revenueActual: null,
-        hour: earningsHour(ts, dates[1]),
-      } as EarningsEntry
-    })
-  )
-  return results
-    .filter((r): r is PromiseFulfilledResult<EarningsEntry | null> => r.status === 'fulfilled' && r.value !== null)
-    .map((r) => r.value!)
+  // Concurrency 3 to avoid rate limits
+  const results = await pLimit(SYMBOLS.map(sym => () => fetchOne(sym)), 3)
+  return results.filter((r): r is EarningsEntry => r !== null)
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -89,18 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const to = req.query.to as string | undefined
 
   try {
-    const { data, stale } = await cached('market:earnings', 600_000, async () => {
-      try {
-        const entries = await fetchScreener()
-        return entries.slice(0, 50)
-      } catch {
-        try {
-          return await fetchPerSymbol()
-        } catch {
-          return []
-        }
-      }
-    })
+    const { data, stale } = await cached('market:earnings:v2', 600_000, fetchPerSymbol)
 
     let result = data as EarningsEntry[]
     if (from) result = result.filter((e) => e.reportDate >= from)

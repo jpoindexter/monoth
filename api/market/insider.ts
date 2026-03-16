@@ -19,7 +19,7 @@ interface InsiderFiling {
   url: string
 }
 
-// CIK → ticker mapping (zero-padded 10-digit CIK) — keep small to avoid EDGAR rate limits
+// CIK → ticker mapping (zero-padded 10-digit CIK)
 const CIK_TO_TICKER: Record<string, string> = {
   '0000320193': 'AAPL',
   '0000789019': 'MSFT',
@@ -31,6 +31,16 @@ const CIK_TO_TICKER: Record<string, string> = {
   '0000019617': 'JPM',
   '0001403161': 'V',
   '0000070858': 'BAC',
+  '0000886982': 'GS',
+  '0000034088': 'XOM',
+  '0000023217': 'CVX',
+  '0000200406': 'JNJ',
+  '0000104169': 'WMT',
+  '0000354950': 'HD',
+  '0000078814': 'PFE',
+  '0000310158': 'COST',
+  '0001065280': 'NFLX',
+  '0000051143': 'IBM',
 }
 
 async function pLimit<T>(tasks: (() => Promise<T>)[], concurrency: number): Promise<T[]> {
@@ -164,7 +174,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const entries = Object.entries(CIK_TO_TICKER)
       const settled = await pLimit(
         entries.map(([cik, ticker]) => () => fetchCompanyForm4s(cik, ticker).catch(() => [] as InsiderFiling[])),
-        3
+        5
       )
       const all: InsiderFiling[] = []
       for (const filings of settled) {

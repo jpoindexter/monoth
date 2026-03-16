@@ -51,8 +51,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           })
         }
       } catch {}
-      // Fallback: direct Yahoo Finance
-      return Promise.all(symbols.map(s => fetchYFQuote(s)))
+      // Fallback: direct Yahoo Finance (allSettled so one bad symbol doesn't kill the batch)
+      const settled = await Promise.allSettled(symbols.map(fetchYFQuote))
+      return settled.flatMap(r => r.status === 'fulfilled' ? [r.value] : [])
     })
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=180')
     res.json(quotes.data)
