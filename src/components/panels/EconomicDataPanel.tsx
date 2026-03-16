@@ -3,7 +3,9 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { useMacroData } from '@/hooks/use-macro-data'
 import { usePolling } from '@/hooks/use-polling'
 import { tabCls } from '@/lib/panel-utils'
-import type { FredSeries } from '@/services/api/macro'
+import { EconomicDataIndicators } from '@/components/panels/EconomicDataIndicators'
+import { EconomicDataCalendar } from '@/components/panels/EconomicDataCalendar'
+import { EconomicDataTrends } from '@/components/panels/EconomicDataTrends'
 
 interface CalendarEvent {
   country: string
@@ -15,240 +17,8 @@ interface CalendarEvent {
   time: string
 }
 
-interface DayGroup {
-  day: string
-  events: { time: string; name: string; impact: string; country: string }[]
-}
-
-
-const STATIC_EVENTS: DayGroup[] = [
-  {
-    day: 'Today',
-    events: [
-      { time: '8:30 AM', name: 'Initial Jobless Claims', impact: 'medium', country: 'US' },
-      { time: '10:00 AM', name: 'Existing Home Sales', impact: 'medium', country: 'US' },
-    ],
-  },
-  {
-    day: 'Tomorrow',
-    events: [
-      { time: '8:30 AM', name: 'GDP (Q1 Revision)', impact: 'high', country: 'US' },
-      { time: '10:00 AM', name: 'Consumer Sentiment', impact: 'medium', country: 'US' },
-    ],
-  },
-  {
-    day: 'Monday',
-    events: [
-      { time: '9:45 AM', name: 'PMI Manufacturing', impact: 'high', country: 'US' },
-      { time: '2:00 AM', name: 'PMI Manufacturing', impact: 'high', country: 'EU' },
-    ],
-  },
-]
-
-
-function groupByDay(events: CalendarEvent[]): DayGroup[] {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const labelFor = (dateStr: string): string => {
-    if (!dateStr) return 'Upcoming'
-    const d = new Date(dateStr)
-    d.setHours(0, 0, 0, 0)
-    const diff = Math.round((d.getTime() - today.getTime()) / 86_400_000)
-    if (diff === 0) return 'Today'
-    if (diff === 1) return 'Tomorrow'
-    if (diff < 0) return 'Past'
-    return d.toLocaleDateString('en-US', { weekday: 'long' })
-  }
-
-  const map = new Map<string, DayGroup>()
-  for (const evt of events) {
-    const label = labelFor(evt.time?.split('T')[0] ?? '')
-    if (!map.has(label)) map.set(label, { day: label, events: [] })
-    map.get(label)!.events.push({
-      time: evt.time ? new Date(evt.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '--',
-      name: evt.event,
-      impact: evt.impact ?? 'low',
-      country: evt.country,
-    })
-  }
-  return Array.from(map.values())
-}
-
-const impactDot = (impact: string) => {
-  if (impact === 'high') return 'bg-red-500'
-  if (impact === 'medium') return 'bg-amber-400'
-  return 'bg-muted-foreground/40'
-}
-
-const trendIcon = (value: number, previous: number) => {
-  if (value > previous) return <span className="text-emerald-500 text-[10px] font-bold ml-0.5">↑</span>
-  if (value < previous) return <span className="text-red-500 text-[10px] font-bold ml-0.5">↓</span>
-  return <span className="text-muted-foreground text-[10px] ml-0.5">—</span>
-}
-
-// --- Trends helpers ---
-
-function computeHealthScore(data: FredSeries[]): { score: number; label: 'EXPANSION' | 'SLOWDOWN' | 'CONTRACTION' } {
-  let score = 50 // baseline
-
-  // GDP growth: GDPC1 or A191RL1Q225SBEA or any series with GDP in name
-  const gdp = data.find((s) =>
-    s.seriesId === 'A191RL1Q225SBEA' ||
-    s.seriesId === 'GDPC1' ||
-    s.name.toLowerCase().includes('gdp')
-  )
-  if (gdp) {
-    if (gdp.value > 3) score += 20
-    else if (gdp.value > 1.5) score += 12
-    else if (gdp.value > 0) score += 5
-    else score -= 10
-  }
-
-  // Unemployment: UNRATE — lower is better
-  const unrate = data.find((s) =>
-    s.seriesId === 'UNRATE' ||
-    s.name.toLowerCase().includes('unemployment')
-  )
-  if (unrate) {
-    if (unrate.value < 4) score += 20
-    else if (unrate.value < 5) score += 10
-    else if (unrate.value < 6) score += 2
-    else score -= 10
-  }
-
-  // Inflation: CPIAUCSL or CPILFESL — near 2% is good
-  const cpi = data.find((s) =>
-    s.seriesId === 'CPIAUCSL' ||
-    s.seriesId === 'CPILFESL' ||
-    s.name.toLowerCase().includes('cpi') ||
-    s.name.toLowerCase().includes('inflation')
-  )
-  if (cpi) {
-    const dist = Math.abs(cpi.value - 2)
-    if (dist < 0.5) score += 20
-    else if (dist < 1) score += 10
-    else if (dist < 2) score += 2
-    else score -= 8
-  }
-
-  const clamped = Math.max(0, Math.min(100, score))
-  const label =
-    clamped >= 65 ? 'EXPANSION' :
-    clamped >= 40 ? 'SLOWDOWN' :
-    'CONTRACTION'
-
-  return { score: clamped, label }
-}
-
-function rangePosition(value: number, min: number, max: number): number {
-  if (max === min) return 50
-  return Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100))
-}
-
-// Rough historical ranges for common FRED series
-const KNOWN_RANGES: Record<string, { min: number; max: number; avgLabel: string }> = {
-  UNRATE:           { min: 3.4, max: 14.7, avgLabel: 'avg ~5%' },
-  CPIAUCSL:         { min: -0.5, max: 9.1,  avgLabel: 'avg ~2%' },
-  CPILFESL:         { min: 0.5, max: 6.6,   avgLabel: 'avg ~2%' },
-  A191RL1Q225SBEA:  { min: -32, max: 7.4,   avgLabel: 'avg ~2.5%' },
-  GDPC1:            { min: 14000, max: 23000, avgLabel: 'growth trend' },
-  DGS10:            { min: 0.5, max: 5.0,   avgLabel: 'avg ~3%' },
-  DGS2:             { min: 0.1, max: 5.3,   avgLabel: 'avg ~2.5%' },
-  FEDFUNDS:         { min: 0, max: 5.5,     avgLabel: 'avg ~2%' },
-  PAYEMS:           { min: 128000, max: 160000, avgLabel: 'growth trend' },
-}
-
-function getRange(s: FredSeries): { min: number; max: number; avg: number } {
-  const known = KNOWN_RANGES[s.seriesId]
-  if (known) return { min: known.min, max: known.max, avg: (known.min + known.max) / 2 }
-  // Fallback: infer from value and previous
-  const lo = Math.min(s.value, s.previous) * 0.85
-  const hi = Math.max(s.value, s.previous) * 1.15
-  return { min: lo, max: hi, avg: (lo + hi) / 2 }
-}
-
-function aboveAvgLabel(value: number, avg: number, seriesId: string): { text: string; cls: string } {
-  // For unemployment, lower is better
-  const invertedSeries = ['UNRATE']
-  const isInverted = invertedSeries.includes(seriesId)
-
-  if (value > avg) {
-    return isInverted
-      ? { text: 'Above Avg', cls: 'text-red-500' }
-      : { text: 'Above Avg', cls: 'text-emerald-500' }
-  } else if (value < avg) {
-    return isInverted
-      ? { text: 'Below Avg', cls: 'text-emerald-500' }
-      : { text: 'Below Avg', cls: 'text-red-500' }
-  }
-  return { text: 'At Avg', cls: 'text-muted-foreground' }
-}
-
-function TrendsTab({ data, expanded }: { data: FredSeries[]; expanded: boolean }) {
-  const { score, label } = computeHealthScore(data)
-
-  const scoreColor =
-    label === 'EXPANSION' ? 'text-emerald-500' :
-    label === 'SLOWDOWN' ? 'text-amber-400' :
-    'text-red-500'
-
-  const barColor =
-    label === 'EXPANSION' ? 'bg-emerald-500' :
-    label === 'SLOWDOWN' ? 'bg-amber-400' :
-    'bg-red-500'
-
-  return (
-    <div className="space-y-3">
-      <div className="rounded-md border border-border/30 bg-muted/20 px-3 py-2">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Economic Health</span>
-          <span className={`text-[10px] font-bold uppercase tracking-wider ${scoreColor}`}>{label}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-1.5 rounded-full bg-border/40 overflow-hidden">
-            <div className={`h-full rounded-full ${barColor}`} style={{ width: `${score}%` }} />
-          </div>
-          <span className={`text-[11px] font-bold tabular-nums ${scoreColor}`}>{score}</span>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        {data.map((s) => {
-          const range = getRange(s)
-          const pos = rangePosition(s.value, range.min, range.max)
-          const aa = aboveAvgLabel(s.value, range.avg, s.seriesId)
-          return (
-            <div key={s.seriesId}>
-              <div className="flex items-center justify-between mb-0.5">
-                <span className={`font-medium text-foreground ${expanded ? 'text-[12px]' : 'text-[11px] truncate max-w-[120px]'}`}>{s.name}</span>
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-[10px] font-medium ${aa.cls}`}>{aa.text}</span>
-                  <span className={`tabular-nums text-foreground ${expanded ? 'text-[13px] font-bold' : 'text-[11px]'}`}>{s.value.toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="relative h-1 rounded-full bg-border/40 overflow-visible">
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-foreground border border-background"
-                  style={{ left: `calc(${pos}% - 3px)` }}
-                />
-                <div className="absolute left-1/2 top-0 w-px h-full bg-border/60" />
-              </div>
-              <div className="flex justify-between mt-0.5">
-                <span className="text-[9px] text-muted-foreground/60 tabular-nums">{range.min.toFixed(1)}</span>
-                <span className="text-[9px] text-muted-foreground/60 tabular-nums">{range.max.toFixed(1)}</span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-
 export default function EconomicDataPanel() {
-  const expanded = useIsExpanded()
+  useIsExpanded()
   const [tab, setTab] = useState<'indicators' | 'calendar' | 'trends'>('indicators')
   const { data, loading, error, refresh } = useMacroData()
 
@@ -268,9 +38,6 @@ export default function EconomicDataPanel() {
     }
   }, [loading, data, tab])
 
-  const calEvents: DayGroup[] =
-    calData && calData.length > 0 ? groupByDay(calData) : STATIC_EVENTS
-
   return (
     <PanelWrapper title="Economic Data" loading={loading} error={error} onRetry={refresh}>
       <div className="flex gap-1 mb-2 flex-wrap">
@@ -279,83 +46,17 @@ export default function EconomicDataPanel() {
         <button className={tabCls(tab === 'trends')} onClick={() => setTab('trends')}>Trends</button>
       </div>
 
-      {tab === 'indicators' && !loading && data != null && !data.length && (
-        <div className="py-4 text-center text-[10px] text-muted-foreground">
-          No data available. Refreshes automatically.
-        </div>
+      {tab === 'indicators' && !loading && data != null && (
+        <EconomicDataIndicators data={data} />
       )}
 
-      {tab === 'indicators' && data && !!data.length && (
-        <table className="w-full text-[11px]">
-          <thead>
-            <tr className="text-muted-foreground">
-              <th className="text-left font-medium pb-1.5">Indicator</th>
-              <th className="text-right font-medium pb-1.5">Latest</th>
-              <th className="text-right font-medium pb-1.5">Prev</th>
-              <th className="text-right font-medium pb-1.5">Chg</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.map((series) => {
-              const diff = series.value - series.previous
-              const isPositive = diff >= 0
-              return (
-                <tr key={series.seriesId} className="border-t border-border/20">
-                  <td className={`py-1 font-medium flex items-center ${expanded ? 'text-[12px]' : ''}`}>
-                    {series.name}
-                    {trendIcon(series.value, series.previous)}
-                  </td>
-                  <td className={`text-right tabular-nums ${expanded ? 'text-[13px] font-bold' : ''}`}>{series.value.toFixed(2)}</td>
-                  <td className="text-right tabular-nums text-muted-foreground">{series.previous.toFixed(2)}</td>
-                  <td className={`text-right tabular-nums font-medium ${isPositive ? 'text-emerald-600' : 'text-red-500'} ${expanded ? 'text-[12px]' : ''}`}>
-                    {isPositive ? '+' : ''}{diff.toFixed(2)}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      {tab === 'calendar' && (
+        <EconomicDataCalendar calData={calData ?? null} loading={calLoading} />
       )}
 
-      {tab === 'calendar' && calLoading && (
-        <div className="py-4 text-center text-muted-foreground text-[10px]">Loading...</div>
+      {tab === 'trends' && !loading && data != null && (
+        <EconomicDataTrends data={data} />
       )}
-
-      {tab === 'calendar' && !calLoading && (
-        <div className="space-y-3">
-          {calEvents.map((group) => (
-            <div key={group.day}>
-              <div className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">
-                {group.day}
-              </div>
-              <div className="space-y-0.5">
-                {group.events.map((evt, i) => (
-                  <div key={i} className="flex items-center gap-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${impactDot(evt.impact)}`} />
-                    <span className="text-[11px] text-muted-foreground tabular-nums w-16 shrink-0">{evt.time}</span>
-                    <span className={`text-[11px] text-foreground flex-1 ${expanded ? '' : 'truncate'}`}>{evt.name}</span>
-                    <span className="text-[9px] font-bold uppercase px-1 rounded-sm bg-muted text-muted-foreground shrink-0">
-                      {evt.country}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {tab === 'trends' && !loading && data && !!data.length && (
-        <TrendsTab data={data} expanded={expanded} />
-      )}
-
-      {tab === 'trends' && !loading && data != null && !data.length && (
-        <div className="py-4 text-center text-[10px] text-muted-foreground">
-          No data available for trends.
-        </div>
-      )}
-
-
     </PanelWrapper>
   )
 }
