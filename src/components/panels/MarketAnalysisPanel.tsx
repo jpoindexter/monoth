@@ -150,9 +150,9 @@ export default function MarketAnalysisPanel() {
       .then((candles: { close: number }[]) => {
         if (!Array.isArray(candles) || !candles.length) return
         const closes = candles.map((c) => c.close)
-        const spyPrice = closes[closes.length - 1]
-        const dma50 = sma(closes, 50)
-        const dma200 = sma(closes, 200)
+        const spyPrice = closes[closes.length - 1] ?? null
+        const dma50 = sma(closes, 50) ?? null
+        const dma200 = sma(closes, 200) ?? null
         setTech({ spyPrice, dma50, dma200, loading: false })
       })
       .catch(() => setTech((s) => ({ ...s, loading: false })))
