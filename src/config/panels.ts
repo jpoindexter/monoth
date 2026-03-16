@@ -43,4 +43,9 @@ export const PANELS: PanelConfig[] = [
   { id: 'fundamentals', name: 'Fundamentals', tier: 1, enabled: true, defaultWidth: 4, defaultHeight: 3 },
   { id: 'stock-screener', name: 'Stock Screener', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
   { id: 'options-chain', name: 'Options Chain', tier: 1, enabled: true, defaultWidth: 6, defaultHeight: 4 },
+  { id: 'crypto-markets', name: 'Crypto Markets', tier: 2, enabled: true, defaultWidth: 2, defaultHeight: 3 },
+  { id: 'commodities-spot', name: 'Spot Prices', tier: 2, enabled: true, defaultWidth: 2, defaultHeight: 3 },
+  { id: 'shipping-freight', name: 'Shipping & Freight', tier: 2, enabled: true, defaultWidth: 2, defaultHeight: 3 },
+  { id: 'options-flow', name: 'Options Flow', tier: 2, enabled: true, defaultWidth: 2, defaultHeight: 3 },
+  { id: 'short-interest', name: 'Short Interest', tier: 2, enabled: true, defaultWidth: 2, defaultHeight: 3 },
 ]

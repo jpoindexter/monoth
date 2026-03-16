@@ -46,6 +46,11 @@ const panels: Record<string, React.LazyExoticComponent<() => React.JSX.Element>>
   'fundamentals': lazy(() => import('./FundamentalsPanel')),
   'stock-screener': lazy(() => import('./StockScreenerPanel')),
   'options-chain': lazy(() => import('./OptionsChainPanel')),
+  'crypto-markets': lazy(() => import('./CryptoMarketsPanel')),
+  'commodities-spot': lazy(() => import('./CommoditiesSpotPanel')),
+  'shipping-freight': lazy(() => import('./ShippingFreightPanel')),
+  'options-flow': lazy(() => import('./OptionsFlowPanel')),
+  'short-interest': lazy(() => import('./ShortInterestPanel')),
 }
 
 interface PanelRendererProps {
