@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
 
@@ -17,7 +17,6 @@ const LIVE_CHANNELS = [
   { id: 'abc-news', name: 'ABC News', channelId: 'UCBi2mrWuNuyYy4gbM6fU18Q', color: 'border-indigo-400', desc: 'US breaking news', handle: 'ABCNews' },
   { id: 'reuters', name: 'Reuters', channelId: 'UChqUTb7kYRX8-EiaN3XFrSQ', color: 'border-orange-400', desc: 'Wire news & markets', handle: 'Reuters' },
   { id: 'ntd', name: 'NTD', channelId: 'UCjz-4y6ts-VF2KSQX-jsnVg', color: 'border-green-400', desc: 'Independent global news', handle: 'NTDNews' },
-  { id: 'newsmax', name: 'Newsmax', channelId: 'UCaDCI0bxPZ_ZHdtx9LXOxRw', color: 'border-red-400', desc: 'Conservative news', handle: 'Newsmax' },
   { id: 'oann', name: 'OAN', channelId: 'UCNbIDJNNgaRrXOD7VllIMRQ', color: 'border-blue-300', desc: 'One America News Network', handle: 'OANN' },
   { id: 'cnbc-intl', name: 'CNBC Intl', channelId: 'UCo7a6riBFJ3tkeHjvkXVOGojBQ', color: 'border-yellow-300', desc: 'International markets', handle: 'CNBCi' },
 ]
@@ -65,8 +64,8 @@ function timeAgo(published: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-function LivePlayer({ channelId, handle, muted, playing }: { channelId: string; handle: string; muted: boolean; playing: boolean }) {
-  const iframeRef = useState<HTMLIFrameElement | null>(null)
+function LivePlayer({ channelId, handle, volume, playing }: { channelId: string; handle: string; volume: number; playing: boolean }) {
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
 
   const liveFetcher = useCallback(
     () => fetch(`/api/market/youtube-live?handle=${handle}`)
@@ -84,6 +83,17 @@ function LivePlayer({ channelId, handle, muted, playing }: { channelId: string; 
   const videoId = liveData?.videoId ?? rssData?.videos?.find(v => !v.url.includes('/shorts/'))?.id ?? null
   const isLive = !!liveData?.videoId
 
+  useEffect(() => {
+    const iframe = iframeRef.current
+    if (!iframe?.contentWindow) return
+    iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [volume] }), '*')
+    if (volume === 0) {
+      iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'mute', args: [] }), '*')
+    } else {
+      iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unMute', args: [] }), '*')
+    }
+  }, [volume])
+
   if (loading && !videoId) {
     return <div className="w-full h-full bg-muted/20 rounded-sm animate-pulse" />
   }
@@ -97,14 +107,14 @@ function LivePlayer({ channelId, handle, muted, playing }: { channelId: string; 
     )
   }
 
-  const src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muted ? 1 : 0}&controls=0&modestbranding=1&rel=0`
+  const src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${volume === 0 ? 1 : 0}&controls=0&modestbranding=1&rel=0&enablejsapi=1`
 
   return (
     <div className="relative w-full h-full rounded-sm overflow-hidden">
       {playing ? (
         <iframe
-          ref={el => { iframeRef[1](el) }}
-          key={`${videoId}-${muted}`}
+          ref={iframeRef}
+          key={videoId}
           src={src}
           className="w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -252,7 +262,7 @@ export default function MarketVideoPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<Tab>('live')
   const [activeChannel, setActiveChannel] = useState(LIVE_CHANNELS[0]!.id)
-  const [muted, setMuted] = useState(true)
+  const [volume, setVolume] = useState(0)
   const [playing, setPlaying] = useState(true)
 
   const tabCls = (active: boolean) =>
@@ -270,12 +280,21 @@ export default function MarketVideoPanel() {
         {playing ? '⏸' : '▶'}
       </button>
       <button
-        onClick={() => setMuted(m => !m)}
+        onClick={() => setVolume(v => v === 0 ? 50 : 0)}
         className="text-[10px] text-muted-foreground hover:text-foreground transition-colors px-0.5"
-        title={muted ? 'Unmute' : 'Mute'}
+        title={volume === 0 ? 'Unmute' : 'Mute'}
       >
-        {muted ? '🔇' : '🔊'}
+        {volume === 0 ? '🔇' : volume < 50 ? '🔉' : '🔊'}
       </button>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={volume}
+        onChange={e => setVolume(Number(e.target.value))}
+        className="w-14 h-1 accent-foreground cursor-pointer"
+        title={`Volume: ${volume}%`}
+      />
     </>
   ) : null
 
@@ -313,7 +332,7 @@ export default function MarketVideoPanel() {
               key={activeChannel}
               channelId={activeChannelData.channelId}
               handle={activeChannelData.handle}
-              muted={muted}
+              volume={volume}
               playing={playing}
             />
           </div>

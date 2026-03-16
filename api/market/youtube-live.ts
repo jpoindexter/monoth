@@ -16,7 +16,6 @@ const CHANNEL_IDS: Record<string, string> = {
   ABCNews:         'UCBi2mrWuNuyYy4gbM6fU18Q',
   Reuters:         'UChqUTb7kYRX8-EiaN3XFrSQ',
   NTDNews:         'UCjz-4y6ts-VF2KSQX-jsnVg',
-  Newsmax:         'UCaDCI0bxPZ_ZHdtx9LXOxRw',
   OANN:            'UCNbIDJNNgaRrXOD7VllIMRQ',
   CNBCi:           'UCo7a6riBFJ3tkeHjvkXVOGojBQ',
 }
