@@ -5,7 +5,7 @@ import { useNewsStore } from '@/stores/news-store'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
 import { LightweightChart } from '@/components/charts/LightweightChart'
-import { X, TrendingUp, TrendingDown } from 'lucide-react'
+import { X, TrendingUp, TrendingDown, Star, ExternalLink } from 'lucide-react'
 
 interface SymbolDetailSheetProps {
   ticker: string
@@ -22,8 +22,20 @@ interface CandleData {
 }
 
 type Range = '1W' | '1M' | '3M' | '6M' | '1Y'
+type Tab = 'overview' | 'chart' | 'technical' | 'analyst' | 'fundamentals' | 'news'
 
 const RANGE_DAYS: Record<Range, number> = { '1W': 7, '1M': 30, '3M': 90, '6M': 180, '1Y': 365 }
+
+const TA_OVERALL: Record<string, { label: string; cls: string }> = {
+  strong_buy: { label: 'STRONG BUY', cls: 'text-emerald-400' },
+  buy: { label: 'BUY', cls: 'text-emerald-500' },
+  neutral: { label: 'NEUTRAL', cls: 'text-amber-400' },
+  sell: { label: 'SELL', cls: 'text-red-500' },
+  strong_sell: { label: 'STRONG SELL', cls: 'text-red-400' },
+}
+
+const ACTION_LABELS: Record<string, string> = { up: 'Upgrade', down: 'Downgrade', init: 'Initiated', reit: 'Reiterated' }
+const ACTION_CLS: Record<string, string> = { up: 'text-emerald-400', down: 'text-red-400', init: 'text-amber-400', reit: 'text-muted-foreground' }
 
 function fmt(n: number, digits = 2) {
   return n.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })
@@ -44,6 +56,21 @@ function relTime(ts: number) {
   return `${Math.floor(d / 86400)}d`
 }
 
+function signalBadge(signal: string) {
+  const bullish = ['oversold', 'bullish'].includes(signal)
+  const bearish = ['overbought', 'bearish'].includes(signal)
+  const cls = bullish ? 'bg-emerald-500/10 text-emerald-400' : bearish ? 'bg-red-500/10 text-red-400' : 'bg-amber-500/10 text-amber-400'
+  return <span className={`text-[9px] px-1 py-0.5 rounded-sm font-medium uppercase ${cls}`}>{signal.replace('_', ' ')}</span>
+}
+
+const LS_KEY = 'ta-watchlist'
+function loadWatchlist(): string[] {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) ?? '[]') } catch { return [] }
+}
+function saveWatchlist(list: string[]) {
+  localStorage.setItem(LS_KEY, JSON.stringify(list))
+}
+
 export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSheetProps) {
   const indices = useMarketStore((s) => s.indices)
   const crypto = useMarketStore((s) => s.crypto)
@@ -53,10 +80,19 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
   const [range, setRange] = useState<Range>('3M')
   const [fundamentals, setFundamentals] = useState<Record<string, number | string | null> | null>(null)
   const [fundsLoading, setFundsLoading] = useState(false)
-  const [tab, setTab] = useState<'overview' | 'chart' | 'news' | 'fundamentals'>('overview')
+  const [taData, setTaData] = useState<Record<string, unknown> | null>(null)
+  const [taLoading, setTaLoading] = useState(false)
+  const [analystData, setAnalystData] = useState<unknown[] | null>(null)
+  const [analystLoading, setAnalystLoading] = useState(false)
+  const [tab, setTab] = useState<Tab>('overview')
+  const [watchlisted, setWatchlisted] = useState(false)
 
   const indexMatch = indices.find((i) => i.symbol === ticker)
   const cryptoMatch = crypto.find((c) => c.symbol === ticker)
+
+  useEffect(() => {
+    if (open) setWatchlisted(loadWatchlist().includes(ticker))
+  }, [ticker, open])
 
   const { data: quoteData } = usePolling({
     fetcher: useCallback(() => fetchQuotes([ticker]), [ticker]),
@@ -81,6 +117,26 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
   }, [ticker, open, tab])
 
   useEffect(() => {
+    if (!open || tab !== 'technical') return
+    setTaLoading(true)
+    fetch(`/api/market/tech-analysis?symbol=${ticker}`)
+      .then((r) => r.json())
+      .then((d) => setTaData(d))
+      .catch(() => {})
+      .finally(() => setTaLoading(false))
+  }, [ticker, open, tab])
+
+  useEffect(() => {
+    if (!open || tab !== 'analyst') return
+    setAnalystLoading(true)
+    fetch('/api/market/analyst')
+      .then((r) => r.json())
+      .then((d: unknown[]) => setAnalystData(d.filter((r: any) => r.ticker === ticker)))
+      .catch(() => {})
+      .finally(() => setAnalystLoading(false))
+  }, [ticker, open, tab])
+
+  useEffect(() => {
     if (!open) return
     setCandleLoading(true)
     const days = RANGE_DAYS[range]
@@ -98,18 +154,23 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
   const firstClose = closes[0] ?? null
   const rangeChg = firstClose && price ? ((price - firstClose) / firstClose) * 100 : null
   const avgVol = candles.length ? candles.reduce((s, c) => s + ((c as any).volume ?? 0), 0) / candles.length : 0
-  const highPct = high52 && price ? ((price - low52!) / (high52 - low52!)) * 100 : null
+  const highPct = high52 && low52 && price ? ((price - low52) / (high52 - low52)) * 100 : null
 
-  // Related news
   const relatedNews = allNews
     .filter((n) => n.title.toLowerCase().includes(ticker.toLowerCase().replace('^', '')) || (name.length > 4 && n.title.toLowerCase().includes(name.toLowerCase().split(' ')[0] ?? '')))
     .slice(0, 8)
 
   const tabCls = (active: boolean) =>
     `text-[10px] uppercase tracking-wider px-2 py-1 font-medium transition-colors ${active ? 'text-foreground border-b border-foreground' : 'text-muted-foreground hover:text-foreground'}`
-
   const rangeCls = (r: Range) =>
     `text-[10px] px-1.5 py-0.5 rounded-sm font-medium transition-colors ${range === r ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
+
+  function toggleWatchlist() {
+    const list = loadWatchlist()
+    const next = list.includes(ticker) ? list.filter((s) => s !== ticker) : [...list, ticker].slice(0, 10)
+    saveWatchlist(next)
+    setWatchlisted(next.includes(ticker))
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -125,12 +186,30 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
               <div className="text-[10px] uppercase tracking-[2px] text-muted-foreground mb-0.5">{ticker}</div>
               <div className="text-base font-semibold text-foreground leading-tight">{name}</div>
             </div>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="text-muted-foreground hover:text-foreground p-1 -mr-1 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={toggleWatchlist}
+                title={watchlisted ? 'Remove from watchlist' : 'Add to watchlist'}
+                className={`p-1.5 rounded transition-colors ${watchlisted ? 'text-amber-400 hover:text-amber-300' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Star className="w-3.5 h-3.5" fill={watchlisted ? 'currentColor' : 'none'} />
+              </button>
+              <a
+                href={`https://finance.yahoo.com/quote/${ticker}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Open in Yahoo Finance"
+                className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <button
+                onClick={() => onOpenChange(false)}
+                className="text-muted-foreground hover:text-foreground p-1 -mr-1 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {price !== null ? (
@@ -153,11 +232,14 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-border/20 px-5 gap-4">
-          <button className={tabCls(tab === 'overview')} onClick={() => setTab('overview')}>Overview</button>
-          <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
-          <button className={tabCls(tab === 'fundamentals')} onClick={() => setTab('fundamentals')}>Fundamentals</button>
-          <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News {relatedNews.length > 0 && <span className="ml-1 text-[9px] text-muted-foreground">({relatedNews.length})</span>}</button>
+        <div className="flex border-b border-border/20 px-5 gap-4 overflow-x-auto scrollbar-none">
+          {(['overview', 'chart', 'technical', 'analyst', 'fundamentals', 'news'] as Tab[]).map((t) => (
+            <button key={t} className={tabCls(tab === t)} onClick={() => setTab(t)}>
+              {t === 'news' && relatedNews.length > 0
+                ? `News (${relatedNews.length})`
+                : t.charAt(0).toUpperCase() + t.slice(1)}
+            </button>
+          ))}
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -165,7 +247,6 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
           {/* Overview tab */}
           {tab === 'overview' && (
             <div className="px-5 py-4 space-y-5">
-              {/* Range bar */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Price Range ({range})</span>
@@ -175,8 +256,6 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                     ))}
                   </div>
                 </div>
-
-                {/* Spark chart */}
                 <div className="rounded-sm overflow-hidden border border-border/20">
                   {candleLoading ? (
                     <div className="h-28 flex items-center justify-center">
@@ -195,8 +274,6 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                     <div className="h-28 flex items-center justify-center text-[10px] text-muted-foreground">No chart data</div>
                   )}
                 </div>
-
-                {/* 52W range indicator */}
                 {high52 && low52 && price && highPct !== null && (
                   <div className="mt-2">
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
@@ -212,8 +289,6 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
                   </div>
                 )}
               </div>
-
-              {/* Stats grid */}
               <div className="grid grid-cols-2 gap-px bg-border/20 rounded-sm overflow-hidden border border-border/20">
                 {[
                   { label: `${range} Change`, value: rangeChg !== null ? `${rangeChg >= 0 ? '+' : ''}${rangeChg.toFixed(2)}%` : '—', colored: true, positive: (rangeChg ?? 0) >= 0 },
@@ -265,15 +340,123 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
             </div>
           )}
 
+          {/* Technical tab */}
+          {tab === 'technical' && (
+            <div className="px-5 py-4">
+              {taLoading && <div className="h-20 flex items-center justify-center text-[10px] text-muted-foreground animate-pulse">Loading…</div>}
+              {!taLoading && !taData && <div className="text-[10px] text-muted-foreground text-center py-8">No technical data available</div>}
+              {!taLoading && taData && (() => {
+                const d = taData as any
+                const overall = TA_OVERALL[d.overall] ?? { label: d.overall, cls: 'text-muted-foreground' }
+                return (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] text-muted-foreground mb-1">Overall Signal</div>
+                        <span className={`text-lg font-bold ${overall.cls}`}>{overall.label}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-[10px] ${d.bullishCount > d.bearishCount ? 'text-emerald-400' : 'text-red-400'}`}>{d.bullishCount} Bullish</div>
+                        <div className="text-[10px] text-amber-400">{4 - d.bullishCount - d.bearishCount} Neutral</div>
+                        <div className={`text-[10px] ${d.bearishCount > d.bullishCount ? 'text-red-400' : 'text-muted-foreground'}`}>{d.bearishCount} Bearish</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">RSI (14)</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="relative h-2.5 flex-1 rounded-full overflow-hidden bg-zinc-800 mr-3">
+                          <div className="absolute inset-y-0 left-[30%] right-[30%] bg-amber-500/20" />
+                          <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${d.rsi}%`, background: d.rsi < 30 ? '#34d399' : d.rsi > 70 ? '#f87171' : '#a1a1aa' }} />
+                        </div>
+                        <span className="text-[11px] tabular-nums font-medium shrink-0">{fmt(d.rsi, 1)}</span>
+                      </div>
+                      <div className="flex justify-between text-[9px] text-muted-foreground">
+                        <span>Oversold &lt;30</span><span>{signalBadge(d.rsiSignal)}</span><span>&gt;70 Overbought</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">MACD (12,26,9)</div>
+                      {[['Line', fmt(d.macd.line, 3)], ['Signal', fmt(d.macd.signal, 3)], ['Histogram', (d.macd.histogram >= 0 ? '+' : '') + fmt(d.macd.histogram, 3)]].map(([k, v]) => (
+                        <div key={k} className="flex justify-between py-1 border-t border-border/15 text-[11px]">
+                          <span className="text-muted-foreground">{k}</span>
+                          <span className="tabular-nums">{v}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Moving Averages</div>
+                      {([['SMA 20', d.sma20], ['SMA 50', d.sma50], ['SMA 200', d.sma200]] as [string, number][]).map(([label, val]) => (
+                        <div key={label} className="flex justify-between py-1 border-t border-border/15 text-[11px]">
+                          <span className="text-muted-foreground">{label}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="tabular-nums">{fmt(val, 2)}</span>
+                            <span className={`text-[9px] ${d.price >= val ? 'text-emerald-400' : 'text-red-400'}`}>{d.price >= val ? 'Above' : 'Below'}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Bollinger Bands (20,2)</div>
+                      {([['Upper', d.bb.upper], ['Middle', d.bb.middle], ['Lower', d.bb.lower], ['Price', d.price]] as [string, number][]).map(([label, val]) => (
+                        <div key={label} className="flex justify-between py-1 border-t border-border/15 text-[11px]">
+                          <span className="text-muted-foreground">{label}</span>
+                          <span className="tabular-nums">{fmt(val, 2)}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="text-[9px] text-muted-foreground/50 pt-1 text-center">
+                      <button className="hover:text-muted-foreground transition-colors" onClick={() => { onOpenChange(false) }}>
+                        Open in Tech Analysis panel for more
+                      </button>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          )}
+
+          {/* Analyst tab */}
+          {tab === 'analyst' && (
+            <div className="px-5 py-4">
+              {analystLoading && <div className="h-20 flex items-center justify-center text-[10px] text-muted-foreground animate-pulse">Loading…</div>}
+              {!analystLoading && (!analystData || analystData.length === 0) && (
+                <div className="text-[10px] text-muted-foreground text-center py-8">No analyst ratings in the last 90 days</div>
+              )}
+              {!analystLoading && analystData && analystData.length > 0 && (
+                <div className="space-y-0">
+                  {analystData.map((r: any, i) => (
+                    <div key={i} className="flex items-start gap-2 border-t border-border/15 py-2">
+                      <span className={`text-[9px] font-bold uppercase w-14 shrink-0 mt-0.5 ${ACTION_CLS[r.action] ?? 'text-muted-foreground'}`}>
+                        {ACTION_LABELS[r.action] ?? r.action}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[11px] font-medium truncate">{r.firm}</div>
+                        {(r.fromGrade || r.toGrade) && (
+                          <div className="text-[10px] text-muted-foreground mt-0.5">
+                            {r.fromGrade && <span>{r.fromGrade}</span>}
+                            {r.fromGrade && r.toGrade && <span className="mx-1">→</span>}
+                            {r.toGrade && <span className={ACTION_CLS[r.action] ?? ''}>{r.toGrade}</span>}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{r.date?.slice(5)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Fundamentals tab */}
           {tab === 'fundamentals' && (
             <div className="px-5 py-4">
-              {fundsLoading && (
-                <div className="h-20 flex items-center justify-center text-[10px] text-muted-foreground animate-pulse">Loading…</div>
-              )}
-              {!fundsLoading && !fundamentals && (
-                <div className="text-[10px] text-muted-foreground text-center py-8">No fundamental data available</div>
-              )}
+              {fundsLoading && <div className="h-20 flex items-center justify-center text-[10px] text-muted-foreground animate-pulse">Loading…</div>}
+              {!fundsLoading && !fundamentals && <div className="text-[10px] text-muted-foreground text-center py-8">No fundamental data available</div>}
               {!fundsLoading && fundamentals && (() => {
                 function fmtBig(n: number | null | undefined) {
                   if (n == null) return '—'

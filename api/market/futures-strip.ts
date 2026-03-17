@@ -1,8 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-import { YF_HEADERS } from '../_yf.js'
-
 export interface FuturesStripItem {
   label: string
   symbol: string
@@ -22,13 +20,13 @@ const STRIP = [
   { label: 'Silver', symbol: 'SI=F' },
   { label: '10Y Bond', symbol: 'ZN=F' },
   { label: '30Y Bond', symbol: 'ZB=F' },
-  { label: 'VIX', symbol: 'VX=F' },
+  { label: 'VIX', symbol: '^VIX' },
   { label: 'Bitcoin', symbol: 'BTC=F' },
 ]
 
 async function fetchOne(label: string, symbol: string): Promise<FuturesStripItem> {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`
-  const r = await fetch(url, { headers: YF_HEADERS, signal: AbortSignal.timeout(6_000) })
+  const r = await fetch(url, { signal: AbortSignal.timeout(6_000) })
   if (!r.ok) throw new Error(`YF ${r.status}`)
   const json = await r.json()
   const meta = json.chart?.result?.[0]?.meta
@@ -43,7 +41,7 @@ async function fetchOne(label: string, symbol: string): Promise<FuturesStripItem
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const { data } = await cached<FuturesStripItem[]>('futures-strip:v1', 60_000, async () => {
+    const { data } = await cached<FuturesStripItem[]>('futures-strip:v3', 60_000, async () => {
       const results = await Promise.allSettled(STRIP.map(({ label, symbol }) => fetchOne(label, symbol)))
       return results
         .filter((r): r is PromiseFulfilledResult<FuturesStripItem> => r.status === 'fulfilled')

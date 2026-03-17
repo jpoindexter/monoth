@@ -1,8 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-import { YF_HEADERS } from '../_yf.js'
-
 const SYMBOLS = ['SPY', 'QQQ', 'IWM', 'DIA', 'AAPL', 'MSFT', 'NVDA', 'META', 'GOOGL', 'AMZN', 'TSLA', 'AMD', 'COIN', 'NFLX']
 
 interface PreMarketEntry {
@@ -18,7 +16,7 @@ interface PreMarketEntry {
 
 async function fetchOne(symbol: string): Promise<PreMarketEntry> {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`
-  const res = await fetch(url, { headers: YF_HEADERS, signal: AbortSignal.timeout(8_000) })
+  const res = await fetch(url, { signal: AbortSignal.timeout(8_000) })
   if (!res.ok) throw new Error(`${symbol}: ${res.status}`)
   const json = await res.json()
   const meta = json?.chart?.result?.[0]?.meta ?? {}
@@ -44,7 +42,7 @@ async function fetchAll(): Promise<PreMarketEntry[]> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
-    const { data, stale } = await cached('market:premarket', 60_000, fetchAll)
+    const { data, stale } = await cached('market:premarket:v2', 60_000, fetchAll)
     if (stale) res.setHeader('X-Cache', 'STALE')
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120')
     res.json(data)

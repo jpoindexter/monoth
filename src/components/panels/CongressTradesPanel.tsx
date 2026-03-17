@@ -43,6 +43,7 @@ export default function CongressTradesPanel() {
   const { data, loading, error, refresh } = usePolling<CongressFiling[]>({
     fetcher: async () => {
       const res = await fetch('/api/market/congress')
+      if (res.status === 503) throw new Error('Senate disclosure system temporarily unavailable')
       if (!res.ok) throw new Error('Failed to fetch')
       return res.json()
     },
