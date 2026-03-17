@@ -710,6 +710,83 @@ export function Landing() {
         </div>
       </div>
 
+      {/* ── Pricing ───────────────────────────────────────────────────────── */}
+      <div className="py-24 bg-black border-t border-zinc-900" id="pricing">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="font-mono text-[9px] text-zinc-700 uppercase tracking-widest text-center mb-16">Pricing</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* Free */}
+            <div className="border border-zinc-800 rounded-[3px] bg-zinc-950 p-8 flex flex-col">
+              <div className="mb-6">
+                <p className="font-mono text-[9px] text-zinc-600 uppercase tracking-widest mb-3">Free</p>
+                <div className="flex items-end gap-1.5 mb-1">
+                  <span className="text-4xl font-bold text-white">$0</span>
+                  <span className="font-mono text-[11px] text-zinc-600 mb-1">/ month</span>
+                </div>
+                <p className="font-mono text-[10px] text-zinc-700">Self-host or use the hosted version</p>
+              </div>
+              <div className="space-y-2.5 flex-1 mb-8">
+                {[
+                  '60 live panels',
+                  'All asset classes',
+                  'Preset layouts',
+                  'Price alerts',
+                  'Watchlist',
+                  'No login required',
+                  'MIT licensed',
+                ].map((f) => (
+                  <div key={f} className="flex items-center gap-2.5">
+                    <span className="w-1 h-1 rounded-full bg-zinc-700 shrink-0" />
+                    <span className="text-[13px] text-zinc-500">{f}</span>
+                  </div>
+                ))}
+              </div>
+              <Link to="/dashboard">
+                <button className="w-full h-9 rounded-[3px] border border-zinc-700 text-zinc-400 text-[12px] hover:border-zinc-500 hover:text-zinc-200 transition-colors">
+                  Launch Dashboard →
+                </button>
+              </Link>
+            </div>
+
+            {/* Pro */}
+            <div className="border border-emerald-800/50 rounded-[3px] bg-emerald-950/10 p-8 flex flex-col relative overflow-hidden">
+              <div className="absolute top-4 right-4">
+                <span className="font-mono text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-[2px] bg-emerald-500/10 text-emerald-500 border border-emerald-800/60">
+                  Coming soon
+                </span>
+              </div>
+              <div className="mb-6">
+                <p className="font-mono text-[9px] text-emerald-600 uppercase tracking-widest mb-3">Pro</p>
+                <div className="flex items-end gap-1.5 mb-1">
+                  <span className="text-4xl font-bold text-white">TBD</span>
+                </div>
+                <p className="font-mono text-[10px] text-zinc-700">Everything in Free, plus</p>
+              </div>
+              <div className="space-y-2.5 flex-1 mb-8">
+                {[
+                  'Everything in Free',
+                  'Cloud sync across devices',
+                  'Portfolio tracking',
+                  'Alert history',
+                  'API access',
+                  'Priority support',
+                ].map((f) => (
+                  <div key={f} className="flex items-center gap-2.5">
+                    <span className="w-1 h-1 rounded-full bg-emerald-800/60 shrink-0" />
+                    <span className="text-[13px] text-zinc-500">{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button disabled className="w-full h-9 rounded-[3px] bg-emerald-950/40 border border-emerald-800/40 text-emerald-700 text-[12px] cursor-not-allowed">
+                Notify me
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       {/* ── Final CTA ─────────────────────────────────────────────────────── */}
       <div className="border-t border-zinc-900">
         <div className="max-w-4xl mx-auto px-6 py-36 text-center">
