@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
     const { data, stale } = await cached('stablecoins', 300_000, async () => {
-      // Primary: worldmonitor (CoinGecko pro + CoinPaprika fallback, full stablecoin metadata)
+      // Primary: proxy API
       try {
         const resp = await wmGet<{ stablecoins: WmStablecoin[] }>(
           '/api/market/v1/list-stablecoin-markets',

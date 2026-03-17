@@ -38,7 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (symbols.length > 20) return res.status(400).json({ error: 'Too many symbols (max 20)' })
   try {
     const quotes = await cached(`quote:${symbols.join(',')}`, 60_000, async () => {
-      // Primary: worldmonitor
+      // Primary: proxy API
       try {
         const resp = await wmGet<{ quotes: WmQuote[] }>(
           '/api/market/v1/list-market-quotes',

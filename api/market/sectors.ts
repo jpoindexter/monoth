@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
     const { data, stale } = await cached('sectors', 120_000, async () => {
-      // Primary: worldmonitor (Finnhub + Yahoo, cached 10min server-side)
+      // Primary: proxy API
       try {
         const resp = await wmGet<{ sectors: { symbol: string; name: string; change: number }[] }>(
           '/api/market/v1/get-sector-summary',

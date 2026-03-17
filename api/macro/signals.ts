@@ -191,7 +191,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
     const { data, stale } = await cached('macro-signals', 600_000, async () => {
-      // Primary: worldmonitor macro signals (richer data, server-side cached)
+      // Primary: proxy API
       try {
         const resp = await wmGet<WmMacroResponse>('/api/economic/v1/get-macro-signals')
         if (!resp.unavailable && resp.signals) {

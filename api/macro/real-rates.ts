@@ -61,7 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const seriesIds = Object.keys(SERIES)
       const values: Record<string, number | null> = {}
 
-      // Primary: worldmonitor FRED batch (uses WM's FRED key)
+      // Primary: proxy batch endpoint
       try {
         const resp = await wmPost<{ results: Record<string, { observations: { date: string; value: number }[] }>; fetched: number }>(
           '/api/economic/v1/get-fred-series-batch',

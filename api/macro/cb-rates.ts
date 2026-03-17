@@ -92,7 +92,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
     const { data, stale } = await cached('cb-rates', 21_600_000, async () => {
-      // Primary: worldmonitor BIS policy rates (cached 6h server-side with Redis)
+      // Primary: proxy API
       try {
         const resp = await wmGet<{ rates: WmBisRate[] }>('/api/economic/v1/get-bis-policy-rates')
         if (resp.rates?.length) {

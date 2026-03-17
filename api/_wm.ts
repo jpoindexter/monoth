@@ -1,10 +1,4 @@
-/**
- * Worldmonitor API proxy helper.
- * Calls https://api.worldmonitor.app (or WM_API_URL env override).
- * No API key needed — worldmonitor's public production API.
- */
-
-const WM_BASE = (process.env.WM_API_URL ?? 'https://api.worldmonitor.app').replace(/\/$/, '')
+const WM_BASE = (process.env.WM_API_URL ?? '').replace(/\/$/, '')
 
 export async function wmGet<T>(
   path: string,

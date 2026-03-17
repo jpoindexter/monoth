@@ -3,7 +3,7 @@ import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
 import { wmGet } from '../_wm.js'
 
-// Top crypto IDs matching worldmonitor's crypto.json (CoinGecko IDs)
+// Top crypto IDs (CoinGecko IDs)
 const CRYPTO_IDS = [
   'bitcoin', 'ethereum', 'tether', 'binancecoin', 'ripple', 'solana', 'usd-coin',
   'dogecoin', 'cardano', 'tron', 'avalanche-2', 'chainlink', 'polkadot', 'polygon',
@@ -51,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       } catch {}
 
-      // Fallback: worldmonitor (pro CoinGecko key + CoinPaprika fallback, no rank/marketCap)
+      // Fallback: proxy API
       const resp = await wmGet<{ quotes: WmCryptoQuote[] }>(
         '/api/market/v1/list-crypto-quotes',
         { ids: CRYPTO_IDS },

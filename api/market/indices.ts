@@ -47,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
     const { data, stale } = await cached('indices', 60_000, async () => {
-      // Primary: worldmonitor (Finnhub + Yahoo + relay fallback, all cached server-side)
+      // Primary: proxy API
       try {
         const symbols = INDICES.map(i => i.symbol)
         const resp = await wmGet<{ quotes: WmQuote[] }>(

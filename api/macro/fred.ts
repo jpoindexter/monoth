@@ -94,7 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { data, stale } = await cached(`fred:${seriesIds.join(',')}`, 3_600_000, async () => {
-      // Primary: worldmonitor FRED batch (uses WM's FRED key + Redis cache)
+      // Primary: proxy batch endpoint
       try {
         const resp = await wmPost<{ results: Record<string, WmFredSeries>; fetched: number }>(
           '/api/economic/v1/get-fred-series-batch',

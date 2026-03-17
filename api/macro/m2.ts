@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
 
-const FRED_KEY = 'REDACTED'
+const FRED_KEY = process.env.FRED_API_KEY
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations'
 
 const SERIES = [

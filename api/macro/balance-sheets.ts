@@ -32,7 +32,7 @@ async function fetchBalanceSheets(): Promise<BalanceSheet[]> {
   let walclValue: number | null = null
   let ecbValue: number | null = null
 
-  // Primary: worldmonitor FRED batch
+  // Primary: proxy batch endpoint
   try {
     const resp = await wmPost<{ results: Record<string, { observations: { date: string; value: number }[] }>; fetched: number }>(
       '/api/economic/v1/get-fred-series-batch',

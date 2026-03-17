@@ -47,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   try {
     const data = await cached('futures:all', 120_000, async () => {
-      // Primary: worldmonitor handles futures/commodities with Yahoo + relay
+      // Primary: proxy API
       try {
         const symbols = FUTURES.map(f => f.symbol)
         const resp = await wmGet<{ quotes: WmQuote[] }>(
