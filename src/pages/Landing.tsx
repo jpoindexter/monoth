@@ -303,11 +303,10 @@ export function Landing() {
           </div>
 
           <h1
-            className="text-5xl sm:text-7xl md:text-8xl font-bold leading-[1.02] tracking-tight text-white mb-8"
+            className="text-3xl sm:text-4xl font-semibold leading-snug tracking-tight text-white mb-6"
           >
             Market Intelligence
-            <br />
-            <em className="not-italic text-zinc-400">in one dashboard.</em>
+            <span className="text-zinc-400 font-normal"> — in one dashboard.</span>
           </h1>
 
           <p className="text-lg text-zinc-400 max-w-lg mx-auto mb-3 leading-relaxed font-light">
