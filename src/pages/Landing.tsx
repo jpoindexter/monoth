@@ -760,39 +760,6 @@ export function Landing() {
               </Link>
             </div>
 
-            {/* Pro */}
-            <div className="border border-emerald-800/50 rounded-[3px] bg-emerald-950/10 p-8 flex flex-col relative overflow-hidden">
-              <div className="absolute top-4 right-4">
-                <span className="font-mono text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-[2px] bg-emerald-500/10 text-emerald-500 border border-emerald-800/60">
-                  Coming soon
-                </span>
-              </div>
-              <div className="mb-6">
-                <p className="font-mono text-[9px] text-emerald-600 uppercase tracking-widest mb-3">Pro</p>
-                <div className="flex items-end gap-1.5 mb-1">
-                  <span className="text-4xl font-bold text-white">TBD</span>
-                </div>
-                <p className="font-mono text-[10px] text-zinc-400">Everything in Free, plus</p>
-              </div>
-              <div className="space-y-2.5 flex-1 mb-8">
-                {[
-                  'Everything in Free',
-                  'Cloud sync across devices',
-                  'Portfolio tracking',
-                  'Alert history',
-                  'API access',
-                  'Priority support',
-                ].map((f) => (
-                  <div key={f} className="flex items-center gap-2.5">
-                    <span className="w-1 h-1 rounded-full bg-emerald-800/60 shrink-0" />
-                    <span className="text-[13px] text-zinc-400">{f}</span>
-                  </div>
-                ))}
-              </div>
-              <button disabled className="w-full h-9 rounded-[3px] bg-emerald-950/40 border border-emerald-800/40 text-emerald-700 text-[12px] cursor-not-allowed">
-                Notify me
-              </button>
-            </div>
 
           </div>
         </div>
