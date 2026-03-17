@@ -5,9 +5,9 @@ import { SectionMark, GitHubIcon, LogoMark } from './LandingPrimitives'
 
 export function DataSourcesBar() {
   return (
-    <div className="bg-zinc-950/20 py-16" id="data">
-      <div className="max-w-7xl mx-auto px-6">
-        <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest text-center mb-8">Data powered by</p>
+    <div className="bg-black py-16" id="data">
+      <div className="max-w-5xl mx-auto px-6">
+        <p className="font-mono text-[9px] text-zinc-600 uppercase tracking-widest text-center mb-8">Data powered by</p>
         <div className="flex flex-wrap justify-center gap-2">
           {DATA_SOURCES.map((s) => (
             <motion.span
@@ -87,10 +87,10 @@ export function DocsSection() {
 
 export function SetupSection() {
   return (
-    <div className="py-24 bg-[#0e0e0e]" id="setup">
+    <div className="py-24 bg-black" id="setup">
       <div className="max-w-3xl mx-auto px-6">
-        <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest mb-12">Self-host in minutes</p>
-        <h2 className="text-4xl font-bold text-white mb-10">Run it yourself.</h2>
+        <p className="font-mono text-[9px] text-zinc-600 uppercase tracking-widest mb-12">Self-host in minutes</p>
+        <h2 className="text-4xl font-bold text-white mb-10 tracking-tight">Run it yourself.</h2>
         <div className="space-y-2">
           {SETUP_STEPS.map((s, i) => (
             <motion.div
@@ -99,17 +99,17 @@ export function SetupSection() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.35, delay: i * 0.1 }}
-              className="flex items-start gap-5 border border-zinc-800/60 bg-zinc-950 rounded-[3px] px-5 py-4"
+              className="flex items-start gap-5 bg-zinc-950 rounded-xl px-6 py-5"
             >
-              <span className="font-mono text-[10px] text-zinc-400 pt-0.5 shrink-0">{s.step}</span>
+              <span className="font-mono text-[10px] text-zinc-600 pt-0.5 shrink-0">{s.step}</span>
               <div className="flex-1 min-w-0">
-                <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest mb-1.5">{s.label}</p>
+                <p className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">{s.label}</p>
                 <code className="text-[13px] text-emerald-400 font-mono break-all">{s.cmd}</code>
               </div>
             </motion.div>
           ))}
         </div>
-        <p className="font-mono text-[10px] text-zinc-400 text-center mt-8">
+        <p className="font-mono text-[10px] text-zinc-600 text-center mt-8">
           Requires Node 20+. Free API keys from Finnhub, CoinGecko, FRED, and Kalshi.
         </p>
       </div>
@@ -186,13 +186,13 @@ export function CTASection() {
 
 export function LandingFooter() {
   return (
-    <footer className="px-6 py-8">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+    <footer className="bg-black px-6 py-10">
+      <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <LogoMark />
-          <span className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest">Monoth</span>
+          <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest">Monoth</span>
         </div>
-        <span className="font-mono text-[9px] text-zinc-400">© 2025 · MIT License · Not financial advice.</span>
+        <span className="font-mono text-[9px] text-zinc-600">© 2025 · MIT License · Not financial advice.</span>
       </div>
     </footer>
   )
