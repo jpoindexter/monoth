@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     res.json({ received: true })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Handler error'
-    res.status(500).json({ error: msg })
+    console.error('Webhook handler error:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
 }

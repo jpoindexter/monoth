@@ -90,6 +90,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   const seriesParam = req.query.series as string | undefined
   const seriesIds = seriesParam ? seriesParam.split(',').filter(Boolean) : DEFAULT_SERIES
+  if (seriesIds.length > 20) return res.status(400).json({ error: 'Too many series (max 20)' })
 
   try {
     const { data, stale } = await cached(`fred:${seriesIds.join(',')}`, 3_600_000, async () => {

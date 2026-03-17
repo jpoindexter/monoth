@@ -1,11 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cached } from '../_cache.js'
+import { requireAuth } from '../_auth.js'
 
 const ALLOWED_ORIGINS = [
   /^https?:\/\/.*\.monoth\.app$/,
   /^https?:\/\/monoth\.app$/,
   /^https?:\/\/localhost(:\d+)?$/,
-  /^https?:\/\/.*\.vercel\.app$/,
+  /^https?:\/\/monoth(-[a-z0-9-]+)?\.vercel\.app$/,
 ]
 
 function cors(req: VercelRequest, res: VercelResponse): boolean {
@@ -62,13 +63,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const authHeader = req.headers.authorization ?? ''
-  const token = authHeader.replace('Bearer ', '').trim()
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
+  const userId = await requireAuth(req, res)
+  if (!userId) return
 
-  const userKey = `ai:brief:${token.slice(-16)}`
+  const userKey = `ai:brief:${userId}`
 
   try {
     const { data, stale } = await cached<{ brief: string; generatedAt: number }>(

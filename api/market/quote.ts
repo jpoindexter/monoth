@@ -35,6 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
   const symbols = (req.query.symbols as string)?.split(',').filter(Boolean) ?? []
   if (!symbols.length) return res.status(400).json({ error: 'symbols param required' })
+  if (symbols.length > 20) return res.status(400).json({ error: 'Too many symbols (max 20)' })
   try {
     const quotes = await cached(`quote:${symbols.join(',')}`, 60_000, async () => {
       // Primary: worldmonitor
