@@ -244,10 +244,12 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 antialiased">
-      <StatsBar />
+      <div className="sticky top-0 z-50">
+        <StatsBar />
+      </div>
 
       {/* ── Nav ───────────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-40 border-b border-zinc-900 bg-black/95 backdrop-blur-md">
+      <nav className="sticky top-6 z-40 border-b border-zinc-900 bg-black/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-12 flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2">
             <LogoMark />
@@ -767,7 +769,9 @@ export function Landing() {
         </div>
       </div>
 
-      <NewsTicker />
+      <div className="sticky bottom-0 z-50">
+        <NewsTicker />
+      </div>
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="border-t border-zinc-900 px-6 py-8">

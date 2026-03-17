@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion } from 'motion/react'
 import { useMarketData } from '@/hooks/use-market-data'
 import { useCryptoData } from '@/hooks/use-crypto-data'
 import { useSectorData } from '@/hooks/use-sector-data'
@@ -71,45 +71,40 @@ export function StatsBar() {
 
   if (stats.length === 0) return null
 
+  const renderItem = (s: StatItem, key: string) => {
+    const isPositive = (s.change ?? 0) >= 0
+    return (
+      <span
+        key={key}
+        className="inline-flex items-center gap-1.5 px-3 whitespace-nowrap cursor-pointer hover:opacity-80"
+        onClick={() => navigate(`/symbol/${s.label}`)}
+      >
+        <span className="text-muted-foreground font-medium">{s.label}</span>
+        <span className="tabular-nums font-medium text-foreground">{s.value}</span>
+        {s.change != null && (
+          <>
+            <span className={`tabular-nums font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+              {isPositive ? '+' : ''}{s.change.toFixed(2)}%
+            </span>
+            {!isNaN(s.change) && <MiniSparkline changePercent={s.change} />}
+          </>
+        )}
+      </span>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="border-b border-border/40 bg-white dark:bg-[#0a0a0a] px-3 h-6 flex items-center shrink-0"
+      className="border-b border-border/40 bg-white dark:bg-[#0a0a0a] h-6 flex items-center shrink-0 overflow-hidden relative"
     >
-      <div className="flex items-center gap-4 overflow-x-auto text-[10px] no-scrollbar">
-        <AnimatePresence mode="popLayout">
-          {stats.map((s, i) => {
-            const isPositive = (s.change ?? 0) >= 0
-            return (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.25, delay: i * 0.04 }}
-                className="flex items-center gap-1.5 whitespace-nowrap cursor-pointer hover:opacity-80"
-                onClick={() => navigate(`/symbol/${s.label}`)}
-              >
-                <span className="text-muted-foreground font-medium">{s.label}</span>
-                <span className="tabular-nums font-medium text-foreground">{s.value}</span>
-                {s.change != null && (
-                  <>
-                    <motion.span
-                      key={`${s.label}-${s.change.toFixed(2)}`}
-                      initial={{ opacity: 0.5 }}
-                      animate={{ opacity: 1 }}
-                      className={`tabular-nums font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}
-                    >
-                      {isPositive ? '+' : ''}{s.change.toFixed(2)}%
-                    </motion.span>
-                    {!isNaN(s.change) && <MiniSparkline changePercent={s.change} />}
-                  </>
-                )}
-              </motion.div>
-            )
-          })}
-        </AnimatePresence>
+      <div className="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white dark:from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white dark:from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
+      <div className="flex items-center h-full animate-marquee whitespace-nowrap text-[10px]">
+        {stats.map((s) => renderItem(s, s.label))}
+        {stats.map((s) => renderItem(s, `${s.label}-2`))}
       </div>
     </motion.div>
   )
