@@ -124,7 +124,7 @@ function FeatureGrid() {
 
 export function Landing() {
   return (
-    <div className="min-h-screen bg-black text-zinc-100 antialiased">
+    <div className="min-h-screen bg-black text-zinc-100 antialiased" style={{ colorScheme: 'dark' }}>
       <LandingNav />
       <LandingHero />
 
