@@ -724,11 +724,9 @@ export function Landing() {
               className="text-5xl md:text-7xl font-bold text-white mb-4 leading-[1.05]"
             >
               Everything in one place.
-              <br />
-              <em className="not-italic text-zinc-600">Free, forever.</em>
             </h2>
             <p className="text-zinc-600 mb-12 text-lg font-light">
-              No account. No pricing page. Just open it.
+              No account required. Just open it.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link to="/dashboard">
