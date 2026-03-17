@@ -4,19 +4,6 @@ import { motion } from 'motion/react'
 import { fetchQuotes } from '@/services/api/market'
 import { fetchCryptoPrices } from '@/services/api/crypto'
 
-// ─── Font loader ───────────────────────────────────────────────────────────────
-function useFonts() {
-  useEffect(() => {
-    if (document.getElementById('monoth-landing-fonts')) return
-    const link = document.createElement('link')
-    link.id = 'monoth-landing-fonts'
-    link.rel = 'stylesheet'
-    link.href =
-      'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap'
-    document.head.appendChild(link)
-  }, [])
-}
-
 // ─── Section label (Caret pattern) ────────────────────────────────────────────
 function SectionMark({ num, label, tag }: { num: string; label: string; tag: string }) {
   return (
@@ -308,14 +295,10 @@ const SETUP_STEPS = [
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export function Landing() {
-  useFonts()
   const panelCount = useCountUp(60, 1400)
 
   return (
-    <div
-      className="min-h-screen bg-black text-zinc-100 antialiased"
-      style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}
-    >
+    <div className="min-h-screen bg-black text-zinc-100 antialiased">
       <MarketBar />
 
       {/* ── Nav ───────────────────────────────────────────────────────────── */}
@@ -374,7 +357,6 @@ export function Landing() {
 
           <h1
             className="text-5xl sm:text-7xl md:text-8xl font-bold leading-[1.02] tracking-tight text-white mb-8"
-            style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
           >
             Market Intelligence
             <br />
@@ -425,7 +407,6 @@ export function Landing() {
           <div>
             <h2
               className="text-4xl md:text-5xl font-bold text-white mb-6 leading-[1.1]"
-              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
               60 panels.
               <br />
@@ -507,7 +488,6 @@ export function Landing() {
           <div className="order-1 md:order-2">
             <h2
               className="text-4xl md:text-5xl font-bold text-white mb-6 leading-[1.1]"
-              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
               The market's
               <br />
@@ -535,7 +515,6 @@ export function Landing() {
           <div>
             <h2
               className="text-4xl md:text-5xl font-bold text-white mb-6 leading-[1.1]"
-              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
               Don't watch.
               <br />
@@ -625,7 +604,6 @@ export function Landing() {
           <div className="order-1 md:order-2">
             <h2
               className="text-4xl md:text-5xl font-bold text-white mb-6 leading-[1.1]"
-              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
               Six presets.
               <br />
@@ -648,7 +626,6 @@ export function Landing() {
           <div className="text-center mb-14">
             <h2
               className="text-4xl md:text-5xl font-bold text-white mb-3 leading-[1.1]"
-              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
               No account. No tracking.
               <br />
@@ -706,7 +683,6 @@ export function Landing() {
           <SectionMark num="06" label="Self-host in minutes" tag="Setup" />
           <h2
             className="text-4xl font-bold text-white mt-12 mb-10"
-            style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
           >
             Run it yourself.
           </h2>
@@ -746,7 +722,6 @@ export function Landing() {
             <p className="font-mono text-[9px] text-zinc-700 uppercase tracking-widest mb-8">Try Monoth today</p>
             <h2
               className="text-5xl md:text-7xl font-bold text-white mb-4 leading-[1.05]"
-              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
               Everything in one place.
               <br />
