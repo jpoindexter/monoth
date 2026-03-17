@@ -7,7 +7,7 @@ type Tab = 'prices' | 'dominance' | 'defi' | 'fear'
 
 const CRYPTO_SYMBOLS = ['BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'LINK', 'DOT']
 
-const HIST_BAR_COLORS: Record<string, string> = {
+const HIST_BAR_COLORS = {
   extremeFear: '#ef4444',
   fear: '#f59e0b',
   neutral: '#eab308',

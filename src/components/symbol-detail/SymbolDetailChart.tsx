@@ -18,7 +18,7 @@ interface Props {
   rangeCls: (r: Range) => string
 }
 
-export function SymbolDetailChart({ range, setRange, candles, candleLoading, isPos, rangeCls }: Props) {
+export function SymbolDetailChart({ range: _range, setRange, candles, candleLoading, isPos, rangeCls }: Props) {
   return (
     <div className="px-5 py-4">
       <div className="flex justify-end gap-0.5 mb-2">

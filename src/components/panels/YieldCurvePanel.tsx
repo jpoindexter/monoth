@@ -96,7 +96,7 @@ function HistoryTab({ spreadHistory }: { spreadHistory: SpreadPoint[] }) {
     return <div className="text-[10px] text-muted-foreground">No data</div>
   }
 
-  const latest = spreadHistory[spreadHistory.length - 1]
+  const latest = spreadHistory[spreadHistory.length - 1]!
   const maxAbs = Math.max(...spreadHistory.map((p) => Math.abs(p.value)), 0.01)
 
   return (

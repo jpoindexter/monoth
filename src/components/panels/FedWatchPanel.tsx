@@ -66,7 +66,7 @@ function RateHistory({ history }: { history: { date: string; value: number }[] }
 
   const deduped: { date: string; value: number }[] = []
   for (const h of history) {
-    if (deduped.length === 0 || deduped[deduped.length - 1].value !== h.value) {
+    if (deduped.length === 0 || deduped[deduped.length - 1]?.value !== h.value) {
       deduped.push(h)
     }
   }
@@ -98,6 +98,7 @@ function contextLabel(meetings: MeetingProb[], currentUpper: number): { label: s
     return { label: 'NEUTRAL', cls: 'text-zinc-400', desc: 'CME meeting data unavailable.' }
   }
   const next = meetings[0]
+  if (!next) return { label: 'NEUTRAL', cls: 'text-zinc-400', desc: 'CME meeting data unavailable.' }
   if (!next.probabilities.length) {
     return { label: 'NEUTRAL', cls: 'text-zinc-400', desc: 'Insufficient probability data.' }
   }

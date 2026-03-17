@@ -5,7 +5,7 @@ import { useNewsData } from '@/hooks/use-news-data'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { fetchCandles } from '@/services/api/candles'
 import { relTime, tabCls } from '@/lib/panel-utils'
-import { CommoditiesChartTab, type ChartSymbol, CHART_SYMBOLS } from './CommoditiesChartTab'
+import { CommoditiesChartTab, type ChartSymbol } from './CommoditiesChartTab'
 import { CommoditiesSectorsTab } from './CommoditiesSectorsTab'
 import { CommoditiesSupercycleTab } from './CommoditiesSupercycleTab'
 

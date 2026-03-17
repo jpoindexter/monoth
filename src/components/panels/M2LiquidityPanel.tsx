@@ -14,8 +14,8 @@ type Regime = 'EXPANSIONARY' | 'NEUTRAL' | 'CONTRACTIONARY'
 
 function yoyChange(values: { date: string; value: number }[]): number | null {
   if (values.length < 2) return null
-  const latest = values[values.length - 1].value
-  const older = values[0].value
+  const latest = values[values.length - 1]!.value
+  const older = values[0]!.value
   if (older === 0) return null
   return ((latest - older) / older) * 100
 }
@@ -59,7 +59,7 @@ function M2Tab({ series }: { series: SeriesData[] }) {
   const m2 = series.find((s) => s.id === 'M2SL')
   if (!m2 || !m2.values.length) return <div className="text-[10px] text-muted-foreground">No data</div>
 
-  const latest = m2.values[m2.values.length - 1]
+  const latest = m2.values[m2.values.length - 1]!
   const yoy = yoyChange(m2.values)
   const reg = regime(yoy)
   const color = regimeColor(reg)
@@ -107,7 +107,7 @@ function LiquidityTab({ series }: { series: SeriesData[] }) {
     <div className="space-y-2">
       {items.map(({ label, data, divisor }) => {
         if (!data || !data.values.length) return null
-        const latest = data.values[data.values.length - 1]
+        const latest = data.values[data.values.length - 1]!
         const prev = data.values[data.values.length - 2]
         const chg = prev ? latest.value - prev.value : null
         const val = latest.value / divisor

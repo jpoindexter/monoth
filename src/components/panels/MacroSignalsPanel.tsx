@@ -41,7 +41,7 @@ export default function MacroSignalsPanel() {
         <button className={tabCls(tab === 'cycle')} onClick={() => setTab('cycle')}>Cycle</button>
       </div>
 
-      {tab === 'signals' && <MacroSignalsSignalsTab signals={data} />}
+      {tab === 'signals' && <MacroSignalsSignalsTab signals={data ?? undefined} />}
 
       {tab === 'regime' && (
         <MacroSignalsRegimeTab

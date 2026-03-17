@@ -85,7 +85,7 @@ export default function FixedIncomePanel() {
         <button className={tabCls(tab === 'real')}    onClick={() => setTab('real')}>Real Rates</button>
       </div>
 
-      {tab === 'yields'  && <FixedIncomeYields data={data} />}
+      {tab === 'yields'  && <FixedIncomeYields data={data ?? undefined} />}
       {tab === 'etfs'    && <FixedIncomeETFs data={etfData} />}
       {tab === 'spreads' && <FixedIncomeSpreads spreads={spreads} />}
       {tab === 'curve'   && <FixedIncomeCurve curvePoints={curvePoints} spread210={spread210} />}

@@ -2,7 +2,7 @@
 import { useCallback, useState } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper } from '@/components/layout/PanelWrapper'
-import { tabCls, relTime } from '@/lib/panel-utils'
+import { tabCls } from '@/lib/panel-utils'
 
 type Tab = 'recent' | 'funds' | 'holdings'
 

@@ -14,7 +14,7 @@ interface Props {
   activeAssetsCount: number
 }
 
-export function CorrelationRegimeTab({ regime, regimeBadgeCls, isLive, liveAsOf, activeAssetsCount }: Props) {
+export function CorrelationRegimeTab({ regime, regimeBadgeCls, isLive, liveAsOf: _liveAsOf, activeAssetsCount }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">

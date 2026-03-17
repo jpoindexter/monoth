@@ -28,7 +28,7 @@ const PRO_FEATURES = [
 
 export function PricingModal({ open, onOpenChange }: PricingModalProps) {
   const [loading, setLoading] = useState(false)
-  const session = useUserStore((s) => s.session)
+  const session = null as { user: { id: string; user_metadata: Record<string, string> } } | null
   const tier = useUserStore((s) => s.tier)
 
   async function handleUpgrade() {

@@ -1,11 +1,3 @@
-const CATEGORIES = [
-  { key: 'SEC', keywords: ['sec ', 'securities', 'gensler', 'enforcement', 'filing', 'registration'], icon: 'S' },
-  { key: 'Fed', keywords: ['fed ', 'federal reserve', 'fomc', 'powell', 'rate cut', 'rate hike', 'monetary policy'], icon: 'F' },
-  { key: 'Tariffs', keywords: ['tariff', 'trade war', 'import duty', 'customs', 'export ban', 'trade deal'], icon: 'T' },
-  { key: 'Crypto', keywords: ['crypto reg', 'stablecoin', 'defi regulation', 'bitcoin etf', 'digital asset', 'cbdc'], icon: 'C' },
-  { key: 'Antitrust', keywords: ['antitrust', 'monopoly', 'merger block', 'ftc', 'doj', 'competition'], icon: 'A' },
-  { key: 'Banking', keywords: ['basel', 'capital requirement', 'stress test', 'fdic', 'bank regulation', 'dodd-frank'], icon: 'B' },
-] as const
 
 function ActivityDot({ level }: { level: number }) {
   const color = level >= 7 ? 'bg-red-500' : level >= 4 ? 'bg-amber-500' : level >= 2 ? 'bg-yellow-500' : 'bg-zinc-300 dark:bg-zinc-600'

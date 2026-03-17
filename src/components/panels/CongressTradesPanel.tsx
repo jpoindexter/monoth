@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { usePolling } from '@/hooks/use-polling'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
-import { tabCls, relTime } from '@/lib/panel-utils'
+import { tabCls } from '@/lib/panel-utils'
 
 interface CongressFiling {
   chamber: 'senate' | 'house'

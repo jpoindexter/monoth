@@ -121,14 +121,14 @@ export default function CentralBanksPanel() {
         <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
       </div>
 
-      {tab === 'signals' && <CentralBanksSignalsTab signals={signals} sigLoading={sigLoading} />}
+      {tab === 'signals' && <CentralBanksSignalsTab signals={signals ?? undefined} sigLoading={sigLoading} />}
       {tab === 'rates' && <CentralBanksRatesTab centralBanks={centralBanks} maxRate={maxRate} />}
       {tab === 'calendar' && <CentralBanksCalendarTab sortedByDate={sortedByDate} />}
       {tab === 'dotplot' && <CentralBanksDotPlotTab />}
       {tab === 'balancesheet' && <CentralBanksBalanceSheetTab balanceSheets={balanceSheets} />}
       {tab === 'eer' && <CentralBanksEerTab sortedEer={sortedEer} />}
       {tab === 'credit' && <CentralBanksCreditTab sortedCredit={sortedCredit} />}
-      {tab === 'news' && <CentralBanksNewsTab newsData={newsData} />}
+      {tab === 'news' && <CentralBanksNewsTab newsData={newsData ?? undefined} />}
     </PanelWrapper>
   )
 }
