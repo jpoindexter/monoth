@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { Settings, Sun, Moon, Monitor } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
@@ -35,7 +36,7 @@ export function TopBar() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className="h-8 border-b border-border/60 bg-white dark:bg-[#0a0a0a] flex items-center px-3 shrink-0">
-      <span className="font-bold text-[11px] tracking-[2px] uppercase text-foreground">Monoth</span>
+      <Link to="/" className="font-bold text-[11px] tracking-[2px] uppercase text-foreground hover:opacity-70 transition-opacity">Monoth</Link>
       <div className="ml-3 flex items-center gap-1">
         {open ? (
           <motion.span
