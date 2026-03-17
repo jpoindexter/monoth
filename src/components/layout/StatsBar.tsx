@@ -4,15 +4,12 @@ import { useMarketData } from '@/hooks/use-market-data'
 import { useCryptoData } from '@/hooks/use-crypto-data'
 import { useSectorData } from '@/hooks/use-sector-data'
 import { useMarketStore } from '@/stores'
+import { fmt } from '@/lib/panel-utils'
 
 interface StatItem {
   label: string
   value: string
   change?: number
-}
-
-function fmt(n: number) {
-  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 function MiniSparkline({ changePercent }: { changePercent: number }) {

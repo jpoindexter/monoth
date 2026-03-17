@@ -17,6 +17,14 @@ export function fmtVol(n: number): string {
   return String(n)
 }
 
+export function fmtDolVol(n: number | string): string {
+  const v = typeof n === 'string' ? Number(n) : n
+  if (!isFinite(v)) return '$0'
+  if (v >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M'
+  if (v >= 1e3) return '$' + (v / 1e3).toFixed(0) + 'K'
+  return '$' + v.toFixed(0)
+}
+
 export function fmtBig(n: number | null | undefined): string {
   if (n == null) return '—'
   if (n >= 1e12) return '$' + (n / 1e12).toFixed(1) + 'T'

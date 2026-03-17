@@ -1,12 +1,6 @@
-type Category = 'Finance' | 'Crypto'
+import { fmtDolVol as fmtVol } from '@/lib/panel-utils'
 
-function fmtVol(n: number | string): string {
-  const v = typeof n === 'string' ? Number(n) : n
-  if (!isFinite(v)) return '$0'
-  if (v >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M'
-  if (v >= 1e3) return '$' + (v / 1e3).toFixed(0) + 'K'
-  return '$' + v.toFixed(0)
-}
+type Category = 'Finance' | 'Crypto'
 
 interface Props {
   totalMarkets: number
