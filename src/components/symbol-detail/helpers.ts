@@ -1,4 +1,5 @@
 export type Range = '1W' | '1M' | '3M' | '6M' | '1Y'
+export { fmtBig } from '@/lib/panel-utils'
 export type Tab = 'overview' | 'chart' | 'technical' | 'analyst' | 'fundamentals' | 'news'
 
 export const RANGE_DAYS: Record<Range, number> = { '1W': 7, '1M': 30, '3M': 90, '6M': 180, '1Y': 365 }
@@ -25,13 +26,6 @@ export const ACTION_CLS: Record<string, string> = {
   reit: 'text-muted-foreground',
 }
 
-export function fmtBig(n: number | null | undefined): string {
-  if (n == null) return '—'
-  if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T'
-  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B'
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M'
-  return '$' + n.toLocaleString()
-}
 
 export function fmtPct(n: number | null | undefined): string {
   if (n == null) return '—'

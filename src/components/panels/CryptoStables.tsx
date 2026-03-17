@@ -1,25 +1,6 @@
-interface Stablecoin {
-  id: string
-  symbol: string
-  name: string
-  price: number
-  pegDeviation: number
-  marketCap: number
-  volume24h: number
-}
+import { fmtCap, pegColor as getPegColor } from '@/components/panels/stablecoins-data'
+import type { Stablecoin } from '@/components/panels/stablecoins-data'
 
-function fmtCap(num: number): string {
-  if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T'
-  if (num >= 1e9)  return '$' + (num / 1e9).toFixed(1) + 'B'
-  if (num >= 1e6)  return '$' + (num / 1e6).toFixed(1) + 'M'
-  return '$' + num.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
-
-function getPegColor(deviation: number): string {
-  if (deviation < 0.001) return 'text-emerald-600'
-  if (deviation < 0.005) return 'text-yellow-500'
-  return 'text-red-600'
-}
 
 export function CryptoStables({
   data,

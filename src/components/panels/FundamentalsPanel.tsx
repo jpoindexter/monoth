@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
-import { tabCls } from '@/lib/panel-utils'
+import { tabCls, fmtBig } from '@/lib/panel-utils'
 
 interface Fundamentals {
   symbol: string
@@ -40,14 +40,6 @@ interface Fundamentals {
   twoHundredDayAvg: number | null
 }
 
-function fmtBig(n: number | null): string {
-  if (n == null) return '—'
-  const abs = Math.abs(n)
-  if (abs >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T'
-  if (abs >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B'
-  if (abs >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M'
-  return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
 
 function fmtPct(n: number | null): string {
   if (n == null) return '—'

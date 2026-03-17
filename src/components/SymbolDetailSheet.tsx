@@ -4,8 +4,8 @@ import { useMarketStore } from '@/stores/market-store'
 import { useNewsStore } from '@/stores/news-store'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api/market'
-import { fmt, tabCls } from '@/lib/panel-utils'
-import { X, TrendingUp, TrendingDown, Star, ExternalLink } from 'lucide-react'
+import { tabCls } from '@/lib/panel-utils'
+import { SymbolDetailHeader } from './symbol-detail/SymbolDetailHeader'
 import { SymbolDetailOverview } from './symbol-detail/SymbolDetailOverview'
 import { SymbolDetailChart } from './symbol-detail/SymbolDetailChart'
 import { SymbolDetailTechnical } from './symbol-detail/SymbolDetailTechnical'
@@ -133,59 +133,17 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
         showCloseButton={false}
         className="w-full sm:w-[420px] p-0 overflow-hidden flex flex-col border-l border-border/40 bg-[#0e0e0e]"
       >
-        {/* Header */}
-        <div className={`px-5 pt-5 pb-4 border-b border-border/20 ${isPos ? 'bg-emerald-950/10' : 'bg-red-950/10'}`}>
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <div className="text-[10px] uppercase tracking-[2px] text-muted-foreground mb-0.5">{ticker}</div>
-              <div className="text-base font-semibold text-foreground leading-tight">{name}</div>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={toggleWatchlist}
-                title={watchlisted ? 'Remove from watchlist' : 'Add to watchlist'}
-                className={`p-1.5 rounded transition-colors ${watchlisted ? 'text-amber-400 hover:text-amber-300' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                <Star className="w-3.5 h-3.5" fill={watchlisted ? 'currentColor' : 'none'} />
-              </button>
-              <a
-                href={`https://finance.yahoo.com/quote/${ticker}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Open in Yahoo Finance"
-                className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-              <button
-                onClick={() => onOpenChange(false)}
-                className="text-muted-foreground hover:text-foreground p-1 -mr-1 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        <SymbolDetailHeader
+          ticker={ticker}
+          name={name}
+          price={price}
+          changePercent={changePercent}
+          isPos={isPos}
+          watchlisted={watchlisted}
+          onToggleWatchlist={toggleWatchlist}
+          onClose={() => onOpenChange(false)}
+        />
 
-          {price !== null ? (
-            <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-bold tabular-nums tracking-tight">
-                ${fmt(price)}
-              </span>
-              {changePercent !== null && (
-                <div className={`flex items-center gap-1 ${isPos ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {isPos ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                  <span className="text-sm font-semibold tabular-nums">
-                    {isPos ? '+' : ''}{changePercent.toFixed(2)}%
-                  </span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="h-10 w-32 bg-muted/20 rounded animate-pulse" />
-          )}
-        </div>
-
-        {/* Tabs */}
         <div className="flex border-b border-border/20 px-5 gap-4 overflow-x-auto scrollbar-none">
           {(['overview', 'chart', 'technical', 'analyst', 'fundamentals', 'news'] as Tab[]).map((t) => (
             <button key={t} className={tabCls(tab === t)} onClick={() => setTab(t)}>
@@ -196,7 +154,6 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
           ))}
         </div>
 
-        {/* Tab content */}
         <div className="flex-1 overflow-y-auto">
           {tab === 'overview' && (
             <SymbolDetailOverview

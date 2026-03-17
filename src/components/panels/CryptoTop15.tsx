@@ -1,21 +1,7 @@
 import { useIsExpanded } from '@/components/layout/PanelWrapper'
 import { Sparkline } from '@/components/charts/Sparkline'
 import type { CryptoAsset } from '@/types'
-
-function fmtCap(num: number): string {
-  if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T'
-  if (num >= 1e9)  return '$' + (num / 1e9).toFixed(1) + 'B'
-  if (num >= 1e6)  return '$' + (num / 1e6).toFixed(1) + 'M'
-  return '$' + num.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
-
-function fmtVol(num: number): string {
-  if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T'
-  if (num >= 1e9)  return '$' + (num / 1e9).toFixed(1) + 'B'
-  if (num >= 1e6)  return '$' + (num / 1e6).toFixed(1) + 'M'
-  if (num >= 1e3)  return '$' + (num / 1e3).toFixed(0) + 'K'
-  return '$' + num.toLocaleString('en-US', { maximumFractionDigits: 0 })
-}
+import { fmtBig } from '@/lib/panel-utils'
 
 export function CryptoTop15({ data }: { data: CryptoAsset[] }) {
   const expanded = useIsExpanded()
@@ -46,7 +32,7 @@ export function CryptoTop15({ data }: { data: CryptoAsset[] }) {
                 ${c.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </td>
               <td className="text-right tabular-nums text-muted-foreground">
-                {fmtVol(c.volume24h)}
+                {fmtBig(c.volume24h)}
               </td>
               <td className="text-right">
                 <div className="flex justify-end">
@@ -57,7 +43,7 @@ export function CryptoTop15({ data }: { data: CryptoAsset[] }) {
                 {isPositive ? '+' : ''}{c.changePercent24h.toFixed(2)}%
               </td>
               <td className="text-right tabular-nums text-muted-foreground">
-                {fmtCap(c.marketCap)}
+                {fmtBig(c.marketCap)}
               </td>
             </tr>
           )
