@@ -198,7 +198,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const mapped = mapWmSignals(resp)
           if (mapped.length >= 3) return mapped
         }
-      } catch (e) {
+      } catch {
+        // fallthrough to local build
       }
       // Fallback: build locally from free APIs
       return buildSignalsLocally()

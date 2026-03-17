@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabClsPill } from '@/lib/panel-utils'
 import { useMarketStore } from '@/stores/market-store'
 import { usePanelStore } from '@/stores/panel-store'
 import { useUserStore } from '@/stores/user-store'
@@ -183,14 +184,12 @@ export default function ExportPanel() {
     fileRef.current?.click()
   }
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   return (
     <PanelWrapper title="Settings">
       <div className="flex flex-wrap gap-1 mb-2">
-        <button className={tabCls(tab === 'panels')} onClick={() => setTab('panels')}>Panels</button>
-        <button className={tabCls(tab === 'export')} onClick={() => setTab('export')}>Export</button>
+        <button className={tabClsPill(tab === 'panels')} onClick={() => setTab('panels')}>Panels</button>
+        <button className={tabClsPill(tab === 'export')} onClick={() => setTab('export')}>Export</button>
       </div>
 
       {tab === 'panels' && (

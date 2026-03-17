@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { usePolling } from '@/hooks/use-polling'
+import { tabClsPill } from '@/lib/panel-utils'
 
 type Hour = 'bmo' | 'amc' | 'dmh'
 
@@ -189,8 +190,6 @@ export default function EarningsCalendarPanel() {
     enabled: tab === 'next-week' || tab === 'estimates',
   })
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const thisEntries = thisWeekData ?? []
   const nextEntries = nextWeekData ?? []
@@ -201,9 +200,9 @@ export default function EarningsCalendarPanel() {
   return (
     <PanelWrapper title="Earnings Calendar" loading={loading}>
       <div className="flex gap-1 mb-2 flex-wrap">
-        <button className={tabCls(tab === 'this-week')} onClick={() => setTab('this-week')}>This Week</button>
-        <button className={tabCls(tab === 'next-week')} onClick={() => setTab('next-week')}>Next Week</button>
-        <button className={tabCls(tab === 'estimates')} onClick={() => setTab('estimates')}>Estimates</button>
+        <button className={tabClsPill(tab === 'this-week')} onClick={() => setTab('this-week')}>This Week</button>
+        <button className={tabClsPill(tab === 'next-week')} onClick={() => setTab('next-week')}>Next Week</button>
+        <button className={tabClsPill(tab === 'estimates')} onClick={() => setTab('estimates')}>Estimates</button>
       </div>
 
       {loading && (

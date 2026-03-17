@@ -1,5 +1,3 @@
-/** Shared formatting utilities used across panel components */
-
 export function relTime(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000)
   if (diff < 60) return 'now'
@@ -22,6 +20,12 @@ export function fmtVol(n: number): string {
 export function tabCls(active: boolean): string {
   return `text-[10px] uppercase tracking-wider px-2 py-1 font-medium transition-colors ${
     active ? 'text-foreground border-b border-foreground' : 'text-muted-foreground hover:text-foreground'
+  }`
+}
+
+export function tabClsPill(active: boolean): string {
+  return `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${
+    active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'
   }`
 }
 

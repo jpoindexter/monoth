@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
+import { tabClsPill } from '@/lib/panel-utils'
 import { ALL_CHANNELS, DEFAULT_ENABLED, STORAGE_KEY, LATEST_EXTRA } from './VideoChannelData'
 import { VideoLivePlayer } from './VideoLivePlayer'
 import { VideoChannelSettings } from './VideoChannelSettings'
@@ -49,8 +50,6 @@ export default function MarketVideoPanel() {
 
   const activeChannelData = enabledLiveChannels.find(ch => ch.id === activeChannel) ?? enabledLiveChannels[0]
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const btnCls = 'text-[10px] uppercase tracking-wider font-medium text-muted-foreground hover:text-foreground transition-colors leading-none'
 
@@ -83,10 +82,10 @@ export default function MarketVideoPanel() {
         )}
 
         <div className="flex gap-1 mb-2 items-center">
-          <button className={tabCls(tab === 'live')} onClick={() => setTab('live')}>Live</button>
-          <button className={tabCls(tab === 'latest')} onClick={() => setTab('latest')}>Latest</button>
-          <button className={tabCls(tab === 'trending')} onClick={() => setTab('trending')}>Trending</button>
-          <button className={tabCls(tab === 'shows')} onClick={() => setTab('shows')}>Shows</button>
+          <button className={tabClsPill(tab === 'live')} onClick={() => setTab('live')}>Live</button>
+          <button className={tabClsPill(tab === 'latest')} onClick={() => setTab('latest')}>Latest</button>
+          <button className={tabClsPill(tab === 'trending')} onClick={() => setTab('trending')}>Trending</button>
+          <button className={tabClsPill(tab === 'shows')} onClick={() => setTab('shows')}>Shows</button>
           {tab === 'live' && (
             <div className="flex items-center gap-1 ml-auto">
               <select

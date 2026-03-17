@@ -6,7 +6,7 @@ import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { LightweightChart } from '@/components/charts/LightweightChart'
 import { fetchCandles, type CandleData } from '@/services/api/candles'
 import { useMarketStore } from '@/stores/market-store'
-import { relTime } from '@/lib/panel-utils'
+import { relTime, tabClsPill } from '@/lib/panel-utils'
 
 const VOL_SYMBOLS = ['VIXY', 'UVXY', 'SVXY', 'VXX']
 const VOL_NAMES: Record<string, string> = {
@@ -72,8 +72,6 @@ export default function VolatilityPanel() {
     }
   }, [tab])
 
-  const tabCls = (active: boolean) =>
-    `text-[10px] uppercase tracking-wider px-1.5 h-4 rounded-sm font-medium ${active ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`
 
   const activeStrikes = expanded ? STRIKES_EXPANDED : STRIKES
   const activeMonths = expanded ? MONTHS_EXPANDED : MONTHS
@@ -92,10 +90,10 @@ export default function VolatilityPanel() {
   return (
     <PanelWrapper title="Volatility" loading={loading} error={error} onRetry={refresh}>
       <div className="flex flex-wrap gap-1 mb-2">
-        <button className={tabCls(tab === 'etfs')} onClick={() => setTab('etfs')}>ETFs</button>
-        <button className={tabCls(tab === 'news')} onClick={() => setTab('news')}>News</button>
-        <button className={tabCls(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
-        <button className={tabCls(tab === 'surface')} onClick={() => setTab('surface')}>Surface</button>
+        <button className={tabClsPill(tab === 'etfs')} onClick={() => setTab('etfs')}>ETFs</button>
+        <button className={tabClsPill(tab === 'news')} onClick={() => setTab('news')}>News</button>
+        <button className={tabClsPill(tab === 'chart')} onClick={() => setTab('chart')}>Chart</button>
+        <button className={tabClsPill(tab === 'surface')} onClick={() => setTab('surface')}>Surface</button>
       </div>
 
       {tab === 'chart' && (
