@@ -4,6 +4,8 @@ A real-time financial dashboard with 60+ panels covering equities, crypto, forex
 
 ![License](https://img.shields.io/badge/license-MIT-green) ![Stack](https://img.shields.io/badge/stack-React%20%2B%20Vite%20%2B%20Vercel-black)
 
+![Monoth Dashboard](docs/screenshot.png)
+
 ## Features
 
 - **60+ live panels** — watchlist, sector heatmap, futures strip, yield curve, options flow, dark pool, congress trades, FedWatch, earnings calendar, AI insights, and more
