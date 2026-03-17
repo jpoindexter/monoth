@@ -54,7 +54,7 @@ Most panels work with free-tier keys. Only the keys for the data sources you wan
 | `GROQ_API_KEY` | [console.groq.com](https://console.groq.com) | Optional (AI summary) |
 | `RESEND_API_KEY` | [resend.com](https://resend.com) | Optional (email alerts) |
 
-Supabase and Stripe are only needed if you want user accounts and billing.
+Supabase and Stripe are only needed if you want user accounts and billing. Set `APP_URL` to your deployed URL (e.g. `https://monoth.com`) for Stripe redirect URLs to work.
 
 ## Deploy to Vercel
 

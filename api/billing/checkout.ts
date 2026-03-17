@@ -14,8 +14,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: process.env.STRIPE_PRO_PRICE_ID!, quantity: 1 }],
-      success_url: process.env.NEXT_PUBLIC_URL + '/dashboard?upgraded=true',
-      cancel_url: process.env.NEXT_PUBLIC_URL + '/dashboard',
+      success_url: process.env.APP_URL + '/dashboard?upgraded=true',
+      cancel_url: process.env.APP_URL + '/dashboard',
       client_reference_id: userId as string,
     })
     res.json({ url: session.url })

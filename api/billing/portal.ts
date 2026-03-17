@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const session = await stripe.billingPortal.sessions.create({
       customer: user.stripe_customer_id,
-      return_url: process.env.NEXT_PUBLIC_URL + '/dashboard',
+      return_url: process.env.APP_URL + '/dashboard',
     })
     res.json({ url: session.url })
   } catch (err) {
