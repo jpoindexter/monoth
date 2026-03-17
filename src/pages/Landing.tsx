@@ -1,499 +1,716 @@
 import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { fetchQuotes } from '@/services/api/market'
 import { fetchCryptoPrices } from '@/services/api/crypto'
 
-// --- Icons ---
-const GridIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-  </svg>
-)
+// ─── Font loader ───────────────────────────────────────────────────────────────
+function useFonts() {
+  useEffect(() => {
+    if (document.getElementById('monoth-landing-fonts')) return
+    const link = document.createElement('link')
+    link.id = 'monoth-landing-fonts'
+    link.rel = 'stylesheet'
+    link.href =
+      'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap'
+    document.head.appendChild(link)
+  }, [])
+}
 
-const SignalIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M2 12h2M20 12h2M12 2v2M12 20v2" />
-    <circle cx="12" cy="12" r="3" />
-    <path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4" />
-  </svg>
-)
+// ─── Section label (Caret pattern) ────────────────────────────────────────────
+function SectionMark({ num, label, tag }: { num: string; label: string; tag: string }) {
+  return (
+    <div className="flex items-center justify-between border-t border-zinc-800/60 py-3">
+      <span className="font-mono text-[9px] tracking-[0.18em] text-zinc-600 uppercase">
+        [{num}] {label}
+      </span>
+      <span className="font-mono text-[9px] tracking-[0.18em] text-zinc-700 uppercase">
+        / / {tag}
+      </span>
+    </div>
+  )
+}
 
-const DatabaseIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <ellipse cx="12" cy="5" rx="9" ry="3" />
-    <path d="M3 5v14c0 1.657 4.03 3 9 3s9-1.343 9-3V5" />
-    <path d="M3 12c0 1.657 4.03 3 9 3s9-1.343 9-3" />
-  </svg>
-)
+// ─── Mock data ─────────────────────────────────────────────────────────────────
+const MOCK_QUOTES = [
+  { sym: 'SPY',  price: '544.23', chg: '+0.82%', up: true  },
+  { sym: 'QQQ',  price: '445.67', chg: '+1.31%', up: true  },
+  { sym: 'AAPL', price: '198.45', chg: '-0.34%', up: false },
+  { sym: 'NVDA', price: '875.20', chg: '+2.18%', up: true  },
+  { sym: 'MSFT', price: '412.88', chg: '+0.44%', up: true  },
+  { sym: 'BTC',  price: '84,210', chg: '-1.03%', up: false },
+]
 
-const MoonIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-  </svg>
-)
+const MOCK_PREDICTIONS = [
+  { title: 'No rate change in March?',  yes: 92, no: 8,  src: 'POLY'   },
+  { title: 'Fed cuts rates in 2025?',   yes: 67, no: 33, src: 'KALSHI' },
+  { title: 'BTC above $100K by June?',  yes: 41, no: 59, src: 'POLY'   },
+]
 
-const KeyboardIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="2" y="6" width="20" height="12" rx="2" />
-    <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8" />
-  </svg>
-)
+const MOCK_FUTURES = [
+  { label: 'S&P 500', price: '5,441', chg: '+0.74%', up: true  },
+  { label: 'Nasdaq',  price: '19,102',chg: '+0.91%', up: true  },
+  { label: 'Crude',   price: '72.34', chg: '-0.43%', up: false },
+  { label: 'Gold',    price: '3,142', chg: '+0.22%', up: true  },
+  { label: 'VIX',     price: '18.42', chg: '-4.1%',  up: false },
+]
 
-const DownloadIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="7 10 12 15 17 10" />
-    <line x1="12" y1="15" x2="12" y2="3" />
-  </svg>
-)
+// ─── Mock panel shell ──────────────────────────────────────────────────────────
+function MockPanel({
+  title, children, cols = 1,
+}: { title: string; children: React.ReactNode; cols?: number }) {
+  return (
+    <div
+      className="rounded-[2px] border border-zinc-800/80 bg-zinc-950/90 overflow-hidden"
+      style={{ gridColumn: `span ${cols}` }}
+    >
+      <div className="px-3 py-1.5 border-b border-zinc-800/50 flex items-center justify-between">
+        <span className="font-mono text-[8px] uppercase tracking-widest text-zinc-600">{title}</span>
+        <div className="flex gap-1">
+          <span className="w-1 h-1 rounded-full bg-zinc-800" />
+          <span className="w-1 h-1 rounded-full bg-zinc-800" />
+        </div>
+      </div>
+      <div className="p-3">{children}</div>
+    </div>
+  )
+}
 
+// ─── Dashboard mockup ──────────────────────────────────────────────────────────
+function DashboardPreview() {
+  return (
+    <div className="relative mx-auto max-w-5xl px-6">
+      <div className="rounded-lg overflow-hidden border border-zinc-700/40 shadow-2xl shadow-black">
+        {/* Browser chrome */}
+        <div className="bg-zinc-900/90 border-b border-zinc-800 px-4 py-2.5 flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-zinc-700/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-zinc-700/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-zinc-700/80" />
+          </div>
+          <div className="flex-1 mx-4">
+            <div className="mx-auto w-52 h-5 bg-zinc-800 rounded-sm flex items-center justify-center">
+              <span className="font-mono text-[8px] text-zinc-600">monoth.finance/dashboard</span>
+            </div>
+          </div>
+          <div className="w-16" />
+        </div>
+
+        {/* App topbar */}
+        <div className="bg-[#0a0a0a] border-b border-zinc-800/50 px-3 h-6 flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3.5 h-3.5 rounded-[2px] bg-emerald-500 flex items-center justify-center shrink-0">
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                <rect x="0.5" y="0.5" width="3" height="3" rx="0.5" fill="black" />
+                <rect x="4.5" y="0.5" width="3" height="3" rx="0.5" fill="black" />
+                <rect x="0.5" y="4.5" width="3" height="3" rx="0.5" fill="black" />
+                <rect x="4.5" y="4.5" width="3" height="3" rx="0.5" fill="black" />
+              </svg>
+            </div>
+            <span className="font-mono text-[8px] font-bold tracking-widest text-zinc-300">MONOTH</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-1 h-1 rounded-full bg-emerald-500" style={{ boxShadow: '0 0 4px #10b981' }} />
+            <span className="font-mono text-[7px] text-zinc-600 uppercase tracking-widest">Live</span>
+          </div>
+          <div className="flex-1" />
+          <span className="font-mono text-[7px] text-zinc-700">US · NY</span>
+        </div>
+
+        {/* Grid */}
+        <div className="bg-[#0a0a0a] p-2 grid grid-cols-3 gap-1.5">
+          <MockPanel title="Watchlist">
+            <div className="space-y-1">
+              {MOCK_QUOTES.map((q) => (
+                <div key={q.sym} className="flex items-center justify-between">
+                  <span className="font-mono text-[8px] text-zinc-400 w-9">{q.sym}</span>
+                  <span className="font-mono text-[8px] text-zinc-200 tabular-nums">{q.price}</span>
+                  <span className={`font-mono text-[8px] tabular-nums ${q.up ? 'text-emerald-500' : 'text-red-400'}`}>{q.chg}</span>
+                </div>
+              ))}
+            </div>
+          </MockPanel>
+
+          <MockPanel title="Prediction Markets" cols={2}>
+            <div className="space-y-2.5">
+              {MOCK_PREDICTIONS.map((p) => (
+                <div key={p.title}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[8px] text-zinc-400 truncate flex-1">{p.title}</span>
+                    <span className={`font-mono text-[7px] ml-2 px-1 py-0.5 rounded-sm ${p.src === 'KALSHI' ? 'bg-sky-950/80 text-sky-500 border border-sky-900' : 'bg-purple-950/80 text-purple-400 border border-purple-900'}`}>
+                      {p.src}
+                    </span>
+                  </div>
+                  <div className="flex h-1.5 rounded-[1px] overflow-hidden bg-zinc-800">
+                    <div className="bg-emerald-600" style={{ width: `${p.yes}%` }} />
+                    <div className="bg-red-900/70" style={{ width: `${p.no}%` }} />
+                  </div>
+                  <div className="flex justify-between mt-0.5">
+                    <span className="font-mono text-[7px] text-emerald-600">Yes {p.yes}%</span>
+                    <span className="font-mono text-[7px] text-zinc-700">No {p.no}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </MockPanel>
+
+          <MockPanel title="Futures Strip" cols={2}>
+            <div className="grid grid-cols-5 gap-1.5">
+              {MOCK_FUTURES.map((f) => (
+                <div key={f.label} className="flex flex-col gap-0.5">
+                  <span className="font-mono text-[7px] text-zinc-700 truncate">{f.label}</span>
+                  <span className="font-mono text-[8px] text-zinc-200 tabular-nums">{f.price}</span>
+                  <span className={`font-mono text-[7px] tabular-nums ${f.up ? 'text-emerald-500' : 'text-red-400'}`}>{f.chg}</span>
+                </div>
+              ))}
+            </div>
+          </MockPanel>
+
+          <MockPanel title="Congress Trades">
+            <div className="space-y-1">
+              {[
+                { name: 'N. Pelosi',     ticker: 'NVDA', type: 'BUY'  },
+                { name: 'T. Tuberville', ticker: 'SPY',  type: 'SELL' },
+                { name: 'M. Waters',     ticker: 'AAPL', type: 'BUY'  },
+                { name: 'R. Scott',      ticker: 'MSFT', type: 'BUY'  },
+              ].map((t) => (
+                <div key={t.name} className="flex items-center gap-1.5">
+                  <span className="font-mono text-[7px] text-zinc-600 truncate flex-1">{t.name}</span>
+                  <span className="font-mono text-[8px] text-amber-400">{t.ticker}</span>
+                  <span className={`font-mono text-[7px] px-1 rounded-[2px] ${t.type === 'BUY' ? 'bg-emerald-950/80 text-emerald-600' : 'bg-red-950/80 text-red-500'}`}>
+                    {t.type}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </MockPanel>
+        </div>
+      </div>
+
+      {/* Glow */}
+      <div
+        className="absolute inset-0 -z-10 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 100%, rgba(16,185,129,0.08) 0%, transparent 70%)' }}
+      />
+    </div>
+  )
+}
+
+// ─── Live ticker bar ───────────────────────────────────────────────────────────
+interface TickerItem { symbol: string; price: number; changePercent: number }
+
+function fmt(n: number) {
+  return n >= 1000
+    ? n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : n.toFixed(2)
+}
+
+function MarketBar() {
+  const [tickers, setTickers] = useState<TickerItem[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const [quotes, crypto] = await Promise.all([fetchQuotes(['SPY', 'QQQ']), fetchCryptoPrices()])
+        if (cancelled) return
+        const items: TickerItem[] = []
+        for (const q of quotes) items.push({ symbol: q.symbol, price: q.price, changePercent: q.changePercent })
+        const btc = crypto.find((c) => c.symbol?.toUpperCase() === 'BTC' || c.id === 'bitcoin')
+        if (btc) items.push({ symbol: 'BTC', price: btc.price, changePercent: btc.changePercent24h ?? 0 })
+        setTickers(items)
+      } catch {}
+    }
+    load()
+    return () => { cancelled = true }
+  }, [])
+
+  if (tickers.length === 0) return null
+
+  return (
+    <div className="border-b border-zinc-900/80 bg-black py-1.5 px-4">
+      <div className="max-w-7xl mx-auto flex items-center gap-6 overflow-x-auto">
+        <span className="font-mono text-[8px] text-zinc-700 uppercase tracking-widest shrink-0 flex items-center gap-1.5">
+          <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+          Live
+        </span>
+        {tickers.map((t) => {
+          const up = t.changePercent >= 0
+          return (
+            <div key={t.symbol} className="flex items-center gap-1.5 shrink-0">
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest">{t.symbol}</span>
+              <span className="font-mono text-[9px] text-zinc-200 tabular-nums">{fmt(t.price)}</span>
+              <span className={`font-mono text-[9px] tabular-nums ${up ? 'text-emerald-500' : 'text-red-400'}`}>
+                {up ? '+' : ''}{t.changePercent.toFixed(2)}%
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Counter ───────────────────────────────────────────────────────────────────
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0)
+  const raf = useRef<number>(0)
+  useEffect(() => {
+    const start = performance.now()
+    function tick(now: number) {
+      const elapsed = now - start
+      const p = Math.min(elapsed / duration, 1)
+      setValue(Math.round((1 - Math.pow(1 - p, 3)) * target))
+      if (p < 1) raf.current = requestAnimationFrame(tick)
+    }
+    raf.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf.current)
+  }, [target, duration])
+  return value
+}
+
+// ─── Icons ─────────────────────────────────────────────────────────────────────
 const GitHubIcon = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
     <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
   </svg>
 )
 
-const StarIcon = () => (
-  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-  </svg>
+const LogoMark = () => (
+  <div className="w-5 h-5 rounded-[3px] bg-emerald-500 flex items-center justify-center shrink-0">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+      <rect x="0.5" y="0.5" width="3.5" height="3.5" rx="0.5" fill="black" />
+      <rect x="6" y="0.5" width="3.5" height="3.5" rx="0.5" fill="black" />
+      <rect x="0.5" y="6" width="3.5" height="3.5" rx="0.5" fill="black" />
+      <rect x="6" y="6" width="3.5" height="3.5" rx="0.5" fill="black" />
+    </svg>
+  </div>
 )
 
-const PredictIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-  </svg>
-)
-
-// --- Data ---
-const FEATURES = [
-  {
-    tag: 'PREDICTION MARKETS',
-    title: 'Polymarket + Kalshi',
-    desc: 'Live prediction market odds from both Polymarket and Kalshi. See what the crowd thinks about rate decisions, election outcomes, macro events.',
-  },
-  {
-    tag: 'CORRELATION',
-    title: 'Cross-Asset Correlation',
-    desc: 'See how CPI prints, rate decisions, and jobs data move markets across equities, crypto, and commodities in real time.',
-  },
-  {
-    tag: 'AI INSIGHTS',
-    title: 'AI Market Brief',
-    desc: 'AI-generated market summaries via the Anthropic API. Macro signals, sentiment analysis, trend detection — bring your own key.',
-  },
-  {
-    tag: 'LAYOUTS & ALERTS',
-    title: 'Preset Layouts + Price Alerts',
-    desc: 'Six preset dashboard layouts for different workflows. Set price alerts on any symbol — get a visual flash and browser notification when triggered.',
-  },
-]
-
-const FEATURE_GRID = [
-  { icon: <GridIcon />, label: '60 Live Panels', desc: 'Every panel updates automatically' },
-  { icon: <SignalIcon />, label: 'Real-Time Data', desc: 'Sub-minute refresh intervals' },
-  { icon: <DatabaseIcon />, label: '14+ Data Sources', desc: 'Aggregated market feeds' },
-  { icon: <PredictIcon />, label: 'Poly + Kalshi', desc: 'Two prediction market feeds' },
-  { icon: <MoonIcon />, label: 'Dark Mode', desc: 'Terminal-native dark theme' },
-  { icon: <KeyboardIcon />, label: 'Keyboard Shortcuts', desc: 'Navigate without a mouse' },
-  { icon: <DownloadIcon />, label: 'Export Data', desc: 'CSV export from any panel' },
-]
-
+// ─── Static data ───────────────────────────────────────────────────────────────
 const DATA_SOURCES = [
-  { name: 'Finnhub', color: 'text-blue-400 border-blue-900 bg-blue-950/40' },
-  { name: 'CoinGecko', color: 'text-green-400 border-green-900 bg-green-950/40' },
-  { name: 'FRED', color: 'text-amber-400 border-amber-900 bg-amber-950/40' },
-  { name: 'Frankfurter', color: 'text-purple-400 border-purple-900 bg-purple-950/40' },
-  { name: 'Polymarket', color: 'text-pink-400 border-pink-900 bg-pink-950/40' },
-  { name: 'Kalshi', color: 'text-sky-400 border-sky-900 bg-sky-950/40' },
+  { name: 'Finnhub',       color: 'text-blue-400   border-blue-900   bg-blue-950/40'   },
+  { name: 'CoinGecko',     color: 'text-green-400  border-green-900  bg-green-950/40'  },
+  { name: 'FRED',          color: 'text-amber-400  border-amber-900  bg-amber-950/40'  },
+  { name: 'Frankfurter',   color: 'text-purple-400 border-purple-900 bg-purple-950/40' },
+  { name: 'Polymarket',    color: 'text-pink-400   border-pink-900   bg-pink-950/40'   },
+  { name: 'Kalshi',        color: 'text-sky-400    border-sky-900    bg-sky-950/40'    },
   { name: 'Yahoo Finance', color: 'text-violet-400 border-violet-900 bg-violet-950/40' },
-  { name: 'Google News', color: 'text-red-400 border-red-900 bg-red-950/40' },
-  { name: 'Claude AI', color: 'text-orange-400 border-orange-900 bg-orange-950/40' },
+  { name: 'Google News',   color: 'text-red-400    border-red-900    bg-red-950/40'    },
+  { name: 'Claude AI',     color: 'text-orange-400 border-orange-900 bg-orange-950/40' },
 ]
 
 const SETUP_STEPS = [
-  { step: '01', cmd: 'git clone github.com/jpoindexter/monoth', label: 'Clone the repo' },
-  { step: '02', cmd: 'cp .env.example .env  # add your API keys', label: 'Configure env vars' },
-  { step: '03', cmd: 'npm install && npm run dev', label: 'Start the dashboard' },
+  { step: '01', cmd: 'git clone github.com/jpoindexter/monoth', label: 'Clone the repo'      },
+  { step: '02', cmd: 'cp .env.example .env  # add your API keys',  label: 'Configure env vars' },
+  { step: '03', cmd: 'npm install && npm run dev',                  label: 'Start the dashboard'},
 ]
 
-// --- Animated counter ---
-function useCountUp(target: number, duration = 1200) {
-  const [value, setValue] = useState(0)
-  const raf = useRef<number>(0)
-
-  useEffect(() => {
-    const start = performance.now()
-    function tick(now: number) {
-      const elapsed = now - start
-      const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setValue(Math.round(eased * target))
-      if (progress < 1) {
-        raf.current = requestAnimationFrame(tick)
-      }
-    }
-    raf.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf.current)
-  }, [target, duration])
-
-  return value
-}
-
-// --- Preview card types ---
-interface PreviewCard {
-  symbol: string
-  label: string
-  price: number
-  change: number
-}
-
-interface TickerItem {
-  symbol: string
-  price: number
-  changePercent: number
-}
-
-function fmt(n: number) {
-  return n >= 1000 ? n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : n.toFixed(2)
-}
-
-function MarketBar() {
-  const [tickers, setTickers] = useState<TickerItem[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      try {
-        const [quotes, crypto] = await Promise.all([fetchQuotes(['SPY']), fetchCryptoPrices()])
-        if (cancelled) return
-        const items: TickerItem[] = []
-        const spy = quotes.find((q) => q.symbol === 'SPY')
-        if (spy) items.push({ symbol: 'SPY', price: spy.price, changePercent: spy.changePercent })
-        const btc = crypto.find((c) => c.symbol?.toUpperCase() === 'BTC' || c.id === 'bitcoin')
-        const eth = crypto.find((c) => c.symbol?.toUpperCase() === 'ETH' || c.id === 'ethereum')
-        if (btc) items.push({ symbol: 'BTC', price: btc.price, changePercent: btc.changePercent24h ?? 0 })
-        if (eth) items.push({ symbol: 'ETH', price: eth.price, changePercent: eth.changePercent24h ?? 0 })
-        setTickers(items)
-      } catch {
-        // silently fail
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-    load()
-    return () => { cancelled = true }
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="border-b border-zinc-800 bg-zinc-950 py-2 px-6">
-        <div className="max-w-7xl mx-auto flex items-center gap-6 justify-center">
-          {['SPY', 'BTC', 'ETH'].map((s) => (
-            <div key={s} className="flex items-center gap-2">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{s}</span>
-              <span className="text-[10px] font-mono text-zinc-700 animate-pulse">---</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (tickers.length === 0) return null
-
-  return (
-    <motion.div
-      className="border-b border-zinc-800 bg-zinc-950 py-2 px-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-    >
-      <div className="max-w-7xl mx-auto flex items-center gap-6 justify-center flex-wrap">
-        <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest hidden sm:block">Live</span>
-        {tickers.map((t) => {
-          const up = t.changePercent >= 0
-          return (
-            <div key={t.symbol} className="flex items-center gap-1.5">
-              <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">{t.symbol}</span>
-              <span className="text-[11px] font-mono text-zinc-100 tabular-nums">{fmt(t.price)}</span>
-              <span className={`text-[10px] font-mono tabular-nums ${up ? 'text-emerald-400' : 'text-red-400'}`}>
-                {up ? '+' : ''}{t.changePercent.toFixed(2)}%
-              </span>
-            </div>
-          )
-        })}
-        <span className="text-[10px] font-mono text-zinc-700 hidden sm:block">Delayed</span>
-      </div>
-    </motion.div>
-  )
-}
-
-function LivePreview() {
-  const [cards, setCards] = useState<PreviewCard[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      try {
-        const [quotes, crypto] = await Promise.all([fetchQuotes(['SPY', 'GLD']), fetchCryptoPrices()])
-        if (cancelled) return
-        const result: PreviewCard[] = []
-        const spy = quotes.find((q) => q.symbol === 'SPY')
-        if (spy) result.push({ symbol: 'SPY', label: 'S&P 500 ETF', price: spy.price, change: spy.changePercent })
-        const btc = crypto.find((c) => c.symbol?.toUpperCase() === 'BTC' || c.id === 'bitcoin')
-        if (btc) result.push({ symbol: 'BTC', label: 'Bitcoin', price: btc.price, change: btc.changePercent24h ?? 0 })
-        try {
-          const fx = await fetch('/api/forex/rates').then((r) => r.json()).catch(() => null)
-          const eurusd = fx?.rates?.USD ?? fx?.EUR?.USD ?? null
-          if (eurusd) result.push({ symbol: 'EUR/USD', label: 'Euro / Dollar', price: eurusd, change: 0 })
-        } catch { /* skip */ }
-        const gld = quotes.find((q) => q.symbol === 'GLD')
-        if (gld) result.push({ symbol: 'GLD', label: 'Gold ETF', price: gld.price, change: gld.changePercent })
-        setCards(result.slice(0, 4))
-      } catch { /* fail silently */ } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-    load()
-    return () => { cancelled = true }
-  }, [])
-
-  const placeholders = [
-    { symbol: 'SPY', label: 'S&P 500 ETF' },
-    { symbol: 'BTC', label: 'Bitcoin' },
-    { symbol: 'EUR/USD', label: 'Euro / Dollar' },
-    { symbol: 'GLD', label: 'Gold ETF' },
-  ]
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.5 }}
-      className="max-w-4xl mx-auto px-6 pb-20"
-    >
-      <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest text-center mb-4">Live market snapshot</p>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {loading
-          ? placeholders.map((p) => (
-              <div key={p.symbol} className="backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-4 flex flex-col gap-2">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{p.symbol}</span>
-                <span className="text-[11px] text-zinc-600 font-mono">{p.label}</span>
-                <div className="h-5 w-20 bg-zinc-800 rounded animate-pulse" />
-                <div className="h-4 w-12 bg-zinc-800 rounded animate-pulse" />
-              </div>
-            ))
-          : (cards.length > 0 ? cards : placeholders.map((p) => ({ ...p, price: 0, change: 0 }))).map((c) => {
-              const up = c.change >= 0
-              return (
-                <motion.div
-                  key={c.symbol}
-                  whileHover={{ scale: 1.02 }}
-                  className="backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-4 flex flex-col gap-1 hover:border-white/20 transition-colors"
-                >
-                  <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">{c.symbol}</span>
-                  <span className="text-[11px] text-zinc-500 font-mono truncate">{c.label}</span>
-                  <span className="text-base font-mono font-semibold text-white tabular-nums mt-1">
-                    {c.price > 0 ? fmt(c.price) : '---'}
-                  </span>
-                  {c.change !== 0 && (
-                    <span className={`text-xs font-mono tabular-nums ${up ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {up ? '+' : ''}{c.change.toFixed(2)}%
-                    </span>
-                  )}
-                </motion.div>
-              )
-            })}
-      </div>
-    </motion.div>
-  )
-}
-
-// --- Page ---
+// ─── Page ──────────────────────────────────────────────────────────────────────
 export function Landing() {
+  useFonts()
   const panelCount = useCountUp(60, 1400)
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Live market bar */}
+    <div
+      className="min-h-screen bg-black text-zinc-100 antialiased"
+      style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}
+    >
       <MarketBar />
 
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 max-w-7xl mx-auto">
-        <span className="font-mono text-sm font-semibold tracking-widest text-zinc-300 uppercase">Monoth</span>
-        <div className="flex items-center gap-3">
-          <a
-            href="https://github.com/jpoindexter/monoth"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            <GitHubIcon />
-            <span className="hidden sm:inline">GitHub</span>
-          </a>
-          <Link to="/dashboard">
-            <Button size="sm" variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-              Dashboard
-            </Button>
+      {/* ── Nav ───────────────────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-40 border-b border-zinc-900 bg-black/95 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 h-12 flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-2">
+            <LogoMark />
+            <span className="font-mono text-[10px] font-semibold tracking-[0.22em] text-white uppercase">
+              Monoth
+            </span>
           </Link>
+
+          <div className="hidden md:flex items-center gap-5 ml-6">
+            {['Features', 'Data', 'Setup'].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-[12px] text-zinc-600 hover:text-zinc-300 transition-colors"
+              >
+                {item}
+              </a>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2.5 ml-auto">
+            <a
+              href="https://github.com/jpoindexter/monoth"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[11px] text-zinc-600 hover:text-zinc-300 transition-colors font-mono"
+            >
+              <GitHubIcon />
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+            <Link to="/dashboard">
+              <button className="h-7 px-4 rounded-[3px] bg-white text-black text-[11px] font-semibold hover:bg-zinc-200 transition-colors">
+                Launch →
+              </button>
+            </Link>
+          </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section
-        className="relative flex flex-col items-center text-center px-6 pt-24 pb-20 max-w-4xl mx-auto overflow-hidden"
-        style={{ isolation: 'isolate' }}
-      >
+      {/* ── Hero ──────────────────────────────────────────────────────────── */}
+      <section className="relative max-w-7xl mx-auto px-6 pt-28 pb-20 text-center overflow-hidden">
         <div
-          className="absolute inset-0 -z-10 opacity-20 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse 80% 50% at 50% -20%, #22c55e33 0%, transparent 70%)',
-            animation: 'pulse 6s ease-in-out infinite',
-          }}
+          className="absolute inset-0 -z-10 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 60% 35% at 50% 0%, rgba(16,185,129,0.07) 0%, transparent 70%)' }}
         />
 
-        {/* Open source badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full border border-zinc-700 bg-zinc-900 text-xs font-mono text-zinc-400 tracking-wider uppercase"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Open source &mdash; {panelCount} panels</span>
-        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <div className="inline-flex items-center gap-2 mb-8 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-950 text-[9px] font-mono text-zinc-500 tracking-[0.15em] uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Open source — {panelCount} panels
+          </div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight mb-6"
-        >
-          Market Intelligence<br />for Everyone
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-lg text-zinc-400 max-w-2xl mb-3 leading-relaxed"
-        >
-          Real-time data across equities, crypto, forex, commodities, and prediction markets.
-          Self-host it. Fork it. Make it yours.
-        </motion.p>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-xs font-mono text-zinc-600 mb-10 tracking-wide"
-        >
-          14+ data sources &nbsp;&bull;&nbsp; Polymarket + Kalshi &nbsp;&bull;&nbsp; No login required &nbsp;&bull;&nbsp; MIT license
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="flex flex-wrap gap-3 justify-center"
-        >
-          <Link to="/dashboard">
-            <Button size="lg" className="bg-white text-zinc-900 hover:bg-zinc-200 font-semibold px-8">
-              Launch Dashboard
-            </Button>
-          </Link>
-          <a
-            href="https://github.com/jpoindexter/monoth"
-            target="_blank"
-            rel="noopener noreferrer"
+          <h1
+            className="text-5xl sm:text-7xl md:text-8xl font-bold leading-[1.02] tracking-tight text-white mb-8"
+            style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
           >
-            <Button size="lg" variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 px-8 gap-2">
-              <GitHubIcon />
-              Star on GitHub
-            </Button>
-          </a>
+            Market Intelligence
+            <br />
+            <em className="not-italic text-zinc-500">in one dashboard.</em>
+          </h1>
+
+          <p className="text-lg text-zinc-500 max-w-lg mx-auto mb-3 leading-relaxed font-light">
+            Real-time data across equities, crypto, forex, commodities,
+            and prediction markets. No login. No account. Just open it and go.
+          </p>
+
+          <p className="font-mono text-[10px] text-zinc-700 mb-10 tracking-widest">
+            14+ data sources &nbsp;·&nbsp; Polymarket + Kalshi &nbsp;·&nbsp; No login required &nbsp;·&nbsp; MIT license
+          </p>
+
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link to="/dashboard">
+              <button className="h-10 px-7 rounded-[3px] bg-white text-black text-[13px] font-semibold hover:bg-zinc-100 transition-colors">
+                Launch Dashboard
+              </button>
+            </Link>
+            <a href="https://github.com/jpoindexter/monoth" target="_blank" rel="noopener noreferrer">
+              <button className="h-10 px-7 rounded-[3px] border border-zinc-700 text-zinc-300 text-[13px] hover:border-zinc-500 hover:bg-zinc-900/60 transition-colors flex items-center gap-2">
+                <GitHubIcon />
+                Star on GitHub
+              </button>
+            </a>
+          </div>
         </motion.div>
       </section>
 
-      {/* Live preview cards */}
-      <LivePreview />
+      {/* ── Dashboard preview ─────────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.25 }}
+        className="pb-32"
+      >
+        <DashboardPreview />
+      </motion.div>
 
-      {/* Stats strip */}
-      <section className="border-y border-zinc-800 bg-zinc-900">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-zinc-800">
-          {[
-            { label: '60 Panels', sub: 'dashboard widgets' },
-            { label: '14+ Sources', sub: 'live market feeds' },
-            { label: '6 Asset Classes', sub: 'in a single view' },
-            { label: 'MIT License', sub: 'free to self-host' },
-          ].map((s) => (
-            <div key={s.label} className="flex flex-col items-center py-8 px-4 gap-1">
-              <span className="font-mono text-2xl font-bold text-white">{s.label}</span>
-              <span className="text-xs text-zinc-500 uppercase tracking-wide">{s.sub}</span>
+      {/* ── Sections ──────────────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-6" id="features">
+
+        {/* 01 — All the data */}
+        <SectionMark num="01" label="All the data" tag="Panels" />
+        <div className="py-20 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2
+              className="text-4xl md:text-5xl font-bold text-white mb-6 leading-[1.1]"
+              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
+            >
+              60 panels.
+              <br />
+              <em className="not-italic text-zinc-500">Every asset class.</em>
+            </h2>
+            <p className="text-zinc-500 leading-relaxed mb-8 text-[15px]">
+              Equities, crypto, forex, commodities, fixed income, prediction markets, macro data,
+              congress trades, options flow, dark pool activity — all in one configurable dashboard.
+              Toggle what you need, hide what you don't.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { n: '60',  label: 'Live panels'   },
+                { n: '14+', label: 'Data sources'  },
+                { n: '6',   label: 'Asset classes' },
+                { n: '6',   label: 'Preset layouts'},
+              ].map((s) => (
+                <div key={s.label} className="border border-zinc-800 rounded-[3px] p-4">
+                  <div className="font-mono text-3xl font-bold text-white leading-none mb-1">{s.n}</div>
+                  <div className="font-mono text-[9px] text-zinc-600 uppercase tracking-widest">{s.label}</div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div className="border border-zinc-800 rounded-[3px] bg-zinc-950 overflow-hidden">
+            <div className="px-4 py-2 border-b border-zinc-800 flex items-center justify-between">
+              <span className="font-mono text-[9px] text-zinc-600 uppercase tracking-widest">Active panels</span>
+              <span className="font-mono text-[9px] text-emerald-600">60 enabled</span>
+            </div>
+            <div className="divide-y divide-zinc-900">
+              {[
+                'Live Markets', 'Futures Strip', 'Sector Heatmap', 'Watchlist',
+                'Prediction Markets', 'Congress Trades', 'Crypto Markets', 'Options Flow',
+                'Dark Pool Activity', 'Yield Curve', 'Credit Spreads', 'FX Heatmap',
+                'AI Insights', 'Economic Calendar',
+              ].map((p) => (
+                <div key={p} className="flex items-center justify-between px-4 py-2.5">
+                  <span className="text-[12px] text-zinc-300">{p}</span>
+                  <span
+                    className="w-1.5 h-1.5 rounded-full bg-emerald-500/50"
+                    style={{ boxShadow: '0 0 4px rgba(16,185,129,0.4)' }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </section>
 
-      {/* Feature grid */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-24">
-        <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest text-center mb-3">What you get</p>
-        <h2 className="text-3xl font-bold text-center mb-14 text-white">Built for serious market watchers</h2>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-          {FEATURE_GRID.map((f, i) => (
-            <motion.div
-              key={f.label}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: i * 0.06 }}
-              whileHover={{ scale: 1.02 }}
-              className="group flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-5 hover:border-emerald-900/60 hover:shadow-[0_0_16px_rgba(16,185,129,0.06)] transition-all cursor-default"
-            >
-              <div className="text-zinc-400 group-hover:text-emerald-400 transition-colors">{f.icon}</div>
-              <div>
-                <p className="text-sm font-semibold text-white font-mono">{f.label}</p>
-                <p className="text-xs text-zinc-500 mt-0.5">{f.desc}</p>
+        {/* 02 — Prediction markets */}
+        <SectionMark num="02" label="Prediction Markets" tag="Signals" />
+        <div className="py-20 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div className="order-2 md:order-1 space-y-2">
+            {[
+              ...MOCK_PREDICTIONS,
+              { title: 'Recession in 2025?',     yes: 28, no: 72, src: 'KALSHI' },
+              { title: 'Gold above $3,500 EOY?', yes: 44, no: 56, src: 'POLY'   },
+            ].map((p) => (
+              <div key={p.title} className="border border-zinc-800 rounded-[3px] p-4 bg-zinc-950">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[12px] text-zinc-300 leading-snug flex-1 pr-3">{p.title}</span>
+                  <span className={`font-mono text-[8px] px-1.5 py-0.5 rounded-[2px] border shrink-0 ${
+                    p.src === 'KALSHI'
+                      ? 'border-sky-900 bg-sky-950/80 text-sky-400'
+                      : 'border-purple-900 bg-purple-950/80 text-purple-400'
+                  }`}>{p.src}</span>
+                </div>
+                <div className="flex h-2 rounded-[2px] overflow-hidden bg-zinc-800/60">
+                  <div className="bg-emerald-600" style={{ width: `${p.yes}%` }} />
+                  <div className="bg-red-900/70" style={{ width: `${p.no}%` }} />
+                </div>
+                <div className="flex justify-between mt-1.5">
+                  <span className="font-mono text-[10px] text-emerald-500">Yes {p.yes}%</span>
+                  <span className="font-mono text-[10px] text-zinc-700">No {p.no}%</span>
+                </div>
               </div>
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {FEATURES.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: i * 0.08 }}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 hover:border-zinc-600 hover:shadow-[0_0_20px_rgba(255,255,255,0.04)] transition-all"
+            ))}
+          </div>
+          <div className="order-1 md:order-2">
+            <h2
+              className="text-4xl md:text-5xl font-bold text-white mb-6 leading-[1.1]"
+              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
-              <div className="inline-block mb-4 px-2 py-0.5 rounded border border-zinc-700 bg-zinc-800 text-xs font-mono text-zinc-400 tracking-widest">
-                {f.tag}
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{f.title}</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed">{f.desc}</p>
-            </motion.div>
-          ))}
+              The market's
+              <br />
+              <em className="not-italic text-zinc-500">collective forecast.</em>
+            </h2>
+            <p className="text-zinc-500 leading-relaxed mb-6 text-[15px]">
+              Live odds from Polymarket and Kalshi — both sources, side by side. Probability bars
+              for rate decisions, macro outcomes, election results, and crypto targets. 86+ markets,
+              refreshed every 5 minutes.
+            </p>
+            <div className="flex gap-3">
+              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] px-2.5 py-1 rounded-[2px] border border-purple-900 bg-purple-950/50 text-purple-400">
+                Polymarket
+              </span>
+              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] px-2.5 py-1 rounded-[2px] border border-sky-900 bg-sky-950/50 text-sky-400">
+                Kalshi
+              </span>
+            </div>
+          </div>
         </div>
-      </section>
 
-      {/* Self-host setup */}
-      <section className="bg-zinc-900 border-y border-zinc-800">
-        <div className="max-w-3xl mx-auto px-6 py-24">
-          <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest text-center mb-3">Self-host in minutes</p>
-          <h2 className="text-3xl font-bold text-center mb-14 text-white">Run it yourself</h2>
-          <div className="space-y-4">
+        {/* 03 — Alerts */}
+        <SectionMark num="03" label="Price Alerts" tag="Monitoring" />
+        <div className="py-20 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2
+              className="text-4xl md:text-5xl font-bold text-white mb-6 leading-[1.1]"
+              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
+            >
+              Don't watch.
+              <br />
+              <em className="not-italic text-zinc-500">Get notified.</em>
+            </h2>
+            <p className="text-zinc-500 leading-relaxed mb-8 text-[15px]">
+              Set price alerts on any symbol in your watchlist. When triggered, the entire
+              dashboard flashes red and you get a browser notification. No email. No app. No noise.
+            </p>
+            <div className="space-y-2">
+              {[
+                { sym: 'SPY',  dir: 'above', price: '$550.00', status: 'watching'  },
+                { sym: 'BTC',  dir: 'below', price: '$80,000', status: 'watching'  },
+                { sym: 'NVDA', dir: 'above', price: '$900.00', status: 'triggered' },
+              ].map((a) => (
+                <div
+                  key={a.sym}
+                  className={`flex items-center justify-between border rounded-[3px] px-4 py-3 ${
+                    a.status === 'triggered'
+                      ? 'border-red-800/80 bg-red-950/20'
+                      : 'border-zinc-800 bg-zinc-950'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-[13px] font-bold text-white">{a.sym}</span>
+                    <span className="font-mono text-[10px] text-zinc-600">{a.dir} {a.price}</span>
+                  </div>
+                  <span className={`font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] ${
+                    a.status === 'triggered'
+                      ? 'bg-red-500 text-white'
+                      : 'bg-zinc-800/80 text-zinc-600'
+                  }`}>{a.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-zinc-800 rounded-[3px] bg-zinc-950 p-6">
+            <div className="font-mono text-[9px] text-zinc-600 uppercase tracking-widest mb-5">When an alert fires</div>
+            <div className="space-y-4">
+              {[
+                { icon: '⚡', text: 'Red border flashes across the full dashboard' },
+                { icon: '🔔', text: 'Browser notification with symbol + price'    },
+                { icon: '📌', text: 'Red toast bottom-right with details'          },
+                { icon: '✓',  text: 'Alert marked triggered, stays in history'    },
+              ].map((i) => (
+                <div key={i.text} className="flex items-start gap-3 pb-4 border-b border-zinc-900 last:border-0 last:pb-0">
+                  <span className="text-base leading-none mt-0.5">{i.icon}</span>
+                  <span className="text-[13px] text-zinc-400 leading-snug">{i.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 04 — Layouts */}
+        <SectionMark num="04" label="Preset Layouts" tag="Customize" />
+        <div className="py-20 grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+          <div className="order-2 md:order-1 grid grid-cols-2 gap-2">
+            {[
+              { name: 'Overview', active: true },
+              { name: 'Markets',  active: false },
+              { name: 'Macro',    active: false },
+              { name: 'Crypto',   active: false },
+              { name: 'News',     active: false },
+              { name: 'Video',    active: false },
+            ].map((l) => (
+              <div
+                key={l.name}
+                className={`border rounded-[3px] p-4 ${l.active ? 'border-emerald-800/60 bg-emerald-950/15' : 'border-zinc-800 bg-zinc-950'}`}
+              >
+                <div className={`font-mono text-[9px] uppercase tracking-widest mb-3 ${l.active ? 'text-emerald-500' : 'text-zinc-700'}`}>
+                  {l.name}
+                </div>
+                <div className="grid grid-cols-3 gap-[2px]">
+                  {[2, 1, 2, 1, 1, 2].map((w, j) => (
+                    <div
+                      key={j}
+                      className={`h-3 rounded-[1px] ${l.active ? 'bg-emerald-900/50' : 'bg-zinc-800/80'}`}
+                      style={{ gridColumn: `span ${w}` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="order-1 md:order-2">
+            <h2
+              className="text-4xl md:text-5xl font-bold text-white mb-6 leading-[1.1]"
+              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
+            >
+              Six presets.
+              <br />
+              <em className="not-italic text-zinc-500">One click to switch.</em>
+            </h2>
+            <p className="text-zinc-500 leading-relaxed mb-6 text-[15px]">
+              Overview, Markets, Macro, Crypto, News, Video — each preset activates a curated
+              set of panels optimized for that workflow. Or build your own by toggling panels
+              individually in settings.
+            </p>
+            <p className="font-mono text-[11px] text-zinc-700">
+              Layouts persist across sessions. Panels remember their state.
+            </p>
+          </div>
+        </div>
+
+        {/* 05 — Private by default */}
+        <SectionMark num="05" label="Private by default" tag="Data" />
+        <div className="py-20">
+          <div className="text-center mb-14">
+            <h2
+              className="text-4xl md:text-5xl font-bold text-white mb-3 leading-[1.1]"
+              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
+            >
+              No account. No tracking.
+              <br />
+              <em className="not-italic text-zinc-500">Your data stays local.</em>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                title: 'No login required',
+                desc:  "Open the dashboard and it works. No email, no password, no OAuth. Your watchlist and settings live in localStorage.",
+              },
+              {
+                title: 'No server-side storage',
+                desc:  "We don't store your watchlist, portfolio, or alerts on any server. Everything is local to your browser.",
+              },
+              {
+                title: 'Self-host it',
+                desc:  "Clone the repo and run it on your own infrastructure. MIT licensed — own the code, own the data, own the stack.",
+              },
+            ].map((f) => (
+              <div key={f.title} className="border border-zinc-800 rounded-[3px] bg-zinc-950 p-6">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mb-4" style={{ boxShadow: '0 0 6px rgba(16,185,129,0.5)' }} />
+                <h3 className="text-[15px] font-semibold text-white mb-2">{f.title}</h3>
+                <p className="text-[13px] text-zinc-600 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Data sources ──────────────────────────────────────────────────── */}
+      <div className="border-y border-zinc-900 bg-zinc-950/40 py-16" id="data">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="font-mono text-[9px] text-zinc-700 uppercase tracking-widest text-center mb-8">
+            Data powered by
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {DATA_SOURCES.map((s) => (
+              <motion.span
+                key={s.name}
+                whileHover={{ scale: 1.04 }}
+                className={`inline-flex items-center px-3 py-1.5 rounded-[3px] border font-mono text-[10px] tracking-wide font-medium ${s.color}`}
+              >
+                {s.name}
+              </motion.span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Setup ─────────────────────────────────────────────────────────── */}
+      <div className="py-24 bg-black" id="setup">
+        <div className="max-w-3xl mx-auto px-6">
+          <SectionMark num="06" label="Self-host in minutes" tag="Setup" />
+          <h2
+            className="text-4xl font-bold text-white mt-12 mb-10"
+            style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
+          >
+            Run it yourself.
+          </h2>
+          <div className="space-y-2">
             {SETUP_STEPS.map((s, i) => (
               <motion.div
                 key={s.step}
@@ -501,79 +718,71 @@ export function Landing() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, delay: i * 0.1 }}
-                className="flex items-start gap-4 rounded-xl border border-zinc-800 bg-zinc-950 p-5"
+                className="flex items-start gap-5 border border-zinc-800/60 bg-zinc-950 rounded-[3px] px-5 py-4"
               >
-                <span className="font-mono text-xs text-zinc-600 pt-0.5 flex-shrink-0">{s.step}</span>
+                <span className="font-mono text-[10px] text-zinc-700 pt-0.5 shrink-0">{s.step}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-zinc-500 mb-1.5 uppercase tracking-wide font-mono">{s.label}</p>
-                  <code className="text-sm text-emerald-400 font-mono break-all">{s.cmd}</code>
+                  <p className="font-mono text-[9px] text-zinc-700 uppercase tracking-widest mb-1.5">{s.label}</p>
+                  <code className="text-[13px] text-emerald-400 font-mono break-all">{s.cmd}</code>
                 </div>
               </motion.div>
             ))}
           </div>
-          <p className="text-center text-xs text-zinc-600 font-mono mt-8">
-            Requires Node 20+. Free API keys from Finnhub, CoinGecko, and FRED.
+          <p className="font-mono text-[10px] text-zinc-800 text-center mt-8">
+            Requires Node 20+. Free API keys from Finnhub, CoinGecko, FRED, and Kalshi.
           </p>
         </div>
-      </section>
+      </div>
 
-      {/* Data Sources */}
-      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
-        <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest mb-8">Data powered by</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          {DATA_SOURCES.map((s) => (
-            <motion.span
-              key={s.name}
-              whileHover={{ scale: 1.04 }}
-              className={`inline-flex items-center px-3 py-1.5 rounded-lg border font-mono text-[11px] tracking-wide font-medium ${s.color}`}
+      {/* ── Final CTA ─────────────────────────────────────────────────────── */}
+      <div className="border-t border-zinc-900">
+        <div className="max-w-4xl mx-auto px-6 py-36 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="font-mono text-[9px] text-zinc-700 uppercase tracking-widest mb-8">Try Monoth today</p>
+            <h2
+              className="text-5xl md:text-7xl font-bold text-white mb-4 leading-[1.05]"
+              style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
-              {s.name}
-            </motion.span>
-          ))}
+              Everything in one place.
+              <br />
+              <em className="not-italic text-zinc-600">Free, forever.</em>
+            </h2>
+            <p className="text-zinc-600 mb-12 text-lg font-light">
+              No account. No pricing page. Just open it.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Link to="/dashboard">
+                <button className="h-11 px-10 rounded-[3px] bg-white text-black text-[13px] font-semibold hover:bg-zinc-100 transition-colors">
+                  Launch Dashboard →
+                </button>
+              </Link>
+              <a href="https://github.com/jpoindexter/monoth" target="_blank" rel="noopener noreferrer">
+                <button className="h-11 px-8 rounded-[3px] border border-zinc-700 text-zinc-500 text-[13px] hover:border-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-2">
+                  <GitHubIcon />
+                  Star on GitHub
+                </button>
+              </a>
+            </div>
+          </motion.div>
         </div>
-      </section>
+      </div>
 
-      {/* GitHub CTA */}
-      <section className="border-t border-zinc-800 bg-zinc-900 text-center px-6 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-800 mb-6 mx-auto text-zinc-400">
-            <GitHubIcon />
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
+      <footer className="border-t border-zinc-900 px-6 py-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <LogoMark />
+            <span className="font-mono text-[9px] text-zinc-700 uppercase tracking-widest">Monoth</span>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-4">Open source. Fork it.</h2>
-          <p className="text-zinc-400 mb-8 max-w-md mx-auto">
-            MIT licensed. Add panels, swap data sources, deploy to your own infra.
-            PRs welcome.
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Link to="/dashboard">
-              <Button size="lg" className="bg-white text-zinc-900 hover:bg-zinc-200 font-semibold px-10">
-                Launch Dashboard
-              </Button>
-            </Link>
-            <a
-              href="https://github.com/jpoindexter/monoth"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="lg" variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 px-8 gap-2">
-                <StarIcon />
-                Star on GitHub
-              </Button>
-            </a>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-zinc-800 px-6 py-8 text-center">
-        <p className="text-xs text-zinc-600 font-mono">
-          Monoth &mdash; Open source market intelligence. MIT license. Not financial advice.
-        </p>
+          <span className="font-mono text-[9px] text-zinc-800">
+            © 2025 · MIT License · Not financial advice.
+          </span>
+        </div>
       </footer>
     </div>
   )
