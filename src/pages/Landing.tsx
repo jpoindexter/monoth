@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion } from 'motion/react'
-import { fetchQuotes } from '@/services/api/market'
-import { fetchCryptoPrices } from '@/services/api/crypto'
+import { StatsBar } from '@/components/layout/StatsBar'
+import { NewsTicker } from '@/components/layout/NewsTicker'
 
 // ─── Section label (Caret pattern) ────────────────────────────────────────────
 function SectionMark({ num, label, tag }: { num: string; label: string; tag: string }) {
@@ -183,61 +183,6 @@ function DashboardPreview() {
   )
 }
 
-// ─── Live ticker bar ───────────────────────────────────────────────────────────
-interface TickerItem { symbol: string; price: number; changePercent: number }
-
-function fmt(n: number) {
-  return n >= 1000
-    ? n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    : n.toFixed(2)
-}
-
-function MarketBar() {
-  const [tickers, setTickers] = useState<TickerItem[]>([])
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      try {
-        const [quotes, crypto] = await Promise.all([fetchQuotes(['SPY', 'QQQ']), fetchCryptoPrices()])
-        if (cancelled) return
-        const items: TickerItem[] = []
-        for (const q of quotes) items.push({ symbol: q.symbol, price: q.price, changePercent: q.changePercent })
-        const btc = crypto.find((c) => c.symbol?.toUpperCase() === 'BTC' || c.id === 'bitcoin')
-        if (btc) items.push({ symbol: 'BTC', price: btc.price, changePercent: btc.changePercent24h ?? 0 })
-        setTickers(items)
-      } catch {}
-    }
-    load()
-    return () => { cancelled = true }
-  }, [])
-
-  if (tickers.length === 0) return null
-
-  return (
-    <div className="border-b border-zinc-900/80 bg-black py-1.5 px-4">
-      <div className="max-w-7xl mx-auto flex items-center gap-6 overflow-x-auto">
-        <span className="font-mono text-[8px] text-zinc-700 uppercase tracking-widest shrink-0 flex items-center gap-1.5">
-          <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-          Live
-        </span>
-        {tickers.map((t) => {
-          const up = t.changePercent >= 0
-          return (
-            <div key={t.symbol} className="flex items-center gap-1.5 shrink-0">
-              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest">{t.symbol}</span>
-              <span className="font-mono text-[9px] text-zinc-200 tabular-nums">{fmt(t.price)}</span>
-              <span className={`font-mono text-[9px] tabular-nums ${up ? 'text-emerald-500' : 'text-red-400'}`}>
-                {up ? '+' : ''}{t.changePercent.toFixed(2)}%
-              </span>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 // ─── Counter ───────────────────────────────────────────────────────────────────
 function useCountUp(target: number, duration = 1200) {
   const [value, setValue] = useState(0)
@@ -299,7 +244,7 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 antialiased">
-      <MarketBar />
+      <StatsBar />
 
       {/* ── Nav ───────────────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-40 border-b border-zinc-900 bg-black/95 backdrop-blur-md">
@@ -821,6 +766,8 @@ export function Landing() {
           </motion.div>
         </div>
       </div>
+
+      <NewsTicker />
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="border-t border-zinc-900 px-6 py-8">
