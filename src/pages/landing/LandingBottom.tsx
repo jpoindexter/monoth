@@ -89,8 +89,8 @@ export function SetupSection() {
   return (
     <div className="py-24 bg-[#0e0e0e]" id="setup">
       <div className="max-w-3xl mx-auto px-6">
-        <SectionMark num="06" label="Self-host in minutes" tag="Setup" />
-        <h2 className="text-4xl font-bold text-white mt-12 mb-10">Run it yourself.</h2>
+        <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest mb-12">Self-host in minutes</p>
+        <h2 className="text-4xl font-bold text-white mb-10">Run it yourself.</h2>
         <div className="space-y-2">
           {SETUP_STEPS.map((s, i) => (
             <motion.div
@@ -167,12 +167,12 @@ export function CTASection() {
           <p className="text-zinc-400 mb-12 text-lg font-light">No account required. Just open it.</p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link to="/dashboard">
-              <button className="h-11 px-10 rounded-[3px] bg-white text-black text-[13px] font-semibold hover:bg-zinc-100 transition-colors">
+              <button className="h-11 px-10 rounded-[3px] bg-emerald-500 text-black text-[13px] font-semibold hover:bg-emerald-400 transition-colors">
                 Launch Dashboard →
               </button>
             </Link>
             <a href="https://github.com/jpoindexter/monoth" target="_blank" rel="noopener noreferrer">
-              <button className="h-11 px-8 rounded-[3px] border border-zinc-700 text-zinc-400 text-[13px] hover:border-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-2">
+              <button className="h-11 px-8 rounded-[3px] border border-zinc-700 text-zinc-300 text-[13px] hover:border-zinc-500 hover:bg-zinc-900/60 transition-colors flex items-center gap-2">
                 <GitHubIcon />
                 Star on GitHub
               </button>
