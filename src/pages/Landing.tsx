@@ -623,6 +623,71 @@ export function Landing() {
         </div>
       </div>
 
+      {/* ── Docs ──────────────────────────────────────────────────────────── */}
+      <div className="border-t border-zinc-900 py-24" id="docs">
+        <div className="max-w-7xl mx-auto px-6">
+          <SectionMark num="07" label="How it works" tag="Docs" />
+          <div className="pt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            {/* Keyboard shortcuts */}
+            <div>
+              <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest mb-5">Keyboard shortcuts</p>
+              <div className="space-y-2">
+                {[
+                  { key: '/',  label: 'Command palette'   },
+                  { key: 'R',  label: 'Refresh all panels' },
+                  { key: 'D',  label: 'Cycle theme'        },
+                  { key: 'L',  label: 'Lock layout'        },
+                  { key: '?',  label: 'Show shortcuts'     },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                    <span className="text-[12px] text-zinc-400">{label}</span>
+                    <kbd className="font-mono text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded-[3px]">{key}</kbd>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Panels */}
+            <div>
+              <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest mb-5">Panels</p>
+              <div className="space-y-3">
+                {[
+                  { title: 'Toggle panels',   desc: 'Open Settings → Panels. Enable or disable any of the 60 panels individually.' },
+                  { title: 'Switch layouts',  desc: 'Open Settings → Layouts. Six presets — Overview, Markets, Macro, Crypto, News, Video.' },
+                  { title: 'Drag to reorder', desc: 'Unlock the layout (L), then drag panels into any order. Lock again to save.' },
+                  { title: 'Expand a panel',  desc: 'Click the expand icon on any panel to view it full-screen.' },
+                ].map(({ title, desc }) => (
+                  <div key={title} className="border-b border-zinc-900 pb-3">
+                    <p className="text-[12px] text-white mb-0.5">{title}</p>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tips */}
+            <div>
+              <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest mb-5">Tips</p>
+              <div className="space-y-3">
+                {[
+                  { title: 'Watchlist',      desc: 'Add any ticker symbol to your watchlist. Click a symbol to see detailed charts and data.' },
+                  { title: 'Price alerts',   desc: 'Set above/below alerts on watchlist symbols. The dashboard flashes red when triggered.' },
+                  { title: 'Command palette', desc: 'Press / to search panels, symbols, and actions from anywhere in the dashboard.' },
+                  { title: 'AI Insights',    desc: 'Add your Anthropic API key in the AI Insights panel to generate live market briefs.' },
+                ].map(({ title, desc }) => (
+                  <div key={title} className="border-b border-zinc-900 pb-3">
+                    <p className="text-[12px] text-white mb-0.5">{title}</p>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       {/* ── Setup ─────────────────────────────────────────────────────────── */}
       <div className="py-24 bg-[#0e0e0e]" id="setup">
         <div className="max-w-3xl mx-auto px-6">

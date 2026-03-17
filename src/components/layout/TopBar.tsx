@@ -86,6 +86,13 @@ export function TopBar() {
           {theme === 'system' && <Monitor className="w-3 h-3" />}
         </button>
         <button
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}
+          className="p-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors font-mono text-[10px]"
+          title="Keyboard shortcuts (?)"
+        >
+          ?
+        </button>
+        <button
           onClick={() => setSettingsOpen(true)}
           className="p-0.5 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
           title="Settings"
