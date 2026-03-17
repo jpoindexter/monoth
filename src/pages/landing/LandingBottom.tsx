@@ -5,7 +5,7 @@ import { SectionMark, GitHubIcon, LogoMark } from './LandingPrimitives'
 
 export function DataSourcesBar() {
   return (
-    <div className="border-y border-zinc-900 bg-zinc-950/40 py-16" id="data">
+    <div className="bg-zinc-950/20 py-16" id="data">
       <div className="max-w-7xl mx-auto px-6">
         <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest text-center mb-8">Data powered by</p>
         <div className="flex flex-wrap justify-center gap-2">
@@ -26,7 +26,7 @@ export function DataSourcesBar() {
 
 export function DocsSection() {
   return (
-    <div className="border-t border-zinc-900 py-24" id="docs">
+    <div className="py-24" id="docs">
       <div className="max-w-7xl mx-auto px-6">
         <SectionMark num="07" label="How it works" tag="Docs" />
         <div className="pt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -119,7 +119,7 @@ export function SetupSection() {
 
 export function PricingSection() {
   return (
-    <div className="py-24 bg-[#0e0e0e] border-t border-zinc-900" id="pricing">
+    <div className="py-24 bg-[#0e0e0e] " id="pricing">
       <div className="max-w-4xl mx-auto px-6">
         <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest text-center mb-16">Pricing</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -154,7 +154,7 @@ export function PricingSection() {
 
 export function CTASection() {
   return (
-    <div className="border-t border-zinc-900">
+    <div className="">
       <div className="max-w-4xl mx-auto px-6 py-36 text-center">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -186,7 +186,7 @@ export function CTASection() {
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-zinc-900 px-6 py-8">
+    <footer className="px-6 py-8">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <LogoMark />

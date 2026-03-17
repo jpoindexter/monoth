@@ -15,7 +15,7 @@ const FEATURES = [
 
 function LandingNav() {
   return (
-    <nav className="border-b border-zinc-900 bg-[#0e0e0e]/95 backdrop-blur-md">
+    <nav className="bg-black">
       <div className="max-w-5xl mx-auto px-6 h-12 flex items-center gap-4">
         <Link to="/" className="flex items-center gap-2">
           <LogoMark />
@@ -78,9 +78,9 @@ function LandingHero() {
 function FeatureGrid() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-20" id="features">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-800/40 border border-zinc-800/40 rounded-[4px] overflow-hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {FEATURES.map((f) => (
-          <div key={f.label} className="bg-[#0e0e0e] p-6">
+          <div key={f.label} className="bg-zinc-950/50 rounded-[3px] p-6">
             <p className="text-[13px] font-semibold text-white mb-2">{f.label}</p>
             <p className="text-[12px] text-zinc-400 leading-relaxed">{f.desc}</p>
           </div>
