@@ -2,21 +2,14 @@ import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Settings, Sun, Moon, Monitor } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { SettingsModal } from '@/components/settings/SettingsModal'
+import { useRegionStore, REGION_LABELS, type Region } from '@/stores/region-store'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { AuthModal } from '@/components/auth/AuthModal'
-import { SettingsModal } from '@/components/settings/SettingsModal'
-import { useUserStore } from '@/stores/user-store'
-import { useRegionStore, REGION_LABELS, type Region } from '@/stores/region-store'
-import { supabase } from '@/lib/supabase'
 
 function isMarketOpen(): boolean {
   const now = new Date()
@@ -31,19 +24,10 @@ function isMarketOpen(): boolean {
 
 export function TopBar() {
   const open = isMarketOpen()
-  const [authOpen, setAuthOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const authenticated = useUserStore((s) => s.authenticated)
-  const email = useUserStore((s) => s.email)
   const region = useRegionStore((s) => s.region)
   const setRegion = useRegionStore((s) => s.setRegion)
   const { theme, setTheme } = useTheme()
-
-  const initials = email ? email[0]?.toUpperCase() ?? 'M' : 'M'
-
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-  }
 
   return (
     <motion.header
@@ -107,30 +91,7 @@ export function TopBar() {
         >
           <Settings className="w-3 h-3" />
         </button>
-        {authenticated ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="h-5 w-5 cursor-pointer">
-                <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="text-[10px] text-muted-foreground font-normal truncate max-w-48">
-                {email}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="text-[11px]">
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Button size="sm" variant="ghost" className="h-5 text-[10px] px-2" onClick={() => setAuthOpen(true)}>
-            Sign In
-          </Button>
-        )}
       </div>
-      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </motion.header>
   )

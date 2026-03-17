@@ -1,6 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { useUserStore } from '@/stores'
-import { supabase } from '@/lib/supabase'
 import { usePolling } from '@/hooks/use-polling'
 import { fetchQuotes } from '@/services/api'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
@@ -27,32 +26,10 @@ export default function WatchlistPanel() {
   const watchlist = useUserStore((s) => s.watchlist)
   const addToWatchlist = useUserStore((s) => s.addToWatchlist)
   const removeFromWatchlist = useUserStore((s) => s.removeFromWatchlist)
-  const authenticated = useUserStore((s) => s.authenticated)
   const [input, setInput] = useState('')
   const [tab, setTab] = useState<'quotes' | 'portfolio'>('quotes')
   const [shares, setShares] = useState<Record<string, number>>(loadShares)
   const [expanded, setExpanded] = useState<string | null>(null)
-  const syncedRef = useRef(false)
-
-  useEffect(() => {
-    if (!authenticated || syncedRef.current) return
-    syncedRef.current = true
-    supabase.auth.getUser().then(async ({ data }) => {
-      const userId = data.user?.id
-      if (!userId) return
-      const { data: rows } = await supabase
-        .from('monoth_portfolio')
-        .select('symbol, shares')
-        .eq('user_id', userId)
-      if (!rows || rows.length === 0) return
-      const remote: Record<string, number> = {}
-      for (const r of rows) { if (r.symbol && r.shares > 0) remote[r.symbol] = r.shares }
-      if (Object.keys(remote).length > 0) {
-        setShares(remote)
-        saveShares(remote)
-      }
-    }).catch(() => {})
-  }, [authenticated])
 
   const [alertOpen, setAlertOpen] = useState<string | null>(null)
   const [alertPrice, setAlertPrice] = useState('')
@@ -81,20 +58,6 @@ export default function WatchlistPanel() {
     if (isNaN(n) || n <= 0) { delete next[sym] } else { next[sym] = n }
     setShares(next)
     saveShares(next)
-    if (authenticated) {
-      supabase.auth.getUser().then(async ({ data }) => {
-        const userId = data.user?.id
-        if (!userId) return
-        if (isNaN(n) || n <= 0) {
-          await supabase.from('monoth_portfolio').delete().eq('user_id', userId).eq('symbol', sym)
-        } else {
-          await supabase.from('monoth_portfolio').upsert(
-            { user_id: userId, symbol: sym, shares: n, updated_at: new Date().toISOString() },
-            { onConflict: 'user_id,symbol' }
-          )
-        }
-      }).catch(() => {})
-    }
   }
 
   function openAlertForm(sym: string, price: number | undefined) {
@@ -163,7 +126,6 @@ export default function WatchlistPanel() {
           isPanelExpanded={isPanelExpanded}
           totalValue={totalValue}
           totalPnL={totalPnL}
-          authenticated={authenticated}
           onUpdateShares={updateShares}
         />
       )}

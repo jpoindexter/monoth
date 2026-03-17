@@ -1,5 +1,4 @@
 import { DonutChart, PALETTE } from '@/components/charts/DonutChart'
-import { supabase } from '@/lib/supabase'
 
 interface QuoteData {
   symbol: string
@@ -15,12 +14,11 @@ interface Props {
   isPanelExpanded: boolean
   totalValue: number
   totalPnL: number
-  authenticated: boolean
   onUpdateShares: (sym: string, val: string) => void
 }
 
 export function WatchlistPortfolio({
-  watchlist, data, shares, isPanelExpanded, totalValue, totalPnL, authenticated, onUpdateShares,
+  watchlist, data, shares, isPanelExpanded, totalValue, totalPnL, onUpdateShares,
 }: Props) {
   const segments = watchlist
     .map((sym, i) => {

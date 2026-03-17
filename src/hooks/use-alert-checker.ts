@@ -45,6 +45,7 @@ export function useAlertChecker() {
 
         const msg = `${alert.symbol} ${alert.direction === 'above' ? '▲' : '▼'} $${alert.targetPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })} — now $${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
         window.dispatchEvent(new CustomEvent('monoth:toast', { detail: msg }))
+        window.dispatchEvent(new CustomEvent('monoth:price-alert', { detail: msg }))
 
         Notification.requestPermission().then((perm) => {
           if (perm === 'granted') new Notification('Monoth Price Alert', { body: msg })

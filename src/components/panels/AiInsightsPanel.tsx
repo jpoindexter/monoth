@@ -19,7 +19,6 @@ const TABS: { key: Tab; label: string }[] = [
 
 export default function AiInsightsPanel() {
   const tier = useUserStore((s) => s.tier)
-  const session = useUserStore((s) => s.session)
   const indices = useMarketStore((s) => s.indices)
   const crypto = useMarketStore((s) => s.crypto)
 
@@ -43,21 +42,7 @@ export default function AiInsightsPanel() {
     setLoading(true)
     setError(null)
     try {
-      if (isPro) {
-        const token = session?.access_token
-        if (!token) throw new Error('Not authenticated')
-        const res = await fetch('/api/ai/brief', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        })
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}))
-          throw new Error(body.error ?? `Request failed (${res.status})`)
-        }
-        const data = await res.json()
-        setBrief(data.brief)
-      } else {
-        if (!apiKey.trim()) throw new Error('Enter your Anthropic API key')
+      if (!apiKey.trim()) throw new Error('Enter your Anthropic API key')
         const topIndices = indices.slice(0, 5).map((i) => `${i.symbol}: ${i.changePercent >= 0 ? '+' : ''}${i.changePercent.toFixed(2)}%`).join(', ')
         const topCrypto = crypto.slice(0, 3).map((c) => `${c.symbol.toUpperCase()}: $${c.price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`).join(', ')
         const prompt = `Concise financial analyst. Current market: Indices: ${topIndices || 'N/A'}. Crypto: ${topCrypto || 'N/A'}. Give 3-4 paragraph market brief. Direct, no disclaimers.`
@@ -82,7 +67,6 @@ export default function AiInsightsPanel() {
         }
         const data = await res.json()
         setBrief(data.content?.[0]?.text ?? '')
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {

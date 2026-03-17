@@ -74,8 +74,8 @@ const PredictIcon = () => (
 const FEATURES = [
   {
     tag: 'PREDICTION MARKETS',
-    title: 'Polymarket Integration',
-    desc: 'Live prediction market odds across finance and crypto. See what the market thinks about rate decisions, BTC price, macro outcomes.',
+    title: 'Polymarket + Kalshi',
+    desc: 'Live prediction market odds from both Polymarket and Kalshi. See what the crowd thinks about rate decisions, election outcomes, macro events.',
   },
   {
     tag: 'CORRELATION',
@@ -85,20 +85,20 @@ const FEATURES = [
   {
     tag: 'AI INSIGHTS',
     title: 'AI Market Brief',
-    desc: 'Daily AI-generated market summaries powered by Groq. Macro signals, sentiment analysis, and trend detection — bring your own key.',
+    desc: 'AI-generated market summaries via the Anthropic API. Macro signals, sentiment analysis, trend detection — bring your own key.',
   },
   {
-    tag: 'MULTI-ASSET',
-    title: 'All Asset Classes',
-    desc: 'Equities, crypto, forex, commodities, fixed income, derivatives, and prediction markets in one customisable view.',
+    tag: 'LAYOUTS & ALERTS',
+    title: 'Preset Layouts + Price Alerts',
+    desc: 'Six preset dashboard layouts for different workflows. Set price alerts on any symbol — get a visual flash and browser notification when triggered.',
   },
 ]
 
 const FEATURE_GRID = [
-  { icon: <GridIcon />, label: '44 Live Panels', desc: 'Every panel updates automatically' },
+  { icon: <GridIcon />, label: '60 Live Panels', desc: 'Every panel updates automatically' },
   { icon: <SignalIcon />, label: 'Real-Time Data', desc: 'Sub-minute refresh intervals' },
-  { icon: <DatabaseIcon />, label: '12+ Data Sources', desc: 'Aggregated market feeds' },
-  { icon: <PredictIcon />, label: 'Polymarket', desc: 'Prediction market signals' },
+  { icon: <DatabaseIcon />, label: '14+ Data Sources', desc: 'Aggregated market feeds' },
+  { icon: <PredictIcon />, label: 'Poly + Kalshi', desc: 'Two prediction market feeds' },
   { icon: <MoonIcon />, label: 'Dark Mode', desc: 'Terminal-native dark theme' },
   { icon: <KeyboardIcon />, label: 'Keyboard Shortcuts', desc: 'Navigate without a mouse' },
   { icon: <DownloadIcon />, label: 'Export Data', desc: 'CSV export from any panel' },
@@ -110,8 +110,10 @@ const DATA_SOURCES = [
   { name: 'FRED', color: 'text-amber-400 border-amber-900 bg-amber-950/40' },
   { name: 'Frankfurter', color: 'text-purple-400 border-purple-900 bg-purple-950/40' },
   { name: 'Polymarket', color: 'text-pink-400 border-pink-900 bg-pink-950/40' },
+  { name: 'Kalshi', color: 'text-sky-400 border-sky-900 bg-sky-950/40' },
+  { name: 'Yahoo Finance', color: 'text-violet-400 border-violet-900 bg-violet-950/40' },
   { name: 'Google News', color: 'text-red-400 border-red-900 bg-red-950/40' },
-  { name: 'Groq AI', color: 'text-orange-400 border-orange-900 bg-orange-950/40' },
+  { name: 'Claude AI', color: 'text-orange-400 border-orange-900 bg-orange-950/40' },
 ]
 
 const SETUP_STEPS = [
@@ -317,7 +319,7 @@ function LivePreview() {
 
 // --- Page ---
 export function Landing() {
-  const panelCount = useCountUp(44, 1400)
+  const panelCount = useCountUp(60, 1400)
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -394,7 +396,7 @@ export function Landing() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="text-xs font-mono text-zinc-600 mb-10 tracking-wide"
         >
-          12+ data sources &nbsp;&bull;&nbsp; Polymarket signals &nbsp;&bull;&nbsp; MIT license
+          14+ data sources &nbsp;&bull;&nbsp; Polymarket + Kalshi &nbsp;&bull;&nbsp; No login required &nbsp;&bull;&nbsp; MIT license
         </motion.p>
 
         <motion.div
@@ -428,8 +430,8 @@ export function Landing() {
       <section className="border-y border-zinc-800 bg-zinc-900">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-zinc-800">
           {[
-            { label: '44 Panels', sub: 'dashboard widgets' },
-            { label: '12+ Sources', sub: 'live market feeds' },
+            { label: '60 Panels', sub: 'dashboard widgets' },
+            { label: '14+ Sources', sub: 'live market feeds' },
             { label: '6 Asset Classes', sub: 'in a single view' },
             { label: 'MIT License', sub: 'free to self-host' },
           ].map((s) => (
