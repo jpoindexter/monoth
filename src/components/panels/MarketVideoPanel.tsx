@@ -67,11 +67,6 @@ export default function MarketVideoPanel() {
       <button onClick={() => setVolume(v => v === 0 ? 50 : 0)} className={btnCls}>
         {volume === 0 ? 'unmute' : 'mute'}
       </button>
-      <div className="flex items-center gap-1">
-        <button onClick={() => setVolume(v => Math.max(0, v - 10))} className={btnCls}>−</button>
-        <span className="text-[10px] text-muted-foreground tabular-nums w-5 text-center leading-none">{volume}</span>
-        <button onClick={() => setVolume(v => Math.min(100, v + 10))} className={btnCls}>+</button>
-      </div>
     </div>
   ) : null
 
