@@ -28,6 +28,9 @@ dist-ssr
 *.sw?
 
 agents/
+.claude/
+.playwright-mcp/
+docs/superpowers/
 
 # Commercial fonts (TX-02 / Berkeley Mono)
 public/fonts/*.otf
