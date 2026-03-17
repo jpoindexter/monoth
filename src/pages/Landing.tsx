@@ -243,13 +243,13 @@ export function Landing() {
   const panelCount = useCountUp(60, 1400)
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 antialiased">
+    <div className="min-h-screen bg-[#0e0e0e] text-zinc-100 antialiased">
       <div className="sticky top-0 z-50">
         <StatsBar />
       </div>
 
       {/* ── Nav ───────────────────────────────────────────────────────────── */}
-      <nav className="sticky top-6 z-40 border-b border-zinc-900 bg-black/95 backdrop-blur-md">
+      <nav className="sticky top-6 z-40 border-b border-zinc-900 bg-[#0e0e0e]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-12 flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2">
             <LogoMark />
@@ -625,7 +625,7 @@ export function Landing() {
       </div>
 
       {/* ── Setup ─────────────────────────────────────────────────────────── */}
-      <div className="py-24 bg-black" id="setup">
+      <div className="py-24 bg-[#0e0e0e]" id="setup">
         <div className="max-w-3xl mx-auto px-6">
           <SectionMark num="06" label="Self-host in minutes" tag="Setup" />
           <h2
@@ -658,7 +658,7 @@ export function Landing() {
       </div>
 
       {/* ── Pricing ───────────────────────────────────────────────────────── */}
-      <div className="py-24 bg-black border-t border-zinc-900" id="pricing">
+      <div className="py-24 bg-[#0e0e0e] border-t border-zinc-900" id="pricing">
         <div className="max-w-4xl mx-auto px-6">
           <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest text-center mb-16">Pricing</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
