@@ -40,10 +40,13 @@ export default function CongressTradesPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<Tab>('recent')
 
+  const [maintenance, setMaintenance] = useState(false)
+
   const { data, loading, error, refresh } = usePolling<CongressFiling[]>({
     fetcher: async () => {
       const res = await fetch('/api/market/congress')
-      if (res.status === 503) throw new Error('Senate disclosure system temporarily unavailable')
+      if (res.status === 503) { setMaintenance(true); throw new Error('unavailable') }
+      setMaintenance(false)
       if (!res.ok) throw new Error('Failed to fetch')
       return res.json()
     },
@@ -56,7 +59,7 @@ export default function CongressTradesPanel() {
   const visible = expanded ? rows : rows.slice(0, 12)
 
   return (
-    <PanelWrapper title="Congress Trades" loading={loading} error={error} onRetry={refresh}>
+    <PanelWrapper title="Congress Trades" loading={loading} error={maintenance ? null : error} onRetry={refresh}>
       <div className="flex gap-1 mb-2 flex-wrap">
         <button className={tabCls(tab === 'recent')} onClick={() => setTab('recent')}>
           Recent {data && data.length > 0 && <span className="text-[9px] opacity-60 ml-0.5">({data.length})</span>}
@@ -69,7 +72,24 @@ export default function CongressTradesPanel() {
         </button>
       </div>
 
-      {!loading && visible.length === 0 && (
+      {!loading && maintenance && (
+        <div className="py-6 flex flex-col items-center gap-2 text-center">
+          <div className="text-[11px] text-muted-foreground">Senate disclosure system under maintenance</div>
+          <div className="flex items-center gap-3 text-[10px]">
+            <a href="https://efdsearch.senate.gov/search/home/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">
+              Senate ↗
+            </a>
+            <a href="https://disclosures-clerk.house.gov" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">
+              House ↗
+            </a>
+            <button onClick={refresh} className="text-muted-foreground hover:text-foreground transition-colors">
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!loading && !maintenance && visible.length === 0 && (
         <div className="py-4 text-center text-[10px] text-muted-foreground">
           No recent disclosures found
         </div>

@@ -18,6 +18,11 @@ function TrendingBadge({ volume }: { volume: number }) {
   return null
 }
 
+function SourceBadge({ source }: { source?: string }) {
+  if (source === 'kalshi') return <span className="text-[7px] font-bold bg-blue-500/15 text-blue-400 px-1 py-0.5 rounded-sm">KALSHI</span>
+  return <span className="text-[7px] font-bold bg-purple-500/15 text-purple-400 px-1 py-0.5 rounded-sm">POLY</span>
+}
+
 const CATEGORY_TABS: Category[] = ['All', 'Finance', 'Crypto']
 
 interface Props {
@@ -71,9 +76,16 @@ export function PredictionsMarketsTab({
           <div key={p.id} className="py-1.5 border-b border-border/20 last:border-0">
             <div className="flex items-start gap-1 mb-1">
               <div className={`text-[11px] font-medium text-foreground leading-snug flex-1 ${expanded ? '' : 'line-clamp-2'}`}>
-                {p.title}
+                {p.url ? (
+                  <a href={p.url} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+                    {p.title}
+                  </a>
+                ) : p.title}
               </div>
-              <TrendingBadge volume={p.volume} />
+              <div className="flex items-center gap-1 shrink-0">
+                <SourceBadge source={p.source} />
+                <TrendingBadge volume={p.volume} />
+              </div>
             </div>
             <div className="flex items-center gap-1.5 mb-1">
               <div className="flex-1 h-3 rounded-sm overflow-hidden bg-zinc-200 dark:bg-zinc-700 flex">

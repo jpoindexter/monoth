@@ -11,7 +11,10 @@ interface Prediction {
   yesPct: number
   noPct: number
   volume: number
+  volume24h?: number
   endDate: string
+  source?: 'polymarket' | 'kalshi'
+  url?: string
 }
 
 export type Category = 'All' | 'Finance' | 'Crypto'
