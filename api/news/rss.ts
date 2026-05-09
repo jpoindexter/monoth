@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { XMLParser } from 'fast-xml-parser'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-import { getFeedUrls, CATEGORIES } from './_feed-urls.js'
+import { getFeedUrls, CATEGORIES, VALID_REGIONS } from './_feed-urls.js'
 
 const parser = new XMLParser({ ignoreAttributes: false })
 
@@ -42,6 +42,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!category || !CATEGORIES.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' })
+  }
+  if (!VALID_REGIONS.includes(region)) {
+    return res.status(400).json({ error: 'Invalid region' })
   }
 
   try {

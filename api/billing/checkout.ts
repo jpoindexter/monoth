@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
 import { requireAuth } from '../_auth.js'
+import { toPublicError } from '../_error.js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -20,7 +21,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
     res.json({ url: session.url })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error'
-    res.status(500).json({ error: msg })
+    res.status(500).json({ error: toPublicError(err) })
   }
 }

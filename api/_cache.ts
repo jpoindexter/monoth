@@ -3,6 +3,8 @@ interface CacheEntry<T> {
   expiry: number
 }
 
+const MAX_CACHE_SIZE = 500
+
 const cache = new Map<string, CacheEntry<unknown>>()
 const inFlight = new Map<string, Promise<unknown>>()
 
@@ -28,6 +30,10 @@ export async function cached<T>(
 
   try {
     const data = await promise
+    if (cache.size >= MAX_CACHE_SIZE) {
+      const oldest = cache.keys().next().value
+      if (oldest !== undefined) cache.delete(oldest)
+    }
     cache.set(key, { data, expiry: Date.now() + ttlMs })
     return { data, stale: false }
   } catch (err) {

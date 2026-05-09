@@ -120,6 +120,8 @@ export function getFeedUrls(category: string, region = 'global'): { name: string
   return feeds[category] ?? []
 }
 
+export const VALID_REGIONS = Object.keys(REGION_PARAMS)
+
 export const CATEGORIES = [
   'markets', 'crypto', 'forex', 'bonds', 'commodities', 'centralbanks',
   'economic', 'ipo', 'derivatives', 'fintech', 'regulation', 'hedgefunds',

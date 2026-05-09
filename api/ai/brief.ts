@@ -1,34 +1,16 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cached } from '../_cache.js'
 import { requireAuth } from '../_auth.js'
-
-const ALLOWED_ORIGINS = [
-  /^https?:\/\/.*\.monoth\.app$/,
-  /^https?:\/\/monoth\.app$/,
-  /^https?:\/\/localhost(:\d+)?$/,
-  /^https?:\/\/monoth(-[a-z0-9-]+)?\.vercel\.app$/,
-]
-
-function cors(req: VercelRequest, res: VercelResponse): boolean {
-  const origin = req.headers.origin ?? ''
-  const allowed = ALLOWED_ORIGINS.some((re) => re.test(origin))
-  if (allowed) res.setHeader('Access-Control-Allow-Origin', origin)
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  if (req.method === 'OPTIONS') {
-    res.status(204).end()
-    return true
-  }
-  return false
-}
+import { cors } from '../_cors.js'
+import { toPublicError } from '../_error.js'
 
 const HOUR_MS = 60 * 60 * 1000
 
 async function fetchMarketSnapshot() {
   const [indicesRes, cryptoRes, forexRes] = await Promise.allSettled([
-    fetch(`${process.env.VITE_API_BASE ?? ''}/api/market/indices`),
-    fetch(`${process.env.VITE_API_BASE ?? ''}/api/crypto`),
-    fetch(`${process.env.VITE_API_BASE ?? ''}/api/forex`),
+    fetch(`${process.env.API_BASE_URL ?? ''}/api/market/indices`),
+    fetch(`${process.env.API_BASE_URL ?? ''}/api/crypto`),
+    fetch(`${process.env.API_BASE_URL ?? ''}/api/forex`),
   ])
 
   const indices = indicesRes.status === 'fulfilled' && indicesRes.value.ok
@@ -103,7 +85,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ ...data, stale })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return res.status(500).json({ error: message })
+    return res.status(500).json({ error: toPublicError(err) })
   }
 }

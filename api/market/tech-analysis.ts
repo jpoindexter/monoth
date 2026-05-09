@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
+import { toPublicError } from '../_error.js'
 
 function ema(data: number[], period: number): number[] {
   const k = 2 / (period + 1)
@@ -130,6 +131,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
     res.json(data)
   } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to fetch tech analysis' })
+    res.status(500).json({ error: toPublicError(err) })
   }
 }

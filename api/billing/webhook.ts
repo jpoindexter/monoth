@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
 import { buffer } from 'micro'
 import { createClient } from '@supabase/supabase-js'
+import { toPublicError } from '../_error.js'
 
 export const config = { api: { bodyParser: false } }
 
@@ -23,8 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const raw = await buffer(req)
     event = stripe.webhooks.constructEvent(raw, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Webhook error'
-    return res.status(400).json({ error: msg })
+    return res.status(400).json({ error: toPublicError(err) })
   }
 
   try {

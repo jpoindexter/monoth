@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const ALLOWED_ORIGINS = [
-  /^https?:\/\/.*\.monoth\.app$/,
-  /^https?:\/\/monoth\.app$/,
-  /^https?:\/\/localhost(:\d+)?$/,
-  /^https?:\/\/monoth(-[a-z0-9-]+)?\.vercel\.app$/,
+  /^https:\/\/(www\.monoth\.app|app\.monoth\.app)$/,
+  /^https:\/\/monoth\.app$/,
+  /^https:\/\/monoth(-[a-z0-9-]+)?\.vercel\.app$/,
+  /^http:\/\/localhost(:\d+)?$/,
 ]
 
 export function cors(req: VercelRequest, res: VercelResponse): boolean {

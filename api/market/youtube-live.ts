@@ -5,19 +5,26 @@ import { cached } from '../_cache.js'
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res)) return
 
-  const handle = req.query.handle as string
+  const handle = typeof req.query.handle === 'string' ? req.query.handle : ''
   if (!handle) {
     return res.status(400).json({ error: 'Missing handle' })
+  }
+  if (!/^[\w.-]{1,50}$/.test(handle)) {
+    return res.status(400).json({ error: 'Invalid handle' })
+  }
+  const targetUrl = new URL(`https://www.youtube.com/@${handle}/live`)
+  if (targetUrl.hostname !== 'www.youtube.com') {
+    return res.status(400).json({ error: 'Invalid URL' })
   }
 
   try {
     const { data } = await cached(`youtube-live:${handle}`, 300_000, async () => {
-      const r = await fetch(`https://www.youtube.com/@${handle}/live`, {
+      const r = await fetch(targetUrl.toString(), {
+        redirect: 'manual',
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
           'Accept-Language': 'en-US,en;q=0.9',
         },
-        redirect: 'follow',
       })
 
       if (!r.ok) return { videoId: null, handle }
