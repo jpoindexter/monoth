@@ -1,60 +1,61 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import YahooFinance from 'yahoo-finance2'
 import { cors } from '../_cors.js'
 import { cached } from '../_cache.js'
-import { yfGet } from '../_yf.js'
 
+const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
+
+// yahoo-finance2 handles cookie+crumb auth internally; the raw v10 quoteSummary
+// endpoint now 401s from serverless IPs, so we use the library like the other endpoints.
 async function fetchYF(symbol: string) {
-  const modules = 'defaultKeyStatistics,financialData,summaryDetail,summaryProfile'
-  const r = await yfGet(`https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}`)
-  if (!r.ok) throw new Error(`YF ${r.status}`)
-  const json = await r.json()
-  const result = json.quoteSummary?.result?.[0]
-  if (!result) throw new Error('no data')
+  const result = await yf.quoteSummary(symbol, {
+    modules: ['defaultKeyStatistics', 'financialData', 'summaryDetail', 'summaryProfile', 'price'],
+  })
 
-  const ks = result.defaultKeyStatistics ?? {}
-  const fd = result.financialData ?? {}
-  const sd = result.summaryDetail ?? {}
-  const sp = result.summaryProfile ?? {}
+  const ks = (result.defaultKeyStatistics ?? {}) as Record<string, unknown>
+  const fd = (result.financialData ?? {}) as Record<string, unknown>
+  const sd = (result.summaryDetail ?? {}) as Record<string, unknown>
+  const sp = (result.summaryProfile ?? {}) as Record<string, unknown>
+  const pr = (result.price ?? {}) as Record<string, unknown>
 
-  function raw(obj: Record<string, { raw?: number } | undefined>, key: string): number | null {
-    return (obj[key] as { raw?: number } | undefined)?.raw ?? null
-  }
+  const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null)
+  const str = (v: unknown): string | null => (typeof v === 'string' && v ? v : null)
 
   return {
     symbol,
-    name: (sp as Record<string, string>).longName ?? (sp as Record<string, string>).shortName ?? symbol,
-    sector: (sp as Record<string, string>).sector ?? null,
-    industry: (sp as Record<string, string>).industry ?? null,
-    peRatio: raw(sd, 'trailingPE'),
-    forwardPE: raw(sd, 'forwardPE'),
-    pbRatio: raw(sd, 'priceToBook'),
-    evToEbitda: raw(ks, 'enterpriseToEbitda'),
-    evToRevenue: raw(ks, 'enterpriseToRevenue'),
-    pegRatio: raw(ks, 'pegRatio'),
-    priceToSales: raw(sd, 'priceToSalesTrailing12Months'),
-    profitMargin: raw(fd, 'profitMargins'),
-    operatingMargin: raw(fd, 'operatingMargins'),
-    roe: raw(fd, 'returnOnEquity'),
-    roa: raw(fd, 'returnOnAssets'),
-    revenueGrowth: raw(fd, 'revenueGrowth'),
-    earningsGrowth: raw(fd, 'earningsGrowth'),
-    marketCap: raw(sd, 'marketCap'),
-    enterpriseValue: raw(ks, 'enterpriseValue'),
-    revenue: raw(fd, 'totalRevenue'),
-    ebitda: raw(fd, 'ebitda'),
-    dividendYield: raw(sd, 'dividendYield'),
-    payoutRatio: raw(sd, 'payoutRatio'),
-    debtToEquity: raw(fd, 'debtToEquity'),
-    currentRatio: raw(fd, 'currentRatio'),
-    eps: raw(ks, 'trailingEps'),
-    bookValue: raw(ks, 'bookValue'),
-    sharesOutstanding: raw(ks, 'sharesOutstanding'),
-    shortRatio: raw(ks, 'shortRatio'),
-    beta: raw(sd, 'beta'),
-    week52High: raw(sd, 'fiftyTwoWeekHigh'),
-    week52Low: raw(sd, 'fiftyTwoWeekLow'),
-    fiftyDayAvg: raw(sd, 'fiftyDayAverage'),
-    twoHundredDayAvg: raw(sd, 'twoHundredDayAverage'),
+    name: str(pr.longName) ?? str(pr.shortName) ?? symbol,
+    sector: str(sp.sector),
+    industry: str(sp.industry),
+    peRatio: num(sd.trailingPE),
+    forwardPE: num(sd.forwardPE),
+    pbRatio: num(ks.priceToBook),
+    evToEbitda: num(ks.enterpriseToEbitda),
+    evToRevenue: num(ks.enterpriseToRevenue),
+    pegRatio: num(ks.pegRatio),
+    priceToSales: num(sd.priceToSalesTrailing12Months),
+    profitMargin: num(fd.profitMargins),
+    operatingMargin: num(fd.operatingMargins),
+    roe: num(fd.returnOnEquity),
+    roa: num(fd.returnOnAssets),
+    revenueGrowth: num(fd.revenueGrowth),
+    earningsGrowth: num(fd.earningsGrowth),
+    marketCap: num(sd.marketCap) ?? num(pr.marketCap),
+    enterpriseValue: num(ks.enterpriseValue),
+    revenue: num(fd.totalRevenue),
+    ebitda: num(fd.ebitda),
+    dividendYield: num(sd.dividendYield),
+    payoutRatio: num(sd.payoutRatio),
+    debtToEquity: num(fd.debtToEquity),
+    currentRatio: num(fd.currentRatio),
+    eps: num(ks.trailingEps),
+    bookValue: num(ks.bookValue),
+    sharesOutstanding: num(ks.sharesOutstanding),
+    shortRatio: num(ks.shortRatio),
+    beta: num(sd.beta),
+    week52High: num(sd.fiftyTwoWeekHigh),
+    week52Low: num(sd.fiftyTwoWeekLow),
+    fiftyDayAvg: num(sd.fiftyDayAverage),
+    twoHundredDayAvg: num(sd.twoHundredDayAverage),
   }
 }
 
