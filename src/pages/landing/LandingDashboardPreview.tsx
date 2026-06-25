@@ -19,7 +19,7 @@ export function LandingDashboardPreview() {
           <div className="w-16" />
         </div>
 
-        <div className="bg-[#0a0a0a] border-b border-zinc-800/50 px-3 h-6 flex items-center gap-3">
+        <div className="bg-bg-chrome border-b border-zinc-800/50 px-3 h-6 flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <div className="w-3.5 h-3.5 rounded-[2px] bg-emerald-500 flex items-center justify-center shrink-0">
               <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
@@ -39,7 +39,7 @@ export function LandingDashboardPreview() {
           <span className="font-mono text-[7px] text-zinc-400">US · NY</span>
         </div>
 
-        <div className="bg-[#0a0a0a] p-2 grid grid-cols-3 gap-1.5">
+        <div className="bg-bg-chrome p-2 grid grid-cols-3 gap-1.5">
           <MockPanel title="Watchlist">
             <div className="space-y-1">
               {MOCK_QUOTES.map((q) => (

@@ -81,7 +81,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-4 md:inset-x-[10%] md:inset-y-[5%] z-50 bg-white dark:bg-[#141414] rounded-sm border border-border/40 flex flex-col overflow-hidden"
+            className="fixed inset-4 md:inset-x-[10%] md:inset-y-[5%] z-50 bg-white dark:bg-bg-surface rounded-sm border border-border/40 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="px-4 py-3 border-b border-border/30 flex items-center gap-3">

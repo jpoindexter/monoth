@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLayoutStore, useMarketStore, useNewsStore } from '@/stores'
 import { usePanelStore } from '@/stores'
+import { isMarketOpen } from '@/lib/market-utils'
 
 function fmt(n: number) {
   return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -9,14 +10,6 @@ function fmt(n: number) {
 function fmtPct(n: number) {
   const sign = n >= 0 ? '+' : ''
   return `${sign}${n.toFixed(2)}%`
-}
-
-function isMarketOpen(now: Date) {
-  const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
-  const day = et.getDay()
-  if (day === 0 || day === 6) return false
-  const mins = et.getHours() * 60 + et.getMinutes()
-  return mins >= 9 * 60 + 30 && mins < 16 * 60
 }
 
 export function StatusBar() {
@@ -72,7 +65,7 @@ export function StatusBar() {
   ]
 
   return (
-    <div className="h-5 border-t border-border/40 bg-white dark:bg-[#0a0a0a] px-3 flex items-center justify-between text-[9px] text-muted-foreground/60 shrink-0 select-none">
+    <div className="h-5 border-t border-border/40 bg-white dark:bg-bg-chrome px-3 flex items-center justify-between text-[9px] text-muted-foreground/60 shrink-0 select-none">
       <div className="flex items-center gap-3">
         <span className="uppercase tracking-wider font-medium">Monoth v0.8</span>
         <span className="hidden sm:inline">ET {etTime}</span>

@@ -119,7 +119,7 @@ export function SetupSection() {
 
 export function PricingSection() {
   return (
-    <div className="py-24 bg-[#0e0e0e] " id="pricing">
+    <div className="py-24 bg-bg-base" id="pricing">
       <div className="max-w-4xl mx-auto px-6">
         <p className="font-mono text-[9px] text-zinc-400 uppercase tracking-widest text-center mb-16">Pricing</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

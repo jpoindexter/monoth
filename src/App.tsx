@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
+import { MotionConfig } from 'motion/react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ToastContainer } from '@/components/Toast'
@@ -55,12 +56,14 @@ function AppInner() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="light">
-        <BrowserRouter>
-          <AppInner />
-        </BrowserRouter>
-        <Analytics />
-      </ThemeProvider>
+      <MotionConfig reducedMotion="user">
+        <ThemeProvider defaultTheme="light">
+          <BrowserRouter>
+            <AppInner />
+          </BrowserRouter>
+          <Analytics />
+        </ThemeProvider>
+      </MotionConfig>
     </ErrorBoundary>
   )
 }

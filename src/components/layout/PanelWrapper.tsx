@@ -147,14 +147,13 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
 
   const panel = (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: expanded ? 1 : hovered ? 1 : 0.72 }}
       whileHover={expanded ? undefined : { scale: 1.003 }}
       transition={{ opacity: { duration: 0.15 }, scale: { duration: 0.15 }, y: { duration: 0.3, ease: 'easeOut' } }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className={`flex flex-col bg-white dark:bg-[#141414] rounded-sm border overflow-hidden transition-colors duration-150 ${
+      className={`flex flex-col bg-white dark:bg-bg-surface rounded-sm border overflow-hidden transition-colors duration-150 ${
         expanded
           ? 'fixed inset-2 z-50 border-border/60'
           : hovered

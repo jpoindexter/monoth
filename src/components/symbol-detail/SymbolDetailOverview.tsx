@@ -82,7 +82,7 @@ export function SymbolDetailOverview({
           { label: 'Avg Volume', value: avgVol > 0 ? fmtVol(avgVol) : '—' },
           { label: 'Data Points', value: candles.length > 0 ? `${candles.length} days` : '—' },
         ].map(({ label, value, colored, positive }) => (
-          <div key={label} className="bg-[#0e0e0e] px-3 py-2.5">
+          <div key={label} className="bg-bg-base px-3 py-2.5">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{label}</div>
             <div className={`text-[12px] font-semibold tabular-nums ${colored ? (positive ? 'text-emerald-400' : 'text-red-400') : 'text-foreground'}`}>
               {value}

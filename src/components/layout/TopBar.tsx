@@ -5,23 +5,13 @@ import { Settings, Sun, Moon, Monitor } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
 import { SettingsModal } from '@/components/settings/SettingsModal'
 import { useRegionStore, REGION_LABELS, type Region } from '@/stores/region-store'
+import { isMarketOpen } from '@/lib/market-utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-
-function isMarketOpen(): boolean {
-  const now = new Date()
-  const day = now.getDay()
-  if (day === 0 || day === 6) return false
-  const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
-  const h = et.getHours()
-  const m = et.getMinutes()
-  const mins = h * 60 + m
-  return mins >= 9 * 60 + 30 && mins < 16 * 60
-}
 
 export function TopBar() {
   const open = isMarketOpen()
@@ -35,7 +25,7 @@ export function TopBar() {
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="h-8 border-b border-border/60 bg-white dark:bg-[#0a0a0a] flex items-center px-3 shrink-0">
+      className="h-8 border-b border-border/60 bg-white dark:bg-bg-chrome flex items-center px-3 shrink-0">
       <Link to="/" className="font-bold text-[11px] tracking-[2px] uppercase text-foreground hover:opacity-70 transition-opacity">Monoth</Link>
       <div className="ml-3 flex items-center gap-1">
         {open ? (

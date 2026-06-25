@@ -12,28 +12,6 @@ interface StatItem {
   change?: number
 }
 
-function MiniSparkline({ changePercent }: { changePercent: number }) {
-  const trend = changePercent / 100
-  const points = [0, 1, 2, 3, 4].map((i) => {
-    const base = 5
-    const noise = Math.sin(i * 1.5) * 1.5
-    const direction = (i / 4) * trend * 8
-    return base - direction - noise
-  })
-  const min = Math.min(...points)
-  const max = Math.max(...points)
-  const range = max - min || 1
-  const normalized = points.map((p) => ((p - min) / range) * 8 + 1)
-  const pathPoints = normalized.map((y, i) => `${i * 5},${y}`).join(' ')
-  const color = changePercent >= 0 ? '#059669' : '#ef4444'
-
-  return (
-    <svg width="20" height="10" className="inline-block ml-0.5" viewBox="0 0 20 10">
-      <polyline points={pathPoints} fill="none" stroke={color} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
 export function StatsBar() {
   const navigate = useNavigate()
   useMarketData()
@@ -71,22 +49,21 @@ export function StatsBar() {
   const renderItem = (s: StatItem, key: string) => {
     const isPositive = (s.change ?? 0) >= 0
     return (
-      <span
+      <button
         key={key}
-        className="inline-flex items-center gap-1.5 px-3 whitespace-nowrap cursor-pointer hover:opacity-80"
+        type="button"
+        className="inline-flex items-center gap-1.5 px-3 whitespace-nowrap hover:opacity-80 focus-visible:outline-none focus-visible:opacity-80"
         onClick={() => navigate(`/symbol/${s.label}`)}
+        aria-label={`${s.label} ${s.value}${s.change != null ? ` ${isPositive ? '+' : ''}${s.change.toFixed(2)}%` : ''}`}
       >
         <span className="text-muted-foreground font-medium">{s.label}</span>
         <span className="tabular-nums font-medium text-foreground">{s.value}</span>
         {s.change != null && (
-          <>
-            <span className={`tabular-nums font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
-              {isPositive ? '+' : ''}{s.change.toFixed(2)}%
-            </span>
-            {!isNaN(s.change) && <MiniSparkline changePercent={s.change} />}
-          </>
+          <span className={`tabular-nums font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+            {isPositive ? '+' : ''}{s.change.toFixed(2)}%
+          </span>
         )}
-      </span>
+      </button>
     )
   }
 
@@ -95,11 +72,13 @@ export function StatsBar() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="border-b border-border/40 bg-white dark:bg-[#0a0a0a] h-6 flex items-center shrink-0 overflow-hidden relative"
+      className="border-b border-border/40 bg-white dark:bg-bg-chrome h-6 flex items-center shrink-0 overflow-hidden relative"
+      aria-label="Market summary"
+      role="region"
     >
-      <div className="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white dark:from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white dark:from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
-      <div className="flex items-center h-full animate-marquee whitespace-nowrap text-[10px]">
+      <div className="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white dark:from-bg-chrome to-transparent z-10 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white dark:from-bg-chrome to-transparent z-10 pointer-events-none" aria-hidden="true" />
+      <div className="flex items-center h-full animate-marquee whitespace-nowrap text-[10px]" aria-hidden="true">
         {stats.map((s) => renderItem(s, s.label))}
         {stats.map((s) => renderItem(s, `${s.label}-2`))}
       </div>

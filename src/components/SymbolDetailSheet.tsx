@@ -131,7 +131,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="w-full sm:w-[420px] p-0 overflow-hidden flex flex-col border-l border-border/40 bg-[#0e0e0e]"
+        className="w-full sm:w-[420px] p-0 overflow-hidden flex flex-col border-l border-border/40 bg-bg-base"
       >
         <SymbolDetailHeader
           ticker={ticker}
