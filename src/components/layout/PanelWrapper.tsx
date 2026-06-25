@@ -196,8 +196,8 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
       if (e.key === 'Escape') { setExpanded(false); return }
       if (e.key !== 'Tab') return
       const els = getFocusable()
-      if (els.length === 0) return
       const first = els[0], last = els[els.length - 1]
+      if (!first || !last) return
       if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
     }
