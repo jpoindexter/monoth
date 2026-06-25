@@ -63,7 +63,7 @@ function SpanPicker({ panelId }: { panelId: string }) {
       document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open])
 
   const handleCellKeyDown = (e: React.KeyboardEvent, col: number, row: number) => {
     let nc = col, nr = row
