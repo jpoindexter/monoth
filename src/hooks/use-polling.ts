@@ -17,8 +17,11 @@ export function usePolling<T>({ fetcher, interval, enabled = true }: UsePollingO
   const intervalRef = useRef(interval)
   // activeRef: true only when the hook is enabled AND mounted — guards both in-flight fetches and next-poll scheduling
   const activeRef = useRef(false)
-  fetcherRef.current = fetcher
-  intervalRef.current = interval
+
+  // Indirection so doFetch can re-schedule itself without referencing its own
+  // binding before declaration (keeps the React Compiler happy). The ref always
+  // points at the latest (stable) doFetch.
+  const doFetchRef = useRef<() => void>(() => {})
 
   const doFetch = useCallback(async () => {
     if (!activeRef.current) return
@@ -29,7 +32,7 @@ export function usePolling<T>({ fetcher, interval, enabled = true }: UsePollingO
       setData(result)
       setLoading(false)
       failuresRef.current = 0
-      timerRef.current = setTimeout(doFetch, intervalRef.current)
+      timerRef.current = setTimeout(() => doFetchRef.current(), intervalRef.current)
     } catch (err) {
       if (!activeRef.current) return
       failuresRef.current++
@@ -37,9 +40,17 @@ export function usePolling<T>({ fetcher, interval, enabled = true }: UsePollingO
       setLoading(false)
       // Exponential backoff: 5s → 10s → 20s → 30s max
       const backoff = Math.min(5_000 * Math.pow(2, failuresRef.current - 1), 30_000)
-      timerRef.current = setTimeout(doFetch, backoff)
+      timerRef.current = setTimeout(() => doFetchRef.current(), backoff)
     }
   }, []) // stable — reads everything via refs
+
+  // Keep the "latest value" refs current. Done in an effect (not during render)
+  // so render stays pure; they're only read later inside the async doFetch.
+  useEffect(() => {
+    fetcherRef.current = fetcher
+    intervalRef.current = interval
+    doFetchRef.current = doFetch
+  })
 
   const refresh = useCallback(() => {
     if (!activeRef.current) return

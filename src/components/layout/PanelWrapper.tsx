@@ -193,6 +193,7 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
     if (!expanded) return
     const panel = panelRef.current
     if (!panel) return
+    const returnFocusTo = expandBtnRef.current
 
     const getFocusable = () => Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE))
 
@@ -211,7 +212,7 @@ export function PanelWrapper({ title, panelId, children, loading, error, onRetry
 
     return () => {
       document.removeEventListener('keydown', onKeyDown)
-      expandBtnRef.current?.focus()
+      returnFocusTo?.focus()
     }
   }, [expanded])
 

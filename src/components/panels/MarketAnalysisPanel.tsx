@@ -99,7 +99,7 @@ export default function MarketAnalysisPanel() {
         setTech({ spyPrice, dma50, dma200, loading: false })
       })
       .catch(() => setTech((s) => ({ ...s, loading: false })))
-  }, [tab])
+  }, [tab, tech.spyPrice])
 
   const sentimentSources = useMemo(() => deriveSentiment(indices), [indices])
   const consensusScore = useMemo(() => {

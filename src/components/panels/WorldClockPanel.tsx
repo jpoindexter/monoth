@@ -14,7 +14,7 @@ const tabs: { id: Tab; label: string }[] = [
 
 export default function WorldClockPanel() {
   const expanded = useIsExpanded()
-  const [, setNow] = useState(Date.now())
+  const [, setNow] = useState(() => Date.now())
   const [tab, setTab] = useState<Tab>('clocks')
 
   useEffect(() => {

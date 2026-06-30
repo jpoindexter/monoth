@@ -122,11 +122,10 @@ export default function CommoditiesSpotPanel() {
   const [tab, setTab] = useState<Tab>('metals')
 
   const commodities = TAB_COMMODITIES[tab]
-  const symbols = commodities.map((c) => c.symbol)
 
   const fetcher = useCallback(async () => {
-    return fetchQuotes(symbols)
-  }, [tab]) // eslint-disable-line react-hooks/exhaustive-deps
+    return fetchQuotes(TAB_COMMODITIES[tab].map((c) => c.symbol))
+  }, [tab])
 
   const { data, loading, error, refresh } = usePolling({
     fetcher,

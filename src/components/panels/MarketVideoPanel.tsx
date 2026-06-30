@@ -32,12 +32,12 @@ export default function MarketVideoPanel() {
 
   const enabledLiveChannels = ALL_CHANNELS.filter(ch => enabledIds.has(ch.id))
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (enabledLiveChannels.length > 0 && !enabledIds.has(activeChannel)) {
-      setActiveChannel(enabledLiveChannels[0]!.id)
+    if (!enabledIds.has(activeChannel)) {
+      const firstEnabled = ALL_CHANNELS.find(ch => enabledIds.has(ch.id))
+      if (firstEnabled) setActiveChannel(firstEnabled.id)
     }
-  }, [enabledIds])
+  }, [enabledIds, activeChannel])
 
   const toggleChannel = (id: string) => {
     setEnabledIds(prev => {
