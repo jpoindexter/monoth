@@ -26,6 +26,10 @@ export default defineConfig([
         varsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^_',
       }],
+      // This React-Compiler rule over-flags the standard fetch-in-effect / timer /
+      // external-sync patterns this SPA relies on (no data-fetching framework).
+      // Keep it visible as a warning rather than a build-blocking error.
+      'react-hooks/set-state-in-effect': 'warn',
     },
   },
 ])
