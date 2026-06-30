@@ -44,8 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             changePercent: s.change,
           }))
         }
-      } catch (e) {
-      }
+      } catch { /* upstream source failed; fall through to fallback */ }
 
       // Fallback: direct Yahoo Finance (11 sequential calls)
       return Promise.all(SECTOR_ETFS.map(async (symbol) => {

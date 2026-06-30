@@ -49,6 +49,7 @@ export function NewsFeedPanel({ category, title }: NewsFeedPanelProps) {
     const currentIds = new Set(data.map((item) => item.id))
     const newIds = [...currentIds].filter((id) => !prevIdsRef.current.has(id))
     if (newIds.length > 0 && prevIdsRef.current.size > 0) {
+      // New items on a refresh — intentionally left out of seenIds so they render as unread.
     } else if (prevIdsRef.current.size === 0) {
       setSeenIds(new Set(data.map((item) => item.id)))
     }

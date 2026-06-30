@@ -68,8 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
           })
         }
-      } catch (e) {
-      }
+      } catch { /* upstream source failed; fall through to fallback */ }
 
       // Fallback: direct Yahoo Finance
       const results = await Promise.allSettled(

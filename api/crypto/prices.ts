@@ -62,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }))
           }
         }
-      } catch {}
+      } catch { /* primary fetch failed; fall through to fallback source */ }
 
       // Fallback: proxy API
       const resp = await wmGet<{ quotes: WmCryptoQuote[] }>(

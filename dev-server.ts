@@ -15,7 +15,7 @@ try {
     const val = trimmed.slice(eq + 1)
     if (!process.env[key]) process.env[key] = val
   }
-} catch {}
+} catch { /* .env is optional in this environment */ }
 
 const app = express()
 app.use(express.json())

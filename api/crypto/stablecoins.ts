@@ -52,8 +52,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             volume24h: s.volume24h,
           }))
         }
-      } catch (e) {
-      }
+      } catch { /* upstream source failed; fall through to fallback */ }
 
       // Fallback: CoinGecko free tier
       const r = await fetch(

@@ -70,8 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
           })
         }
-      } catch (e) {
-      }
+      } catch { /* upstream source failed; fall through to fallback */ }
       // Fallback: direct Yahoo Finance (sequential, rate-limit prone)
       return Promise.all(INDICES.map(({ symbol, name }) => fetchYF(symbol, name)))
     })

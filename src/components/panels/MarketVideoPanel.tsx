@@ -22,7 +22,7 @@ export default function MarketVideoPanel() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) return new Set(JSON.parse(stored) as string[])
-    } catch {}
+    } catch { /* absent or corrupt storage; use defaults */ }
     return new Set(DEFAULT_ENABLED)
   })
 

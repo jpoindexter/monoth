@@ -104,8 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             next: NEXT_MEETING[r.countryCode] ?? null,
           }))
         }
-      } catch (e) {
-      }
+      } catch { /* upstream source failed; fall through to fallback */ }
 
       // Fallback: direct BIS API
       return fetchBISDirect()

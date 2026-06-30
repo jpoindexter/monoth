@@ -118,8 +118,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               }
             })
         }
-      } catch (e) {
-      }
+      } catch { /* upstream source failed; fall through to fallback */ }
 
       // Fallback: local FRED key or Yahoo Finance for treasury series
       const results = await Promise.allSettled(seriesIds.map(async (id) => {
