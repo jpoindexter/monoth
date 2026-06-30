@@ -38,6 +38,8 @@ export function HeadlinesSentiment({ data }: { data: NewsItem[] }) {
   const totalNeg = scored.reduce((acc, s) => acc + Math.max(0, -s.score), 0)
   const total = totalPos + totalNeg
   const gauge = total === 0 ? 50 : Math.round((totalPos / total) * 100)
+  // Relative-time display count; reading current time at render is intentional here.
+  // eslint-disable-next-line react-hooks/purity
   const lastHourCount = data.filter((item) => Date.now() - item.published < 3_600_000).length
   const sl = sentimentLabel(gauge)
 
