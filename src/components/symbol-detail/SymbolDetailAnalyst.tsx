@@ -1,5 +1,13 @@
 import { ACTION_LABELS, ACTION_CLS } from './helpers'
 
+interface AnalystRating {
+  action: string
+  firm?: string
+  fromGrade?: string
+  toGrade?: string
+  date?: string
+}
+
 interface Props {
   analystLoading: boolean
   analystData: unknown[] | null
@@ -15,7 +23,7 @@ export function SymbolDetailAnalyst({ analystLoading, analystData }: Props) {
 
   return (
     <div className="px-5 py-4 space-y-0">
-      {analystData.map((r: any, i) => (
+      {(analystData as AnalystRating[]).map((r, i) => (
         <div key={i} className="flex items-start gap-2 border-t border-border/15 py-2">
           <span className={`text-[9px] font-bold uppercase w-14 shrink-0 mt-0.5 ${ACTION_CLS[r.action] ?? 'text-muted-foreground'}`}>
             {ACTION_LABELS[r.action] ?? r.action}

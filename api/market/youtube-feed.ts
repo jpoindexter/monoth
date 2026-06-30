@@ -23,7 +23,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const entries = parsed?.feed?.entry ?? []
       const entryArray = Array.isArray(entries) ? entries : [entries]
 
-      const videos = entryArray.map((entry: any) => {
+      const videos = entryArray.map((entry: {
+        'yt:videoId'?: string
+        id?: string
+        title?: string
+        published?: string
+        link?: { '@_href'?: string }
+      }) => {
         const rawId: string = entry['yt:videoId'] ?? entry.id ?? ''
         const videoId = rawId.replace('yt:video:', '')
         const link = entry.link?.['@_href'] ?? `https://www.youtube.com/watch?v=${videoId}`

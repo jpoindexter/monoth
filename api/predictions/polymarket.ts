@@ -14,30 +14,45 @@ export interface PredictionItem {
   url: string
 }
 
+interface RawPolyMarket {
+  outcomePrices?: string
+  question?: string
+}
+
+interface RawPolyEvent {
+  id?: string | number
+  title?: string
+  slug?: string
+  volume?: number | string
+  volume24hr?: number | string
+  endDate?: string
+  markets?: RawPolyMarket[]
+}
+
 async function fetchPolymarket(): Promise<PredictionItem[]> {
   const r = await fetch(
     'https://gamma-api.polymarket.com/events?closed=false&order=volume&ascending=false&limit=40',
     { signal: AbortSignal.timeout(8_000) }
   )
   if (!r.ok) throw new Error(`Polymarket ${r.status}`)
-  const events: any[] = await r.json()
+  const events = await r.json() as RawPolyEvent[]
 
   const items: PredictionItem[] = []
   for (const ev of events) {
-    const markets: any[] = ev.markets ?? []
+    const markets: RawPolyMarket[] = ev.markets ?? []
     // For binary single-outcome events use top market; for multi-outcome use event-level
     if (markets.length === 0) continue
     // For multi-outcome events (election races etc.) pick the leading market
-    const parsedMarkets = markets.map((m: any) => {
+    const parsedMarkets = markets.map((m) => {
       let prices: number[] = []
-      try { prices = JSON.parse(m.outcomePrices ?? '[]').map(Number) } catch {}
+      try { prices = JSON.parse(m.outcomePrices ?? '[]').map(Number) } catch { /* malformed prices → empty */ }
       return { ...m, yesPct: Math.round((prices[0] ?? 0) * 100) }
     })
     const isBinary = markets.length <= 2
     // Binary: use first market; multi-outcome: use highest-probability market as headline
     const top = isBinary
       ? parsedMarkets[0]
-      : parsedMarkets.sort((a: any, b: any) => b.yesPct - a.yesPct)[0]
+      : parsedMarkets.sort((a, b) => b.yesPct - a.yesPct)[0]
     const yesPct = top.yesPct || 1
     const vol = Number(ev.volume ?? 0)
     if (vol < 5_000) continue
@@ -57,24 +72,38 @@ async function fetchPolymarket(): Promise<PredictionItem[]> {
   return items
 }
 
+interface RawKalshiMarket {
+  volume_fp?: number | string
+  volume?: number | string
+  yes_bid_dollars?: number | string
+  last_price_dollars?: number | string
+}
+
+interface RawKalshiEvent {
+  event_ticker?: string
+  title?: string
+  end_date?: string
+  markets?: RawKalshiMarket[]
+}
+
 async function fetchKalshi(): Promise<PredictionItem[]> {
   const r = await fetch(
     'https://api.elections.kalshi.com/trade-api/v2/events?status=open&with_nested_markets=true&limit=50',
     { signal: AbortSignal.timeout(8_000) }
   )
   if (!r.ok) throw new Error(`Kalshi ${r.status}`)
-  const json = await r.json()
-  const events: any[] = json.events ?? []
+  const json = await r.json() as { events?: RawKalshiEvent[] }
+  const events = json.events ?? []
 
   const items: PredictionItem[] = []
   for (const ev of events) {
-    const markets: any[] = ev.markets ?? []
+    const markets: RawKalshiMarket[] = ev.markets ?? []
     if (markets.length === 0) continue
     // Sum volume across all child markets (volume_fp = volume in dollars fixed-point)
-    const vol = markets.reduce((s: number, m: any) => s + Number(m.volume_fp ?? m.volume ?? 0), 0)
+    const vol = markets.reduce((s, m) => s + Number(m.volume_fp ?? m.volume ?? 0), 0)
     if (vol < 500) continue
     // Use market with highest yes bid for display
-    const top = markets.sort((a: any, b: any) => Number(b.yes_bid_dollars ?? 0) - Number(a.yes_bid_dollars ?? 0))[0]
+    const top = markets.sort((a, b) => Number(b.yes_bid_dollars ?? 0) - Number(a.yes_bid_dollars ?? 0))[0]
     // yes_bid_dollars is a decimal probability (0.09 = 9%)
     const yesBid = Number(top.yes_bid_dollars ?? top.last_price_dollars ?? 0.5)
     const yesPct = Math.min(99, Math.max(1, Math.round(yesBid * 100)))

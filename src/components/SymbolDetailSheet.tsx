@@ -88,7 +88,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
     setAnalystLoading(true)
     fetch('/api/market/analyst')
       .then((r) => r.json())
-      .then((d: unknown[]) => setAnalystData(d.filter((r: any) => r.ticker === ticker)))
+      .then((d: { ticker?: string }[]) => setAnalystData(d.filter((r) => r.ticker === ticker)))
       .catch(() => {})
       .finally(() => setAnalystLoading(false))
   }, [ticker, open, tab])
@@ -109,7 +109,7 @@ export function SymbolDetailSheet({ ticker, open, onOpenChange }: SymbolDetailSh
   const low52 = closes.length ? Math.min(...closes) : null
   const firstClose = closes[0] ?? null
   const rangeChg = firstClose && price ? ((price - firstClose) / firstClose) * 100 : null
-  const avgVol = candles.length ? candles.reduce((s, c) => s + ((c as any).volume ?? 0), 0) / candles.length : 0
+  const avgVol = candles.length ? candles.reduce((s, c) => s + ((c as { volume?: number }).volume ?? 0), 0) / candles.length : 0
   const highPct = high52 && low52 && price ? ((price - low52) / (high52 - low52)) * 100 : null
 
   const relatedNews = allNews

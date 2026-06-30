@@ -12,6 +12,19 @@ const CRYPTO_IDS = [
   'filecoin', 'lido-dao', 'shiba-inu', 'pepe',
 ]
 
+interface CoinGeckoMarket {
+  id: string
+  symbol: string
+  name: string
+  current_price: number
+  price_change_24h: number
+  price_change_percentage_24h: number
+  market_cap: number
+  market_cap_rank: number
+  total_volume: number
+  sparkline_in_7d?: { price: number[] }
+}
+
 interface WmCryptoQuote {
   name: string
   symbol: string
@@ -33,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (r.ok) {
           const coins = await r.json()
           if (Array.isArray(coins) && coins.length) {
-            return coins.map((c: any) => ({
+            return coins.map((c: CoinGeckoMarket) => ({
               id: c.id,
               symbol: c.symbol.toUpperCase(),
               name: c.name,

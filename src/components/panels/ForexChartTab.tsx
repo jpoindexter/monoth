@@ -20,9 +20,9 @@ export function ForexChartTab({ expanded }: { expanded: boolean }) {
         .then(r => r.json())
         .then(json => {
           const rates = json.rates ?? {}
-          const points = Object.entries(rates).map(([date, val]: [string, any]) => ({
+          const points = Object.entries(rates).map(([date, val]: [string, unknown]) => ({
             time: date,
-            value: val[chartPair] ?? 0,
+            value: (val as Record<string, number>)[chartPair] ?? 0,
           })).filter(p => p.value > 0)
           setChartData(points)
         })

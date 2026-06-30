@@ -18,7 +18,7 @@ const COMMODITY_NAMES: Record<string, string> = {
 export default function CommoditiesPanel() {
   const expanded = useIsExpanded()
   const [tab, setTab] = useState<'prices' | 'news' | 'chart' | 'sectors' | 'supercycle'>('prices')
-  const [chartData, setChartData] = useState<any[]>([])
+  const [chartData, setChartData] = useState<Awaited<ReturnType<typeof fetchCandles>>>([])
   const [chartSymbol, setChartSymbol] = useState<ChartSymbol>('GLD')
 
   const fetcher = useCallback(async () => fetchQuotes(COMMODITY_SYMBOLS), [])
