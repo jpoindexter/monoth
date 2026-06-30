@@ -44,7 +44,7 @@ async function fetchBalanceSheets(): Promise<BalanceSheet[]> {
       if (walclObs?.length) walclValue = walclObs[walclObs.length - 1]?.value ?? null
       if (ecbObs?.length) ecbValue = ecbObs[ecbObs.length - 1]?.value ?? null
     }
-  } catch (e) {
+  } catch {
     // Fallback: local FRED key
     const [walcl, ecb] = await Promise.allSettled([
       fetchFredSeries('WALCL'),
