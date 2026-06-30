@@ -93,7 +93,7 @@ function SpanPicker({ panelId }: { panelId: string }) {
         <div
           role="dialog"
           aria-label="Choose panel size"
-          className="absolute top-full right-0 mt-1 z-50 bg-zinc-900 dark:bg-zinc-800 border border-border/40 rounded-md shadow-lg p-2 flex flex-col items-center gap-1"
+          className="absolute top-full right-0 mt-1 z-50 bg-popover text-popover-foreground border border-border rounded-md shadow-lg p-2 flex flex-col items-center gap-1"
         >
           <div
             role="grid"
@@ -112,7 +112,7 @@ function SpanPicker({ panelId }: { panelId: string }) {
                         data-cell={`${col}-${row}`}
                         aria-label={`${col}×${row}`}
                         aria-pressed={col === span.col && row === span.row}
-                        className={`w-3 h-3 rounded-[2px] cursor-pointer transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-foreground/60 ${lit ? 'bg-foreground/50' : 'bg-border/30'}`}
+                        className={`w-3 h-3 rounded-[2px] cursor-pointer transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-foreground/60 ${lit ? 'bg-foreground/80' : 'bg-muted-foreground/25'}`}
                         onMouseEnter={() => setHover({ col, row })}
                         onFocus={() => setHover({ col, row })}
                         onBlur={() => setHover(null)}
