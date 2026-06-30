@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/command'
 import { Badge } from '@/components/ui/badge'
 import { usePanelStore, useLayoutStore } from '@/stores'
-import { useTheme } from '@/components/theme-provider'
+import { useTheme } from '@/components/theme-context'
 import { PANELS } from '@/config/panels'
 
 const POPULAR_SYMBOLS = [

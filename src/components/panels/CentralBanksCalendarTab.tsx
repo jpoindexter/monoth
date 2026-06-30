@@ -1,4 +1,5 @@
-import { type CbRate, ActionBadge, daysUntil, direction } from './CentralBanksRatesTab'
+import { ActionBadge } from './CentralBanksRatesTab'
+import { type CbRate, daysUntil, direction } from './central-banks-utils'
 
 interface Props {
   sortedByDate: CbRate[]

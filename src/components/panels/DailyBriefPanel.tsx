@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useMarketStore } from '@/stores'
 import { PanelWrapper, useIsExpanded } from '@/components/layout/PanelWrapper'
 import { tabCls } from '@/lib/panel-utils'
-import { DailyBriefAnalysis, generateBrief } from '@/components/panels/DailyBriefAnalysis'
+import { DailyBriefAnalysis } from '@/components/panels/DailyBriefAnalysis'
+import { generateBrief } from '@/components/panels/daily-brief-utils'
 import { DailyBriefScorecard } from '@/components/panels/DailyBriefScorecard'
 
 interface BriefSection {

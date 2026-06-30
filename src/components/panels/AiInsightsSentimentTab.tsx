@@ -10,7 +10,7 @@ const LEVEL_SCORE: Record<string, number> = {
   medium: 0,
 }
 
-export const CATEGORY_COLORS: Partial<Record<ThreatCategory, string>> = {
+const CATEGORY_COLORS: Partial<Record<ThreatCategory, string>> = {
   conflict: '#ef4444',
   military: '#f97316',
   terrorism: '#dc2626',

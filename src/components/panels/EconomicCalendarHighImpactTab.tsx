@@ -1,6 +1,6 @@
 import { useIsExpanded } from '@/components/layout/PanelWrapper'
-import { IMPACT_BG, fmtDate, isWithinDays } from '@/components/panels/EconomicCalendarShared'
-import type { EconEvent } from '@/components/panels/EconomicCalendarShared'
+import { IMPACT_BG, fmtDate, isWithinDays } from '@/components/panels/economic-calendar-utils'
+import type { EconEvent } from '@/components/panels/economic-calendar-utils'
 
 export default function EconomicCalendarHighImpactTab({ events }: { events: EconEvent[] }) {
   const expanded = useIsExpanded()

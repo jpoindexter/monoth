@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CITIES, formatTimeInZone, getMarketStatus, STATUS_DOT, STATUS_TEXT } from './WorldClockClocksTab'
+import { CITIES, formatTimeInZone, getMarketStatus, STATUS_DOT, STATUS_TEXT } from './world-clock-utils'
 
 export function WorldClockConvertTab() {
   const [inputTime, setInputTime] = useState(() => {

@@ -1,4 +1,4 @@
-import { CITIES, getLocalHours, getMarketStatus } from './WorldClockClocksTab'
+import { CITIES, getLocalHours, getMarketStatus } from './world-clock-utils'
 
 export function WorldClockOverlapTab() {
   const etHours = getLocalHours('America/New_York')

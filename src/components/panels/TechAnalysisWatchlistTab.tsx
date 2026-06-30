@@ -14,7 +14,7 @@ const OVERALL_MAP: Record<Overall, { label: string; cls: string }> = {
 const LS_KEY = 'ta-watchlist'
 const MAX = 10
 
-export function loadWatchlist(): string[] {
+function loadWatchlist(): string[] {
   try { return JSON.parse(localStorage.getItem(LS_KEY) ?? '[]') } catch { return [] }
 }
 

@@ -10,7 +10,7 @@ import { Dashboard } from '@/pages/Dashboard'
 import { CommandPalette } from '@/components/CommandPalette'
 import { KeyboardHelp } from '@/components/KeyboardHelp'
 import { useLayoutStore } from '@/stores'
-import { useTheme } from '@/components/theme-provider'
+import { useTheme } from '@/components/theme-context'
 import { useAlertChecker } from '@/hooks/use-alert-checker'
 
 function AppInner() {
