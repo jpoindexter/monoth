@@ -16,6 +16,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (targetUrl.hostname !== 'www.youtube.com') {
     return res.status(400).json({ error: 'Invalid URL' })
   }
+  // Force US/English so YouTube serves the page directly instead of 302-ing to the
+  // EU cookie-consent wall (consent.youtube.com), which returned an empty body and
+  // made every scrape yield videoId:null.
+  targetUrl.searchParams.set('hl', 'en')
+  targetUrl.searchParams.set('gl', 'US')
 
   try {
     const { data } = await cached(`youtube-live:${handle}`, 300_000, async () => {
@@ -24,6 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
           'Accept-Language': 'en-US,en;q=0.9',
+          // Pre-accepted consent cookie — without it YouTube redirects to the consent wall.
+          'Cookie': 'SOCS=CAISEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg',
         },
       })
 
