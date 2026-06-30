@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const prompt = `You are a Bloomberg terminal market analyst. Summarize the current market in 3-4 bullet points. Be extremely concise and data-driven. No fluff.
 
 Headlines: ${JSON.stringify(headlines)}
-Top Crypto: ${JSON.stringify(crypto.map((c: any) => ({ name: c.name, price: c.current_price, change24h: c.price_change_percentage_24h })))}
+Top Crypto: ${JSON.stringify(crypto.map((c: { name?: string; current_price?: number; price_change_percentage_24h?: number }) => ({ name: c.name, price: c.current_price, change24h: c.price_change_percentage_24h })))}
 
 Format: bullet points only, each under 20 words.`
 

@@ -8,6 +8,15 @@ const STABLECOIN_IDS = [
   'frax', 'true-usd', 'pax-dollar', 'usdp', 'gemini-dollar',
 ]
 
+interface CoinGeckoMarket {
+  id: string
+  symbol: string
+  name: string
+  current_price: number
+  market_cap: number
+  total_volume: number
+}
+
 interface WmStablecoin {
   id: string
   symbol: string
@@ -53,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       )
       if (!r.ok) throw new Error(`CoinGecko error: ${r.status}`)
       const coins = await r.json()
-      return coins.map((c: any) => ({
+      return coins.map((c: CoinGeckoMarket) => ({
         id: c.id,
         symbol: c.symbol.toUpperCase(),
         name: c.name,

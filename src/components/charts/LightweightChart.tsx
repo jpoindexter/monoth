@@ -44,7 +44,7 @@ function formatValue(v: number) {
 
 const tickStyle = { fontSize: 9, fill: '#9ca3af' }
 
-function CustomTooltip({ active, payload }: any) {
+function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<{ value?: number }> }) {
   if (!active || !payload?.length) return null
   const val = payload[0]?.value
   return (

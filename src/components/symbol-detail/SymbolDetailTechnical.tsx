@@ -16,6 +16,20 @@ function signalBadge(signal: string) {
   )
 }
 
+interface TechnicalData {
+  overall: string
+  bullishCount: number
+  bearishCount: number
+  rsi: number
+  rsiSignal: string
+  macd: { line: number; signal: number; histogram: number }
+  sma20: number
+  sma50: number
+  sma200: number
+  bb: { upper: number; middle: number; lower: number }
+  price: number
+}
+
 interface Props {
   taLoading: boolean
   taData: Record<string, unknown> | null
@@ -30,7 +44,7 @@ export function SymbolDetailTechnical({ taLoading, taData, onClose }: Props) {
     return <div className="px-5 py-4 text-[10px] text-muted-foreground text-center py-8">No technical data available</div>
   }
 
-  const d = taData as any
+  const d = taData as unknown as TechnicalData
   const overall = TA_OVERALL[d.overall] ?? { label: d.overall, cls: 'text-muted-foreground' }
 
   return (

@@ -14,7 +14,13 @@ function parseRSSItems(xml: string, sourceName: string, category: string) {
     []
   const itemArray = Array.isArray(items) ? items : [items]
 
-  return itemArray.map((item: any, idx: number) => {
+  return itemArray.map((item: {
+    link?: string | { '@_href'?: string }
+    guid?: string | { '#text'?: string }
+    title?: string
+    pubDate?: string
+    published?: string
+  }, idx: number) => {
     const url = typeof item.link === 'string'
       ? item.link
       : item.link?.['@_href'] ?? ''
@@ -59,8 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         })
       )
       const allItems = results
-        .filter((r): r is PromiseFulfilledResult<any[]> => r.status === 'fulfilled')
-        .flatMap((r) => r.value)
+        .flatMap((r) => r.status === 'fulfilled' ? r.value : [])
 
       const seen = new Set<string>()
       return allItems

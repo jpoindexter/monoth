@@ -132,8 +132,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }))
       return results
-        .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled')
-        .map(r => r.value)
+        .flatMap(r => r.status === 'fulfilled' ? [r.value] : [])
     })
     if (stale) res.setHeader('X-Cache', 'STALE')
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=7200')
