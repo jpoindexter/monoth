@@ -24,7 +24,7 @@ function loadRegion(): Region {
   try {
     const saved = localStorage.getItem(LS_KEY)
     if (saved && saved in REGION_LABELS) return saved as Region
-  } catch {}
+  } catch { /* storage unavailable; default to global */ }
   return 'global'
 }
 

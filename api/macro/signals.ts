@@ -158,7 +158,7 @@ async function buildSignalsLocally(): Promise<MacroSignal[]> {
       const spread = y10 - yShort
       signals.push({ name: 'Yield Curve', value: Math.round(spread * 100) / 100, label: spread < 0 ? 'Inverted' : spread < 0.5 ? 'Flat' : 'Normal', status: spread < 0 ? 'bearish' : spread > 0.5 ? 'bullish' : 'neutral', detail: `10Y-3M: ${spread > 0 ? '+' : ''}${spread.toFixed(2)}%` })
     }
-  } catch {}
+  } catch { /* indicator unavailable; skip it */ }
 
   // VIX
   try {
@@ -166,7 +166,7 @@ async function buildSignalsLocally(): Promise<MacroSignal[]> {
     const d = await r.json()
     const level = d.chart?.result?.[0]?.meta?.regularMarketPrice
     if (level != null) signals.push({ name: 'Volatility', value: Math.round(level * 10) / 10, label: level > 30 ? 'Elevated Fear' : level < 15 ? 'Low Volatility' : 'Moderate', status: level > 30 ? 'bearish' : level < 15 ? 'bullish' : 'neutral', detail: `VIX: ${level.toFixed(1)}` })
-  } catch {}
+  } catch { /* indicator unavailable; skip it */ }
 
   // US Debt
   try {
@@ -182,7 +182,7 @@ async function buildSignalsLocally(): Promise<MacroSignal[]> {
       const trillions = (current / 1e12).toFixed(2)
       signals.push({ name: 'US Debt', value: Math.round(current / 1e9), label: dailyChg != null ? `${dailyChg > 0 ? '+' : ''}${dailyChg.toFixed(0)}B today` : `$${trillions}T`, status: 'bearish', detail: `$${trillions}T as of ${latest.record_date}` })
     }
-  } catch {}
+  } catch { /* indicator unavailable; skip it */ }
 
   return signals
 }

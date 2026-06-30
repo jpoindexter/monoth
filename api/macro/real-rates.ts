@@ -77,8 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             if (values[id] == null) values[id] = null
           }
         }
-      } catch (e) {
-      }
+      } catch { /* upstream source failed; fall through to fallback */ }
 
       // Fallback: local FRED key
       if (!Object.values(values).some(v => v != null)) {

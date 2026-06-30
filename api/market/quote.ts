@@ -51,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return { symbol: q.symbol, price: q.price, change: absChange, changePercent: changePct, volume: 0, timestamp: Date.now(), source: 'wm' }
           })
         }
-      } catch {}
+      } catch { /* primary fetch failed; fall through to direct Yahoo */ }
       // Fallback: direct Yahoo Finance (allSettled so one bad symbol doesn't kill the batch)
       const settled = await Promise.allSettled(symbols.map(fetchYFQuote))
       return settled.flatMap(r => r.status === 'fulfilled' ? [r.value] : [])
