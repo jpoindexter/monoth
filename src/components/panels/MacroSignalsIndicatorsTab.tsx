@@ -114,10 +114,8 @@ function buildIndicators(fredData: FredSeries[]): LeadingIndicator[] {
 function computeLei(indicators: LeadingIndicator[]): { composite: LeiComposite; score: number } {
   const positive: IndicatorSignal[] = ['expanding', 'rising', 'steep']
   let bullish = 0
-  let bearish = 0
   for (const ind of indicators) {
     if (positive.includes(ind.signal)) bullish++
-    else if (ind.signal !== 'flat') bearish++
   }
   const score = indicators.length === 0 ? 50 : Math.round((bullish / indicators.length) * 100)
   const composite: LeiComposite = score >= 60 ? 'EXPANSION' : score <= 40 ? 'CONTRACTION' : 'MIXED'

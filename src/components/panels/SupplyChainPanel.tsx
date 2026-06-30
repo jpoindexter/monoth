@@ -12,8 +12,7 @@ import { SupplyChainChart } from '@/components/panels/SupplyChainChart'
 import { SupplyChainNews } from '@/components/panels/SupplyChainNews'
 
 const SC_SYMBOLS = ['IYT', 'XTN', 'SEA', 'FDX', 'UPS', 'ZIM']
-const CHART_SYMBOLS = ['IYT', 'XTN', 'SEA'] as const
-type ChartSymbol = typeof CHART_SYMBOLS[number]
+type ChartSymbol = 'IYT' | 'XTN' | 'SEA'
 
 interface ShippingRate {
   indexId: string
