@@ -1,5 +1,5 @@
 import { EventRow } from '@/components/panels/EconomicCalendarShared'
-import type { EconEvent } from '@/components/panels/EconomicCalendarShared'
+import type { EconEvent } from '@/components/panels/economic-calendar-utils'
 
 export default function EconomicCalendarTodayTab({ events }: { events: EconEvent[] }) {
   const today = new Date().toISOString().slice(0, 10)

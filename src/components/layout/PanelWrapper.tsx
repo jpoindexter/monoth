@@ -26,9 +26,13 @@ export function FlashValue({ value, className = '' }: { value: number | string |
 }
 
 const ExpandedContext = createContext(false)
+// Context hooks colocated with their provider (idiomatic React); 70 panels import
+// useIsExpanded from here. Splitting to satisfy fast-refresh isn't worth the churn.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useIsExpanded = () => useContext(ExpandedContext)
 
 const PanelIdContext = createContext<string | undefined>(undefined)
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePanelId = () => useContext(PanelIdContext)
 export function PanelIdProvider({ id, children }: { id: string; children: React.ReactNode }) {
   return <PanelIdContext.Provider value={id}>{children}</PanelIdContext.Provider>

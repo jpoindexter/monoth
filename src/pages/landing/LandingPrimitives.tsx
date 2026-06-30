@@ -1,5 +1,3 @@
-import { useState, useEffect, useRef } from 'react'
-
 export function SectionMark({ num, label, tag }: { num: string; label: string; tag: string }) {
   return (
     <div className="flex items-center justify-between border-t border-zinc-800/60 py-3">
@@ -49,20 +47,3 @@ export const LogoMark = () => (
     </svg>
   </div>
 )
-
-export function useCountUp(target: number, duration = 1200) {
-  const [value, setValue] = useState(0)
-  const raf = useRef<number>(0)
-  useEffect(() => {
-    const start = performance.now()
-    function tick(now: number) {
-      const elapsed = now - start
-      const p = Math.min(elapsed / duration, 1)
-      setValue(Math.round((1 - Math.pow(1 - p, 3)) * target))
-      if (p < 1) raf.current = requestAnimationFrame(tick)
-    }
-    raf.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf.current)
-  }, [target, duration])
-  return value
-}

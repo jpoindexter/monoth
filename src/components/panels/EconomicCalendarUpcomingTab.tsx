@@ -1,6 +1,7 @@
 import { useIsExpanded } from '@/components/layout/PanelWrapper'
-import { EventRow, fmtDate, isToday, isWithinDays } from '@/components/panels/EconomicCalendarShared'
-import type { EconEvent } from '@/components/panels/EconomicCalendarShared'
+import { EventRow } from '@/components/panels/EconomicCalendarShared'
+import { fmtDate, isToday, isWithinDays } from '@/components/panels/economic-calendar-utils'
+import type { EconEvent } from '@/components/panels/economic-calendar-utils'
 
 export default function EconomicCalendarUpcomingTab({ events }: { events: EconEvent[] }) {
   const expanded = useIsExpanded()

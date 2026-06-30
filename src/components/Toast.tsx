@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface ToastItem {
@@ -8,12 +8,6 @@ interface ToastItem {
 }
 
 let toastId = 0
-
-export function useToast() {
-  return useCallback((message: string) => {
-    window.dispatchEvent(new CustomEvent('monoth:toast', { detail: message }))
-  }, [])
-}
 
 export function ToastContainer() {
   const [toasts, setToasts] = useState<ToastItem[]>([])
